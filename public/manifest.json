@@ -1,0 +1,16 @@
+{
+  "name": "엘림스의 비공식 아카이브",
+  "short_name": "엘림스 아카이브",
+  "description": "테일즈런너 비공식 아카이브 — 런너 능력치, 변경권 확률, 맵 도감, 코스튬, 가이드, 스토리",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0e0a18",
+  "theme_color": "#2dd4bf",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: #2dd4bf;
+  --color-primary-light: #5eead4;
+  --color-accent: #d4a055;
+  --color-accent-light: #e8c47a;
+  --color-surface: #13101f;
+  --color-surface-alt: #1a1530;
+  --color-surface-card: #171228;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text: #ede8f5;
+  --color-text-muted: rgba(255, 255, 255, 0.4);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: #0e0a18;
+  color: var(--color-text);
+}
+
+/* Guide HTML content (from official API) */
+.guide-content {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+  font-size: 14px;
+}
+.guide-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 0.75rem 0;
+}
+.guide-content p {
+  color: rgba(255, 255, 255, 0.7) !important;
+  background-color: transparent !important;
+  font-family: inherit !important;
+}
+.guide-content strong {
+  color: rgba(255, 255, 255, 0.9);
+}
+.guide-content div {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem;
+  padding: 12px;
+}
+.guide-content span {
+  color: inherit !important;
+}

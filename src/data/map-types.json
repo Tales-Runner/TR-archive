@@ -1,0 +1,30 @@
+[
+  {
+    "codeId": 0,
+    "codeName": "PVP"
+  },
+  {
+    "codeId": 1,
+    "codeName": "협동"
+  },
+  {
+    "codeId": 2,
+    "codeName": "하드코어"
+  },
+  {
+    "codeId": 3,
+    "codeName": "트레이닝"
+  },
+  {
+    "codeId": 4,
+    "codeName": "럼블"
+  },
+  {
+    "codeId": 5,
+    "codeName": "서바이벌"
+  },
+  {
+    "codeId": 6,
+    "codeName": "아케이드"
+  }
+]
