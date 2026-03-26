@@ -74,7 +74,7 @@ export async function submitFeedback(
     if (!res.ok) {
       const err = await res.text();
       console.error("GitHub API error:", res.status, err);
-      return { ok: false, message: "전송에 실패했습니다. 잠시 후 다시 시도해 주세요." };
+      return { ok: false, message: `전송 실패 (${res.status}). 잠시 후 다시 시도해 주세요.` };
     }
 
     const issue = await res.json();

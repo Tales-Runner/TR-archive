@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useState } from "react";
 import { submitFeedback } from "./actions";
 
 const CATEGORIES = [
@@ -11,20 +11,47 @@ const CATEGORIES = [
 ];
 
 export function FeedbackForm() {
-  const [state, action, pending] = useActionState(submitFeedback, null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [category, setCategory] = useState("feature");
+  const [nickname, setNickname] = useState("");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [pending, setPending] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; message: string; issueUrl?: string } | null>(null);
 
-  if (state?.ok) {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setPending(true);
+    setResult(null);
+
+    const fd = new FormData();
+    fd.set("category", category);
+    fd.set("nickname", nickname);
+    fd.set("title", title);
+    fd.set("body", body);
+
+    const res = await submitFeedback(null, fd);
+    setResult(res);
+    setPending(false);
+
+    // 성공 시에만 폼 비우기
+    if (res.ok) {
+      setTitle("");
+      setBody("");
+      setNickname("");
+    }
+  }
+
+  if (result?.ok) {
     return (
       <div className="rounded-xl border border-teal-500/20 bg-teal-950/30 p-6 text-center animate-scale-in">
         <div className="text-2xl mb-3">✓</div>
-        <h3 className="text-lg font-bold text-teal-300 mb-2">{state.message}</h3>
+        <h3 className="text-lg font-bold text-teal-300 mb-2">{result.message}</h3>
         <p className="text-sm text-white/50 mb-4">
           소중한 의견 감사합니다. 확인 후 반영하겠습니다.
         </p>
-        {state.issueUrl && (
+        {result.issueUrl && (
           <a
-            href={state.issueUrl}
+            href={result.issueUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block rounded-lg bg-white/5 px-4 py-2 text-sm text-teal-300 hover:bg-white/10 transition-colors"
@@ -34,10 +61,7 @@ export function FeedbackForm() {
         )}
         <div className="mt-4">
           <button
-            onClick={() => {
-              formRef.current?.reset();
-              window.location.reload();
-            }}
+            onClick={() => setResult(null)}
             className="text-sm text-white/30 hover:text-white/60 transition-colors"
           >
             다른 건의 작성하기
@@ -48,7 +72,7 @@ export function FeedbackForm() {
   }
 
   return (
-    <form ref={formRef} action={action} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Category */}
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-white/50">분류</legend>
@@ -56,13 +80,18 @@ export function FeedbackForm() {
           {CATEGORIES.map((cat) => (
             <label
               key={cat.value}
-              className="group cursor-pointer rounded-xl border border-white/10 bg-white/[0.02] p-3 text-center transition-all hover:border-teal-500/30 hover:bg-white/[0.04] has-[:checked]:border-teal-500/50 has-[:checked]:bg-teal-950/30"
+              className={`cursor-pointer rounded-xl border p-3 text-center transition-all hover:border-teal-500/30 hover:bg-white/[0.04] ${
+                category === cat.value
+                  ? "border-teal-500/50 bg-teal-950/30"
+                  : "border-white/10 bg-white/[0.02]"
+              }`}
             >
               <input
                 type="radio"
                 name="category"
                 value={cat.value}
-                defaultChecked={cat.value === "feature"}
+                checked={category === cat.value}
+                onChange={(e) => setCategory(e.target.value)}
                 className="sr-only"
               />
               <div className="text-sm font-medium text-white/80">{cat.label}</div>
@@ -83,6 +112,8 @@ export function FeedbackForm() {
           type="text"
           placeholder="익명"
           maxLength={30}
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
           className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 transition-colors"
         />
       </div>
@@ -100,6 +131,8 @@ export function FeedbackForm() {
           minLength={2}
           maxLength={100}
           placeholder="한 줄로 요약해 주세요"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
           className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 transition-colors"
         />
       </div>
@@ -117,14 +150,16 @@ export function FeedbackForm() {
           maxLength={3000}
           rows={6}
           placeholder="자세히 설명해 주세요. 스크린샷 URL이 있으면 함께 첨부해 주세요."
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
           className="w-full resize-y rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 transition-colors"
         />
       </div>
 
       {/* Error */}
-      {state && !state.ok && (
+      {result && !result.ok && (
         <div className="rounded-lg border border-red-500/20 bg-red-950/20 px-4 py-2.5 text-sm text-red-300">
-          {state.message}
+          {result.message}
         </div>
       )}
 
