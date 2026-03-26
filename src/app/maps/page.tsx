@@ -23,7 +23,7 @@ export default function MapsPage() {
       <CharacterComment
         lines={[
           { char: "drHell", text: "런너들! 맵 정보를 찾고 있다면 잘 왔다네. 내 연구실에서 정리해 둔 자료들이라네." },
-          { char: "kai", text: "...조심히 봐. 아빠가 만든 맵도 있으니까." },
+          { char: "kai", text: "...우리 아빠가 만든 것도 있어." },
         ]}
       />
       <Suspense><MapCatalog maps={maps} types={types} /></Suspense>
