@@ -102,16 +102,23 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
   /* ── Character analysis ── */
   const charAnalysis = useMemo(() => {
     const mbti: Record<string, number> = {};
+    const mbtiChars: Record<string, Character[]> = {};
     const blood: Record<string, number> = {};
+    const bloodChars: Record<string, Character[]> = {};
     let tallest = visibleChars[0];
     let shortest = visibleChars[0];
 
-    // Stat distribution patterns
     const statPatterns: { c: Character; total: number; type: string }[] = [];
 
     for (const c of visibleChars) {
-      if (c.mbti && c.mbti !== "?") mbti[c.mbti] = (mbti[c.mbti] || 0) + 1;
-      if (c.bloodType && c.bloodType !== "?") blood[c.bloodType] = (blood[c.bloodType] || 0) + 1;
+      if (c.mbti && c.mbti !== "?") {
+        mbti[c.mbti] = (mbti[c.mbti] || 0) + 1;
+        (mbtiChars[c.mbti] ??= []).push(c);
+      }
+      if (c.bloodType && c.bloodType !== "?") {
+        blood[c.bloodType] = (blood[c.bloodType] || 0) + 1;
+        (bloodChars[c.bloodType] ??= []).push(c);
+      }
 
       const h = parseFloat(c.height);
       if (!isNaN(h)) {
@@ -137,7 +144,9 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
 
     return {
       mbti: Object.entries(mbti).sort((a, b) => b[1] - a[1]),
+      mbtiChars,
       blood: Object.entries(blood).sort((a, b) => b[1] - a[1]),
+      bloodChars,
       tallest, shortest,
       total14, total15,
       typeCounts: Object.entries(typeCounts).sort((a, b) => b[1] - a[1]),
@@ -376,35 +385,50 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
 
           {/* MBTI */}
           <Section title="MBTI 분포 — 동화나라 성격 지도" accent="text-violet-400">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-              {charAnalysis.mbti.slice(0, 4).map(([type, count]) => (
-                <div key={type} className="rounded-lg bg-violet-500/10 border border-violet-500/20 p-2.5 text-center">
-                  <div className="text-lg font-black text-violet-300">{type}</div>
-                  <div className="text-xs text-white/40">{count}명</div>
-                </div>
-              ))}
-            </div>
-            <div className="space-y-1.5">
-              {charAnalysis.mbti.map(([type, count]) => (
-                <div key={type} className="flex items-center gap-3">
-                  <span className="text-sm text-white/70 w-12 font-mono">{type}</span>
-                  <Bar value={count} max={charAnalysis.mbti[0][1] as number} color="bg-violet-500" />
-                  <span className="text-sm text-white/50 tabular-nums w-6 text-right">{count}</span>
-                </div>
-              ))}
+            <div className="space-y-3">
+              {charAnalysis.mbti.map(([type, count]) => {
+                const chars = charAnalysis.mbtiChars[type] ?? [];
+                return (
+                  <div key={type} className="rounded-lg bg-white/[0.02] border border-white/5 p-3">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-sm font-black text-violet-300 w-12 font-mono">{type}</span>
+                      <Bar value={count} max={charAnalysis.mbti[0][1] as number} color="bg-violet-500" />
+                      <span className="text-sm text-white/50 tabular-nums w-6 text-right">{count}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {chars.map((c) => (
+                        <div key={c.id} className="flex items-center gap-1 rounded-full bg-white/5 pl-0.5 pr-2 py-0.5" title={c.characterNm}>
+                          <img src={c.circularImageUrl} alt={c.characterNm} width={20} height={20} className="rounded-full" />
+                          <span className="text-[10px] text-white/50">{c.characterNm}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Section>
 
           {/* Blood type + VS */}
           <div className="grid gap-3 sm:grid-cols-2">
             <Section title="혈액형 분포">
-              <div className="grid grid-cols-2 gap-3">
-                {charAnalysis.blood.map(([type, count], i) => (
-                  <div key={type} className={`rounded-xl p-4 text-center ${i === 0 ? "bg-red-500/10 border border-red-500/20" : "bg-white/[0.03] border border-white/5"}`}>
-                    <div className={`text-2xl font-black ${i === 0 ? "text-red-300" : "text-white/70"}`}>{type}</div>
-                    <div className="text-lg font-bold text-white/60 tabular-nums">{count}명</div>
-                  </div>
-                ))}
+              <div className="space-y-3">
+                {charAnalysis.blood.map(([type, count], i) => {
+                  const chars = charAnalysis.bloodChars[type] ?? [];
+                  return (
+                    <div key={type} className={`rounded-xl p-3 ${i === 0 ? "bg-red-500/10 border border-red-500/20" : "bg-white/[0.03] border border-white/5"}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-lg font-black ${i === 0 ? "text-red-300" : "text-white/70"}`}>{type}</span>
+                        <span className="text-xs text-white/40">{count}명</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {chars.map((c) => (
+                          <img key={c.id} src={c.circularImageUrl} alt={c.characterNm} title={c.characterNm} width={22} height={22} className="rounded-full ring-1 ring-white/10" />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </Section>
             <VsCard
