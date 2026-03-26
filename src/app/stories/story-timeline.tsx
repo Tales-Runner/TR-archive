@@ -7,6 +7,38 @@ import { STORY_CATEGORY, STORY_CATEGORY_LABEL, SITE_BASE } from "@/lib/constants
 import { EmptyState } from "@/components/empty-state";
 
 const PAGE_SIZE = 12;
+const GENERIC_TAGS = new Set(["웹툰", "영상", ""]);
+
+interface SeriesInfo {
+  name: string;
+  episodes: StoryItem[]; // chronological (oldest first)
+}
+
+function getSeriesKey(story: StoryItem): string {
+  const tags = story.hashTagSubject
+    .split(",")
+    .map((t) => t.trim())
+    .filter((t) => !GENERIC_TAGS.has(t));
+  return tags.join(", ") || "";
+}
+
+function buildSeriesMap(stories: StoryItem[]): Map<string, SeriesInfo> {
+  const map = new Map<string, SeriesInfo>();
+  // stories comes newest-first, we want chronological for episodes
+  for (let i = stories.length - 1; i >= 0; i--) {
+    const s = stories[i];
+    if (s.images.length === 0) continue;
+    const key = getSeriesKey(s);
+    if (!key) continue;
+    const existing = map.get(key);
+    if (existing) {
+      existing.episodes.push(s);
+    } else {
+      map.set(key, { name: key, episodes: [s] });
+    }
+  }
+  return map;
+}
 
 function StoryViewer({
   story,
@@ -15,6 +47,8 @@ function StoryViewer({
   onNext,
   hasPrev,
   hasNext,
+  seriesMap,
+  onJump,
 }: {
   story: StoryItem;
   onClose: () => void;
@@ -22,6 +56,8 @@ function StoryViewer({
   onNext: () => void;
   hasPrev: boolean;
   hasNext: boolean;
+  seriesMap: Map<string, SeriesInfo>;
+  onJump: (id: number) => void;
 }) {
   const [barVisible, setBarVisible] = useState(false);
 
@@ -49,6 +85,14 @@ function StoryViewer({
   const hasVideo = story.images.some((img) => img.movieUrl);
   const videoUrl = story.images.find((img) => img.movieUrl)?.movieUrl;
   const vid = videoUrl ? youtubeId(videoUrl.trim()) : null;
+
+  // Current series info
+  const currentKey = getSeriesKey(story);
+  const currentSeries = currentKey ? seriesMap.get(currentKey) : undefined;
+  const seriesEntries = useMemo(
+    () => [...seriesMap.values()].filter((s) => s.episodes.length >= 2),
+    [seriesMap],
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0812]">
@@ -108,34 +152,70 @@ function StoryViewer({
 
       {/* Bottom nav bar - toggle on tap */}
       {barVisible && (
-      <div
-        className="shrink-0 flex items-center justify-between border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md px-4 py-3 animate-slide-up"
-      >
-        <button
-          onClick={(e) => { e.stopPropagation(); if (hasPrev) onPrev(); }}
-          disabled={!hasPrev}
-          className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm min-h-[44px] transition-colors ${
-            hasPrev
-              ? "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
-              : "text-white/15 cursor-not-allowed"
-          }`}
-        >
-          ← 이전화
-        </button>
+      <div className="shrink-0 border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md animate-slide-up">
+        {/* Series selector */}
+        <div className="flex items-center gap-2 px-4 pt-3 pb-1">
+          <select
+            value={currentKey}
+            onChange={(e) => {
+              const series = seriesMap.get(e.target.value);
+              if (series && series.episodes.length > 0) {
+                onJump(series.episodes[0].id);
+              }
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="flex-1 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/70 outline-none focus:border-teal-500/50 truncate"
+          >
+            {seriesEntries.map((s) => (
+              <option key={s.name} value={s.name}>
+                {s.name} ({s.episodes.length}화)
+              </option>
+            ))}
+          </select>
+          {currentSeries && currentSeries.episodes.length >= 2 && (
+            <select
+              value={story.id}
+              onChange={(e) => onJump(Number(e.target.value))}
+              onClick={(e) => e.stopPropagation()}
+              className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/70 outline-none focus:border-teal-500/50"
+            >
+              {currentSeries.episodes.map((ep, i) => (
+                <option key={ep.id} value={ep.id}>
+                  {i + 1}화 — {ep.subject}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
 
-        <span className="text-xs text-white/30 truncate min-w-0 mx-2">{story.subject}</span>
+        {/* Prev / Next */}
+        <div className="flex items-center justify-between px-4 py-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); if (hasPrev) onPrev(); }}
+            disabled={!hasPrev}
+            className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm min-h-[44px] transition-colors ${
+              hasPrev
+                ? "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
+                : "text-white/15 cursor-not-allowed"
+            }`}
+          >
+            ← 이전화
+          </button>
 
-        <button
-          onClick={(e) => { e.stopPropagation(); if (hasNext) onNext(); }}
-          disabled={!hasNext}
-          className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm min-h-[44px] transition-colors ${
-            hasNext
-              ? "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
-              : "text-white/15 cursor-not-allowed"
-          }`}
-        >
-          다음화 →
-        </button>
+          <span className="text-xs text-white/30 truncate min-w-0 mx-2">{story.subject}</span>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); if (hasNext) onNext(); }}
+            disabled={!hasNext}
+            className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm min-h-[44px] transition-colors ${
+              hasNext
+                ? "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
+                : "text-white/15 cursor-not-allowed"
+            }`}
+          >
+            다음화 →
+          </button>
+        </div>
       </div>
       )}
     </div>
@@ -194,6 +274,9 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
     [stories]
   );
 
+  // Series map for the viewer
+  const seriesMap = useMemo(() => buildSeriesMap(stories), [stories]);
+
   const viewingStory =
     viewingId !== null ? stories.find((s) => s.id === viewingId) : null;
 
@@ -220,6 +303,8 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
           onNext={goNext}
           hasPrev={viewingIdx > 0}
           hasNext={viewingIdx < viewableList.length - 1}
+          seriesMap={seriesMap}
+          onJump={setViewingId}
         />
       )}
 
