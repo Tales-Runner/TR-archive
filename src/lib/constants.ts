@@ -78,13 +78,21 @@ export const LEVEL_RANKS: { name: string; minLevel: number; maxLevel: number }[]
 ];
 
 // 7색 순서 (각 계급 내 레벨 순서)
-export const RANK_COLORS = ["빨강", "주황", "노랑", "초록", "파랑", "남색", "보라"];
+export const RANK_COLORS: { name: string; hex: string }[] = [
+  { name: "빨강", hex: "#ef4444" },
+  { name: "주황", hex: "#f97316" },
+  { name: "노랑", hex: "#eab308" },
+  { name: "초록", hex: "#22c55e" },
+  { name: "파랑", hex: "#3b82f6" },
+  { name: "남색", hex: "#6366f1" },
+  { name: "보라", hex: "#a855f7" },
+];
 
-export function getLevelRank(level: number): { rank: string; color: string } {
+export function getLevelRank(level: number): { rank: string; color: string; hex: string } {
   const tier = LEVEL_RANKS.find((r) => level >= r.minLevel && level <= r.maxLevel);
-  if (!tier) return { rank: "???", color: "" };
+  if (!tier) return { rank: "???", color: "", hex: "#888" };
   const idx = (level - tier.minLevel) % 7;
-  return { rank: tier.name, color: RANK_COLORS[idx] };
+  return { rank: tier.name, color: RANK_COLORS[idx].name, hex: RANK_COLORS[idx].hex };
 }
 
 export function getLevelLabel(level: number): string {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { LEVEL_RANKS, RANK_COLORS, getLevelLabel } from "@/lib/constants";
+import { LEVEL_RANKS, RANK_COLORS, getLevelLabel, getLevelRank } from "@/lib/constants";
 
 interface LevelEntry {
   level: number;
@@ -92,12 +92,31 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
     return { totalNeeded, remaining, segments };
   }, [levels, currentLevel, currentExp, targetLevel]);
 
-  // Available colors for a rank
   function colorsForRank(rankIdx: number) {
     const rank = LEVEL_RANKS[rankIdx];
     if (!rank) return [];
     const count = rank.maxLevel - rank.minLevel + 1;
     return RANK_COLORS.slice(0, count);
+  }
+
+  function ColorBar({ colors, value, onChange }: { colors: typeof RANK_COLORS; value: number; onChange: (i: number) => void }) {
+    return (
+      <div className="flex gap-1">
+        {colors.map((c, i) => (
+          <button
+            key={c.name}
+            onClick={() => onChange(i)}
+            title={c.name}
+            className={`flex-1 h-8 rounded-md transition-all ${
+              value === i
+                ? "ring-2 ring-white/60 scale-110 z-10"
+                : "opacity-60 hover:opacity-90"
+            }`}
+            style={{ backgroundColor: c.hex }}
+          />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -123,15 +142,11 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
           </div>
           <div>
             <label className="block text-[11px] text-white/30 mb-1">색상</label>
-            <select
+            <ColorBar
+              colors={colorsForRank(curRankIdx)}
               value={curColorIdx}
-              onChange={(e) => setCurColorIdx(Number(e.target.value))}
-              className={selectClass}
-            >
-              {colorsForRank(curRankIdx).map((c, i) => (
-                <option key={c} value={i}>{c}</option>
-              ))}
-            </select>
+              onChange={setCurColorIdx}
+            />
           </div>
           <div>
             <label className="block text-[11px] text-white/30 mb-1">진행률 (%)</label>
@@ -146,7 +161,8 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
             />
           </div>
         </div>
-        <p className="mt-2 text-xs text-teal-400">
+        <p className="mt-2 text-xs text-white/60 flex items-center gap-1.5">
+          <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getLevelRank(currentLevel).hex }} />
           {getLevelLabel(currentLevel)} ({curPercent}%)
         </p>
       </div>
@@ -196,18 +212,15 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
           </div>
           <div>
             <label className="block text-[11px] text-white/30 mb-1">색상</label>
-            <select
+            <ColorBar
+              colors={colorsForRank(tgtRankIdx)}
               value={tgtColorIdx}
-              onChange={(e) => setTgtColorIdx(Number(e.target.value))}
-              className={selectClass}
-            >
-              {colorsForRank(tgtRankIdx).map((c, i) => (
-                <option key={c} value={i}>{c}</option>
-              ))}
-            </select>
+              onChange={setTgtColorIdx}
+            />
           </div>
         </div>
-        <p className="mt-2 text-xs text-accent">
+        <p className="mt-2 text-xs text-white/60 flex items-center gap-1.5">
+          <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getLevelRank(targetLevel).hex }} />
           {getLevelLabel(targetLevel)}
         </p>
       </div>
