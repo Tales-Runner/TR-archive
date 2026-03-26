@@ -24,6 +24,26 @@ function levelFromRank(rankIdx: number, colorIdx: number): number {
 const selectClass =
   "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-medium text-white/90 outline-none focus:border-teal-500/50";
 
+function ColorBar({ colors, value, onChange }: { colors: typeof RANK_COLORS; value: number; onChange: (i: number) => void }) {
+  return (
+    <div className="flex gap-1">
+      {colors.map((c, i) => (
+        <button
+          key={c.name}
+          onClick={() => onChange(i)}
+          title={c.name}
+          className={`flex-1 h-8 rounded-md transition-all ${
+            value === i
+              ? "ring-2 ring-white/60 scale-110 z-10"
+              : "opacity-60 hover:opacity-90"
+          }`}
+          style={{ backgroundColor: c.hex }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
   const maxLv = levels[levels.length - 1].level;
 
@@ -42,9 +62,8 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
   const currentLevel = levelFromRank(curRankIdx, curColorIdx);
   const targetLevel = levelFromRank(tgtRankIdx, tgtColorIdx);
 
-  // Current EXP from percentage
-  const currentLevelData = levels.find((l) => l.level === currentLevel);
-  const nextLevelData = levels.find((l) => l.level === currentLevel + 1);
+  const currentLevelData = useMemo(() => levels.find((l) => l.level === currentLevel), [levels, currentLevel]);
+  const nextLevelData = useMemo(() => levels.find((l) => l.level === currentLevel + 1), [levels, currentLevel]);
   const currentExp = useMemo(() => {
     if (!currentLevelData || !nextLevelData) return 0;
     const segmentExp = nextLevelData.exp - currentLevelData.exp;
@@ -97,26 +116,6 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
     if (!rank) return [];
     const count = rank.maxLevel - rank.minLevel + 1;
     return RANK_COLORS.slice(0, count);
-  }
-
-  function ColorBar({ colors, value, onChange }: { colors: typeof RANK_COLORS; value: number; onChange: (i: number) => void }) {
-    return (
-      <div className="flex gap-1">
-        {colors.map((c, i) => (
-          <button
-            key={c.name}
-            onClick={() => onChange(i)}
-            title={c.name}
-            className={`flex-1 h-8 rounded-md transition-all ${
-              value === i
-                ? "ring-2 ring-white/60 scale-110 z-10"
-                : "opacity-60 hover:opacity-90"
-            }`}
-            style={{ backgroundColor: c.hex }}
-          />
-        ))}
-      </div>
-    );
   }
 
   return (
