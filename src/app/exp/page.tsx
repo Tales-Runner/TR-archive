@@ -20,7 +20,7 @@ export default function ExpPage() {
       </p>
       <ScholarComment
         elims="크큭. 레벨업에 얼마나 걸리는지 알고 싶다고? 현실을 직시하는 건 좋은 습관이지."
-        r="...레벨이 올라갈수록 필요한 경험치가 많아져요. 왜 그런 걸까요."
+        r="...숫자를 입력하면 계산됩니다."
       />
       <ExpCalculator levels={levels} />
     </div>

@@ -19,7 +19,7 @@ export default function StoriesPage() {
       </p>
       <ScholarComment
         elims="여태까지의 이벤트 스토리를 모아 둔 거야. 공식에선 모바일로 보면 깨지던데... 내가 고쳐놨지."
-        r="...이야기를 읽으면 그 사람들을 조금 알 수 있는 것 같아요."
+        r="...세로로 스크롤하면 읽을 수 있어요."
       />
       <StoryTimeline stories={stories} />
     </div>

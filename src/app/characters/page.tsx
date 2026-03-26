@@ -19,7 +19,7 @@ export default function CharactersPage() {
       </p>
       <ScholarComment
         elims="런너들 능력치를 다 까발려 놓는 게 좀 그렇냐고? 크크, 프라이버시 같은 건 아티팩터한테 없어."
-        r="...다들 다르게 생겼는데, 달리는 건 비슷해요."
+        r="...엘림스. 이건 공개 데이터입니다."
       />
       <CharacterTable characters={characters} />
     </div>
