@@ -140,7 +140,11 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
     const total15 = statPatterns.filter((p) => p.total >= 15).length;
 
     const typeCounts: Record<string, number> = {};
-    for (const p of statPatterns) typeCounts[p.type] = (typeCounts[p.type] || 0) + 1;
+    const typeChars: Record<string, Character[]> = {};
+    for (const p of statPatterns) {
+      typeCounts[p.type] = (typeCounts[p.type] || 0) + 1;
+      (typeChars[p.type] ??= []).push(p.c);
+    }
 
     return {
       mbti: Object.entries(mbti).sort((a, b) => b[1] - a[1]),
@@ -150,6 +154,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       tallest, shortest,
       total14, total15,
       typeCounts: Object.entries(typeCounts).sort((a, b) => b[1] - a[1]),
+      typeChars,
     };
   }, [visibleChars]);
 
@@ -335,14 +340,24 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
 
           {/* Stat pattern distribution */}
           <Section title="스탯 배분 유형" sub="가장 높은 스탯(5 이상) 기준으로 분류" accent="text-violet-400">
-            <div className="space-y-2">
-              {charAnalysis.typeCounts.map(([type, count]) => (
-                <div key={type} className="flex items-center gap-3">
-                  <span className="text-sm text-white/70 w-20">{type}</span>
-                  <Bar value={count} max={charAnalysis.typeCounts[0][1] as number} color="bg-violet-500" />
-                  <span className="text-sm text-white/50 tabular-nums w-8 text-right">{count}명</span>
-                </div>
-              ))}
+            <div className="space-y-3">
+              {charAnalysis.typeCounts.map(([type, count]) => {
+                const chars = charAnalysis.typeChars[type] ?? [];
+                return (
+                  <div key={type} className="rounded-lg bg-white/[0.02] border border-white/5 p-3">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-sm font-bold text-violet-300 w-20">{type}</span>
+                      <Bar value={count} max={charAnalysis.typeCounts[0][1] as number} color="bg-violet-500" />
+                      <span className="text-sm text-white/50 tabular-nums w-8 text-right">{count}명</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {chars.map((c) => (
+                        <img key={c.id} src={c.circularImageUrl} alt={c.characterNm} title={c.characterNm} width={22} height={22} className="rounded-full ring-1 ring-white/10" />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </Section>
 
