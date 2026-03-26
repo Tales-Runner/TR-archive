@@ -181,15 +181,13 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
 
       {tab === "overview" && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 stagger-grid">
-            <StatCard label="캐릭터" value={visibleChars.length} sub="명" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 stagger-grid">
+            <StatCard label="플레이 캐릭터" value={visibleChars.length} sub="명" />
             <StatCard label="맵" value={maps.length} sub="개" />
-            <StatCard label="코스튬" value={costumes.length} sub="세트" />
-            <StatCard label="스토리" value={stories.length} sub="개" />
-            <StatCard label="가이드" value={42} sub="개" />
             <StatCard label="변경권" value={gachaStats.totalItems} sub="종" />
-            <StatCard label="최고 레벨" value={levelStats.maxLevel} sub={getLevelLabel(levelStats.maxLevel)} />
-            <StatCard label="스토리 이미지" value={storyStats.totalImages.toLocaleString()} sub="장" />
+            <StatCard label="최저 변경권 확률" value={`${gachaStats.lowestProb}%`} sub={gachaStats.lowestTarget} />
+            <StatCard label="최고 레벨" value={getLevelLabel(levelStats.maxLevel)} sub={`누적 ${(levelStats.maxExp / 1_000_000_000).toFixed(1)}B EXP`} />
+            <StatCard label="EXP 절반 지점" value={getLevelLabel(levelStats.lv50percent)} sub="여기까지가 전체의 50%" />
           </div>
         </div>
       )}
