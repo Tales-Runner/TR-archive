@@ -72,6 +72,12 @@ body {
 .stagger-grid > *:nth-child(9) { animation-delay: 240ms; }
 .stagger-grid > *:nth-child(n+10) { animation-delay: 270ms; }
 
+/* Dark select dropdown */
+select option {
+  background: #13101f;
+  color: #ede8f5;
+}
+
 /* Guide HTML content (from official API) */
 .guide-content {
   color: rgba(255, 255, 255, 0.8);
