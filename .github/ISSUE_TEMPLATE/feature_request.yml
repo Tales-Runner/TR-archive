@@ -1,0 +1,43 @@
+name: 기능 요청
+description: 새로운 기능이나 개선 사항을 제안해주세요
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 어떤 기능인가요?
+      description: 원하는 기능을 설명해주세요.
+      placeholder: "예: 캐릭터 상세 페이지에서 코스튬 미리보기가 되면 좋겠어요."
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: 왜 필요한가요?
+      description: 이 기능이 있으면 어떤 점이 좋을지 알려주세요.
+    validations:
+      required: false
+  - type: dropdown
+    id: category
+    attributes:
+      label: 관련 영역
+      options:
+        - 런너 능력치
+        - 변경권 확률
+        - 경험치 계산기
+        - 맵 도감
+        - 코스튬
+        - 가이드
+        - 스토리
+        - 공지사항
+        - 홈/전체
+        - 기타
+    validations:
+      required: false
+  - type: textarea
+    id: reference
+    attributes:
+      label: 참고 자료
+      description: 참고할 만한 링크나 스크린샷이 있다면 첨부해주세요.
+    validations:
+      required: false
