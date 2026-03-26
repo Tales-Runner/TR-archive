@@ -55,5 +55,42 @@ export const R_CIRCULAR =
 export const KAI_CIRCULAR =
   `${IMAGE_CDN}/images/trintro/character/circularImageUrl/0KztxwgQ2iCDS7LMFEz9Jd.png`;
 
+// ── Level Ranks ───────────────────────────────────────
+export const LEVEL_RANKS: { name: string; minLevel: number; maxLevel: number }[] = [
+  { name: "병아리", minLevel: 1, maxLevel: 7 },
+  { name: "발바닥", minLevel: 8, maxLevel: 14 },
+  { name: "양말", minLevel: 15, maxLevel: 21 },
+  { name: "슬리퍼", minLevel: 22, maxLevel: 28 },
+  { name: "운동화", minLevel: 29, maxLevel: 35 },
+  { name: "윙부츠", minLevel: 36, maxLevel: 42 },
+  { name: "데빌윙부츠", minLevel: 43, maxLevel: 49 },
+  { name: "엔젤윙부츠", minLevel: 50, maxLevel: 56 },
+  { name: "파워윙부츠", minLevel: 57, maxLevel: 63 },
+  { name: "썬더윙부츠", minLevel: 64, maxLevel: 70 },
+  { name: "루나윙부츠", minLevel: 71, maxLevel: 77 },
+  { name: "쏠라윙부츠", minLevel: 78, maxLevel: 84 },
+  { name: "스텔라윙부츠", minLevel: 85, maxLevel: 91 },
+  { name: "갤럭시윙부츠", minLevel: 92, maxLevel: 98 },
+  { name: "홀리윙부츠", minLevel: 99, maxLevel: 105 },
+  { name: "프라우드윙부츠", minLevel: 106, maxLevel: 112 },
+  { name: "크로노스윙부츠", minLevel: 113, maxLevel: 119 },
+  { name: "인페르노윙부츠", minLevel: 120, maxLevel: 126 },
+];
+
+// 7색 순서 (각 계급 내 레벨 순서)
+export const RANK_COLORS = ["빨강", "주황", "노랑", "초록", "파랑", "남색", "보라"];
+
+export function getLevelRank(level: number): { rank: string; color: string } {
+  const tier = LEVEL_RANKS.find((r) => level >= r.minLevel && level <= r.maxLevel);
+  if (!tier) return { rank: "???", color: "" };
+  const idx = (level - tier.minLevel) % 7;
+  return { rank: tier.name, color: RANK_COLORS[idx] };
+}
+
+export function getLevelLabel(level: number): string {
+  const { rank, color } = getLevelRank(level);
+  return `${color} ${rank}`;
+}
+
 // ── Animation ─────────────────────────────────────────
 export const TYPEWRITER_SPEED_MS = 40;

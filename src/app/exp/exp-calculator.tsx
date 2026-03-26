@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { getLevelLabel, getLevelRank, RANK_COLORS } from "@/lib/constants";
 
 interface LevelEntry {
   level: number;
@@ -49,7 +50,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
       {/* Inputs */}
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-white/10 bg-surface-card p-4">
-          <label className="block text-xs text-white/40 mb-2">현재 레벨</label>
+          <label className="block text-xs text-white/40 mb-1">현재 레벨</label>
           <input
             type="number"
             min={1}
@@ -62,10 +63,11 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
             }}
             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-lg font-bold text-white/90 tabular-nums outline-none focus:border-teal-500/50"
           />
+          <p className="mt-1.5 text-xs text-teal-400">{getLevelLabel(currentLevel)}</p>
         </div>
 
         <div className="rounded-xl border border-white/10 bg-surface-card p-4">
-          <label className="block text-xs text-white/40 mb-2">
+          <label className="block text-xs text-white/40 mb-1">
             현재 경험치 (이번 레벨 내)
           </label>
           <input
@@ -78,7 +80,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
         </div>
 
         <div className="rounded-xl border border-white/10 bg-surface-card p-4">
-          <label className="block text-xs text-white/40 mb-2">목표 레벨</label>
+          <label className="block text-xs text-white/40 mb-1">목표 레벨</label>
           <input
             type="number"
             min={currentLevel + 1}
@@ -91,6 +93,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
             }
             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-lg font-bold text-white/90 tabular-nums outline-none focus:border-teal-500/50"
           />
+          <p className="mt-1.5 text-xs text-accent">{getLevelLabel(targetLevel)}</p>
         </div>
       </div>
 
@@ -159,7 +162,8 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
                         className="border-b border-white/5 hover:bg-white/[0.02]"
                       >
                         <td className="px-3 py-1.5 text-white/70 tabular-nums">
-                          Lv.{s.from} → Lv.{s.to}
+                          <span className="text-white/40 text-xs mr-1">{getLevelLabel(s.from)}</span>
+                          → <span className="text-white/40 text-xs ml-1">{getLevelLabel(s.to)}</span>
                         </td>
                         <td className="px-3 py-1.5 text-right text-white/60 tabular-nums">
                           {s.exp.toLocaleString()}
@@ -184,6 +188,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
             <thead className="sticky top-0 bg-surface-card">
               <tr className="border-b border-white/10 text-xs text-white/30">
                 <th className="px-3 py-2 text-left">레벨</th>
+                <th className="px-3 py-2 text-left">계급</th>
                 <th className="px-3 py-2 text-right">누적 경험치</th>
                 <th className="px-3 py-2 text-right">구간 경험치</th>
               </tr>
@@ -200,6 +205,9 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
                 >
                   <td className="px-3 py-1.5 text-white/70 tabular-nums">
                     {l.level}
+                  </td>
+                  <td className="px-3 py-1.5 text-xs text-white/40">
+                    {getLevelLabel(l.level)}
                   </td>
                   <td className="px-3 py-1.5 text-right text-white/50 tabular-nums">
                     {l.exp.toLocaleString()}
