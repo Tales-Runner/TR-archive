@@ -188,9 +188,9 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
     return groups;
   }, [flatVisible]);
 
-  // All viewable stories (with images) in order for prev/next navigation
+  // All viewable stories in chronological order (oldest→newest) for prev/next navigation
   const viewableList = useMemo(
-    () => stories.filter((s) => s.images.length > 0),
+    () => [...stories.filter((s) => s.images.length > 0)].reverse(),
     [stories]
   );
 
