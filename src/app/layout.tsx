@@ -64,6 +64,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "분석",
     items: [
       { href: "/characters", label: "런너 능력치" },
+      { href: "/stats", label: "통계" },
     ],
   },
   {
