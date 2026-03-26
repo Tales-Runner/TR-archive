@@ -20,7 +20,6 @@ function StoryViewer({
   hasNext: boolean;
 }) {
   const [barVisible, setBarVisible] = useState(false);
-  const [barTimer, setBarTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -39,26 +38,9 @@ function StoryViewer({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose, onPrev, onNext, hasPrev, hasNext]);
 
-  // Scroll to top on story change
   useEffect(() => {
     document.getElementById("story-scroll")?.scrollTo(0, 0);
   }, [story.id]);
-
-  function showBar() {
-    setBarVisible(true);
-    if (barTimer) clearTimeout(barTimer);
-    const t = setTimeout(() => setBarVisible(false), 3000);
-    setBarTimer(t);
-  }
-
-  function toggleBar() {
-    if (barVisible) {
-      setBarVisible(false);
-      if (barTimer) clearTimeout(barTimer);
-    } else {
-      showBar();
-    }
-  }
 
   const hasVideo = story.images.some((img) => img.movieUrl);
   const videoUrl = story.images.find((img) => img.movieUrl)?.movieUrl;
@@ -83,7 +65,7 @@ function StoryViewer({
       </div>
 
       {/* Content */}
-      <div id="story-scroll" className="flex-1 overflow-y-auto" onClick={toggleBar}>
+      <div id="story-scroll" className="flex-1 overflow-y-auto" onClick={() => setBarVisible((v) => !v)}>
         {hasVideo && vid ? (
           <div className="mx-auto max-w-3xl p-4">
             <div className="aspect-video rounded-xl overflow-hidden">
