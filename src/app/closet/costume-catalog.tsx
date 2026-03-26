@@ -1,19 +1,37 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import type { CostumeItem } from "@/lib/types";
 import { formatDate } from "@/lib/format";
+import { EmptyState } from "@/components/empty-state";
 
 export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
-  const [search, setSearch] = useState("");
-  const [yearFilter, setYearFilter] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"date" | "name">("date");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
+  const [yearFilter, setYearFilter] = useState<string | null>(
+    () => searchParams.get("year") ?? null,
+  );
+  const [sortBy, setSortBy] = useState<"date" | "name">(() =>
+    searchParams.get("sort") === "name" ? "name" : "date",
+  );
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const years = useMemo(
     () => [...new Set(costumes.map((c) => c.openYear))],
     [costumes]
   );
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (yearFilter) params.set("year", yearFilter);
+    if (search.trim()) params.set("q", search.trim());
+    if (sortBy !== "date") params.set("sort", sortBy);
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : "?", { scroll: false });
+  }, [yearFilter, search, sortBy, router]);
 
   const filtered = useMemo(() => {
     let list = costumes;
@@ -183,32 +201,36 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
       )}
 
       {/* Grid */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 stagger-grid">
-        {filtered.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setSelectedId(c.id)}
-            className="group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left transition-all hover:border-teal-500/30 hover:bg-white/[0.03]"
-          >
-            <div className="aspect-[4/3] overflow-hidden bg-white/5">
-              <img
-                src={c.thumbnail}
-                alt={c.subject}
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                loading="lazy"
-              />
-            </div>
-            <div className="p-3">
-              <h3 className="text-sm font-medium text-white/90 truncate mb-0.5">
-                {c.subject}
-              </h3>
-              <p className="text-[11px] text-white/30">
-                {formatDate(c.openDt)}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <EmptyState message="조건에 맞는 코스튬이 없습니다" />
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 stagger-grid">
+          {filtered.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setSelectedId(c.id)}
+              className="card-hover group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left hover:border-teal-500/30 hover:bg-white/[0.03]"
+            >
+              <div className="aspect-[4/3] overflow-hidden bg-white/5">
+                <img
+                  src={c.thumbnail}
+                  alt={c.subject}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-3">
+                <h3 className="text-sm font-medium text-white/90 truncate mb-0.5">
+                  {c.subject}
+                </h3>
+                <p className="text-[11px] text-white/30">
+                  {formatDate(c.openDt)}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
     </>
   );
 }

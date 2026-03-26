@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { CostumeCatalog } from "./costume-catalog";
 import { ScholarComment } from "../scholar-comment";
 import costumesJson from "@/data/costumes.json";
@@ -20,7 +21,7 @@ export default function ClosetPage() {
       <ScholarComment
         elims="옷 구경하러 왔어? 흥, 난 이런 거에 관심 없지만 정리는 해뒀지."
       />
-      <CostumeCatalog costumes={costumes} />
+      <Suspense><CostumeCatalog costumes={costumes} /></Suspense>
     </div>
   );
 }

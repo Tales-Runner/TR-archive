@@ -4,6 +4,9 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import type { StoryItem } from "@/lib/types";
 import { formatDate, youtubeId } from "@/lib/format";
 import { STORY_CATEGORY, STORY_CATEGORY_LABEL, SITE_BASE } from "@/lib/constants";
+import { EmptyState } from "@/components/empty-state";
+
+const PAGE_SIZE = 12;
 
 function StoryViewer({
   story,
@@ -143,6 +146,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
   const [catFilter, setCatFilter] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [viewingId, setViewingId] = useState<number | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const filtered = useMemo(() => {
     let list = stories;
@@ -160,10 +164,18 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
     return list;
   }, [stories, catFilter, search]);
 
+  // Reset pagination when filter changes
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [catFilter, search]);
+
+  const flatVisible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
   const grouped = useMemo(() => {
     const groups: { year: string; items: StoryItem[] }[] = [];
     const yearMap = new Map<string, StoryItem[]>();
-    for (const s of filtered) {
+    for (const s of flatVisible) {
       const existing = yearMap.get(s.openYear);
       if (existing) {
         existing.push(s);
@@ -174,7 +186,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
       }
     }
     return groups;
-  }, [filtered]);
+  }, [flatVisible]);
 
   // All viewable stories (with images) in order for prev/next navigation
   const viewableList = useMemo(
@@ -256,57 +268,73 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
       </div>
 
       {/* Timeline */}
-      <div className="space-y-8">
-        {grouped.map(({ year, items }) => (
-          <section key={year}>
-            <h2 className="mb-4 text-lg font-bold text-white/70">{year}</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 stagger-grid">
-              {items.map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() =>
-                    s.images.length > 0
-                      ? setViewingId(s.id)
-                      : window.open(
-                          `${SITE_BASE}/archive/trstory/${s.id}`,
-                          "_blank"
-                        )
-                  }
-                  className="group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left transition-all hover:border-teal-500/30 hover:bg-white/[0.03]"
-                >
-                  <div className="aspect-[3/4] overflow-hidden bg-white/5">
-                    <img
-                      src={s.thumbnail}
-                      alt={s.subject}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-medium text-white/90 line-clamp-2 mb-1">
-                      {s.subject}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          s.category === STORY_CATEGORY.WEBTOON
-                            ? "bg-emerald-500/20 text-emerald-300"
-                            : "bg-blue-500/20 text-blue-300"
-                        }`}
-                      >
-                        {STORY_CATEGORY_LABEL[s.category]}
-                      </span>
-                      <span className="text-[11px] text-white/30">
-                        {formatDate(s.openDt)}
-                      </span>
+      {filtered.length === 0 ? (
+        <EmptyState message="조건에 맞는 스토리가 없습니다" />
+      ) : (
+        <div className="space-y-8">
+          {grouped.map(({ year, items }) => (
+            <section key={year}>
+              <h2 className="mb-4 text-lg font-bold text-white/70">{year}</h2>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 stagger-grid">
+                {items.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() =>
+                      s.images.length > 0
+                        ? setViewingId(s.id)
+                        : window.open(
+                            `${SITE_BASE}/archive/trstory/${s.id}`,
+                            "_blank"
+                          )
+                    }
+                    className="card-hover group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left hover:border-teal-500/30 hover:bg-white/[0.03]"
+                  >
+                    <div className="aspect-[3/4] overflow-hidden bg-white/5">
+                      <img
+                        src={s.thumbnail}
+                        alt={s.subject}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        loading="lazy"
+                      />
                     </div>
-                  </div>
-                </button>
-              ))}
+                    <div className="p-3">
+                      <h3 className="text-sm font-medium text-white/90 line-clamp-2 mb-1">
+                        {s.subject}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                            s.category === STORY_CATEGORY.WEBTOON
+                              ? "bg-emerald-500/20 text-emerald-300"
+                              : "bg-blue-500/20 text-blue-300"
+                          }`}
+                        >
+                          {STORY_CATEGORY_LABEL[s.category]}
+                        </span>
+                        <span className="text-[11px] text-white/30">
+                          {formatDate(s.openDt)}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ))}
+
+          {/* Load more */}
+          {hasMore && (
+            <div className="flex justify-center pt-2 pb-4">
+              <button
+                onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
+                className="rounded-lg border border-white/10 bg-white/5 px-6 py-2.5 text-sm text-white/50 hover:bg-white/10 hover:text-white/80 transition-colors"
+              >
+                더보기 ({filtered.length - visibleCount}개 남음)
+              </button>
             </div>
-          </section>
-        ))}
-      </div>
+          )}
+        </div>
+      )}
     </>
   );
 }

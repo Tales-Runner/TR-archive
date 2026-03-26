@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import DOMPurify from "dompurify";
 import type { GuideItem } from "@/lib/types";
 import { GUIDE_CATEGORY_NAMES as CATEGORY_NAMES } from "@/lib/constants";
+import { EmptyState } from "@/components/empty-state";
 
 export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
   const [catFilter, setCatFilter] = useState<number | null>(null);
@@ -143,34 +144,38 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
       </div>
 
       {/* List */}
-      <div className="space-y-2 stagger-grid">
-        {filtered.map((g) => (
-          <button
-            key={g.id}
-            onClick={() => openGuide(g.id)}
-            className="w-full rounded-xl border border-white/10 bg-surface-card px-5 py-3.5 text-left transition-all hover:border-teal-500/30 hover:bg-white/[0.03]"
-          >
-            <div className="flex items-center gap-3">
-              <h3 className="text-sm font-medium text-white/90">
-                {g.subject}
-              </h3>
-              <span className="shrink-0 rounded-full bg-teal-600/20 px-2 py-0.5 text-[10px] text-teal-300">
-                {CATEGORY_NAMES[g.category] ?? g.category}
-              </span>
-            </div>
-            <div className="mt-1 flex flex-wrap gap-1.5">
-              {g.hashTagSubject.split(",").map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[11px] text-white/30"
-                >
-                  #{tag.trim()}
+      {filtered.length === 0 ? (
+        <EmptyState message="조건에 맞는 가이드가 없습니다" />
+      ) : (
+        <div className="space-y-2 stagger-grid">
+          {filtered.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => openGuide(g.id)}
+              className="card-hover w-full rounded-xl border border-white/10 bg-surface-card px-5 py-3.5 text-left hover:border-teal-500/30 hover:bg-white/[0.03]"
+            >
+              <div className="flex items-center gap-3">
+                <h3 className="text-sm font-medium text-white/90">
+                  {g.subject}
+                </h3>
+                <span className="shrink-0 rounded-full bg-teal-600/20 px-2 py-0.5 text-[10px] text-teal-300">
+                  {CATEGORY_NAMES[g.category] ?? g.category}
                 </span>
-              ))}
-            </div>
-          </button>
-        ))}
-      </div>
+              </div>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {g.hashTagSubject.split(",").map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[11px] text-white/30"
+                  >
+                    #{tag.trim()}
+                  </span>
+                ))}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
     </>
   );
 }

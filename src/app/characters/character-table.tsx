@@ -3,13 +3,16 @@
 import { useState, useMemo } from "react";
 import type { Character, SortKey, SortDir } from "@/lib/types";
 import { CHARACTER_CATEGORY, CHARACTER_CATEGORY_LABEL, STAT_MAX, STAT_TOTAL_MAX } from "@/lib/constants";
+import { useToast } from "@/components/toast";
+import { Tooltip } from "@/components/tooltip";
+import { EmptyState } from "@/components/empty-state";
 
-const STAT_COLS: { key: SortKey; label: string }[] = [
-  { key: "maximumSpeed", label: "속도" },
-  { key: "acceleration", label: "가속" },
-  { key: "control", label: "컨트롤" },
-  { key: "power", label: "힘" },
-  { key: "totalStat", label: "합계" },
+const STAT_COLS: { key: SortKey; label: string; tip: string }[] = [
+  { key: "maximumSpeed", label: "속도", tip: "최고 이동 속도" },
+  { key: "acceleration", label: "가속", tip: "가속력 (0→최고속 도달)" },
+  { key: "control", label: "컨트롤", tip: "코너링 안정성" },
+  { key: "power", label: "힘", tip: "충돌 시 밀어내는 힘" },
+  { key: "totalStat", label: "합계", tip: "4대 스탯 합산" },
 ];
 
 const MOTION_COLS: { key: SortKey; label: string }[] = [
@@ -56,6 +59,8 @@ function motionCell(value: string, best: number, worst: number) {
     <span
       className={`text-xs tabular-nums ${isBest ? "font-bold text-emerald-400" : isWorst ? "text-red-400/70" : "text-white/60"}`}
     >
+      {isBest && <span aria-label="최고">▲ </span>}
+      {isWorst && <span aria-label="최저">▼ </span>}
       {value}s
     </span>
   );
@@ -309,12 +314,23 @@ export function CharacterTable({
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [compareIds, setCompareIds] = useState<number[]>([]);
   const [showCompare, setShowCompare] = useState(false);
+  const toast = useToast();
 
   function toggleCompare(id: number, e: React.MouseEvent) {
     e.stopPropagation();
-    setCompareIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : prev.length < 3 ? [...prev, id] : prev
-    );
+    const c = characters.find((x) => x.id === id);
+    setCompareIds((prev) => {
+      if (prev.includes(id)) {
+        if (c) toast(`${c.characterNm} 비교에서 제거`);
+        return prev.filter((x) => x !== id);
+      }
+      if (prev.length < 3) {
+        if (c) toast(`${c.characterNm} 비교에 추가 (${prev.length + 1}/3)`);
+        return [...prev, id];
+      }
+      toast("최대 3명까지 비교할 수 있습니다");
+      return prev;
+    });
   }
 
   const filtered = useMemo(() => {
@@ -473,13 +489,25 @@ export function CharacterTable({
               <th className="px-3 py-2.5 min-w-[120px]">고유능력</th>
               {cols.map((col) => (
                 <th key={col.key} className="px-3 py-2.5 whitespace-nowrap">
-                  <button
-                    onClick={() => toggleSort(col.key)}
-                    className="hover:text-white/70"
-                  >
-                    {col.label}
-                    {sortIndicator(col.key)}
-                  </button>
+                  {"tip" in col ? (
+                    <Tooltip text={(col as { tip: string }).tip}>
+                      <button
+                        onClick={() => toggleSort(col.key)}
+                        className="hover:text-white/70"
+                      >
+                        {col.label}
+                        {sortIndicator(col.key)}
+                      </button>
+                    </Tooltip>
+                  ) : (
+                    <button
+                      onClick={() => toggleSort(col.key)}
+                      className="hover:text-white/70"
+                    >
+                      {col.label}
+                      {sortIndicator(col.key)}
+                    </button>
+                  )}
                 </th>
               ))}
             </tr>
@@ -548,6 +576,7 @@ export function CharacterTable({
             ))}
           </tbody>
         </table>
+        {sorted.length === 0 && <EmptyState message="조건에 맞는 캐릭터가 없습니다" />}
       </div>
 
       {tab === "motions" && (

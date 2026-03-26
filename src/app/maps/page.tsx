@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { MapCatalog } from "./map-catalog";
 import { CharacterComment } from "../scholar-comment";
 import mapsJson from "@/data/maps.json";
@@ -25,7 +26,7 @@ export default function MapsPage() {
           { char: "kai", text: "...조심히 봐. 아빠가 만든 맵도 있으니까." },
         ]}
       />
-      <MapCatalog maps={maps} types={types} />
+      <Suspense><MapCatalog maps={maps} types={types} /></Suspense>
     </div>
   );
 }

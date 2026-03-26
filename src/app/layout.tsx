@@ -4,6 +4,8 @@ import Link from "next/link";
 import { NavMenu, type NavGroup } from "./nav-menu";
 import { GlobalSearch, type SearchEntry } from "./global-search";
 import { MaintenanceBanner } from "./maintenance-banner";
+import { ToastProvider } from "@/components/toast";
+import { ScrollToTop } from "@/components/scroll-to-top";
 import charactersJson from "@/data/characters.json";
 import mapsJson from "@/data/maps.json";
 import costumesJson from "@/data/costumes.json";
@@ -84,6 +86,12 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/notices", label: "공지사항" },
     ],
   },
+  {
+    label: "커뮤니티",
+    items: [
+      { href: "/feedback", label: "건의함" },
+    ],
+  },
 ];
 
 export default function RootLayout({
@@ -101,6 +109,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#2dd4bf" />
       </head>
       <body className="min-h-full flex flex-col bg-[#0f0b1a]">
+        <ToastProvider>
         <MaintenanceBanner />
         <header className="relative sticky top-0 z-50 border-b border-white/5 bg-[#0f0b1a]/80 backdrop-blur-md">
           <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 sm:gap-6 px-4">
@@ -137,6 +146,8 @@ export default function RootLayout({
           </a>
           {" "}&middot; 엘림스의 비공식 아카이브
         </footer>
+        <ScrollToTop />
+        </ToastProvider>
       </body>
     </html>
   );

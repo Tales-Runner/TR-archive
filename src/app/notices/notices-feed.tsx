@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { formatIsoDate } from "@/lib/format";
 import { API_BASE, SITE_BASE } from "@/lib/constants";
+import { EmptyState } from "@/components/empty-state";
 
 const API = `${API_BASE}/main/notices`;
 
@@ -75,8 +76,13 @@ export function NoticesFeed() {
 
   if (loading) {
     return (
-      <div className="text-center py-12 text-white/30 text-sm">
-        공지사항을 불러오는 중...
+      <div className="space-y-1">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 rounded-lg px-4 py-3">
+            <div className="skeleton h-4 flex-1" />
+            <div className="skeleton h-3 w-20" />
+          </div>
+        ))}
       </div>
     );
   }
@@ -127,6 +133,7 @@ export function NoticesFeed() {
       </div>
 
       {/* List */}
+      {filtered.length === 0 && <EmptyState message="조건에 맞는 공지가 없습니다" />}
       <div className="space-y-1">
         {filtered.map((n) => (
           <a

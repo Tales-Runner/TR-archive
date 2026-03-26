@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import type { MapItem, MapType } from "@/lib/types";
 import { formatDate, youtubeId } from "@/lib/format";
+import { EmptyState } from "@/components/empty-state";
 
 export function MapCatalog({
   maps,
@@ -11,10 +13,27 @@ export function MapCatalog({
   maps: MapItem[];
   types: MapType[];
 }) {
-  const [typeFilter, setTypeFilter] = useState<number | null>(null);
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"date" | "name">("date");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const [typeFilter, setTypeFilter] = useState<number | null>(() => {
+    const v = searchParams.get("type");
+    return v ? Number(v) : null;
+  });
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
+  const [sortBy, setSortBy] = useState<"date" | "name">(() =>
+    searchParams.get("sort") === "name" ? "name" : "date",
+  );
   const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (typeFilter !== null) params.set("type", String(typeFilter));
+    if (search.trim()) params.set("q", search.trim());
+    if (sortBy !== "date") params.set("sort", sortBy);
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : "?", { scroll: false });
+  }, [typeFilter, search, sortBy, router]);
 
   const filtered = useMemo(() => {
     let list = maps;
@@ -176,39 +195,43 @@ export function MapCatalog({
       )}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-grid">
-        {filtered.map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setSelectedId(m.id)}
-            className="group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left transition-all hover:border-teal-500/30 hover:bg-white/[0.03]"
-          >
-            <div className="aspect-video overflow-hidden bg-white/5">
-              <img
-                src={m.thumbnail}
-                alt={m.subject}
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                loading="lazy"
-              />
-            </div>
-            <div className="p-3">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-sm font-medium text-white/90 truncate">
-                  {m.subject}
-                </h3>
-                {m.mapTypeCd !== null && (
-                  <span className="shrink-0 rounded-full bg-teal-600/20 px-2 py-0.5 text-[10px] text-teal-300">
-                    {typeName(m.mapTypeCd)}
-                  </span>
-                )}
+      {filtered.length === 0 ? (
+        <EmptyState message="조건에 맞는 맵이 없습니다" />
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-grid">
+          {filtered.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => setSelectedId(m.id)}
+              className="card-hover group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left hover:border-teal-500/30 hover:bg-white/[0.03]"
+            >
+              <div className="aspect-video overflow-hidden bg-white/5">
+                <img
+                  src={m.thumbnail}
+                  alt={m.subject}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  loading="lazy"
+                />
               </div>
-              <p className="text-[11px] text-white/30">
-                {formatDate(m.openDt)}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
+              <div className="p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-sm font-medium text-white/90 truncate">
+                    {m.subject}
+                  </h3>
+                  {m.mapTypeCd !== null && (
+                    <span className="shrink-0 rounded-full bg-teal-600/20 px-2 py-0.5 text-[10px] text-teal-300">
+                      {typeName(m.mapTypeCd)}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-white/30">
+                  {formatDate(m.openDt)}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
     </>
   );
 }
