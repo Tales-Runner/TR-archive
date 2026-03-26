@@ -1,5 +1,5 @@
 name: 기능 요청
-description: 새로운 기능이나 개선 사항을 제안해주세요
+description: 이런 기능이 있으면 좋겠다! 하는 걸 알려주세요.
 labels: ["enhancement"]
 body:
   - type: textarea
@@ -7,16 +7,17 @@ body:
     attributes:
       label: 어떤 기능인가요?
       description: 원하는 기능을 설명해주세요.
-      placeholder: "예: 캐릭터 상세 페이지에서 코스튬 미리보기가 되면 좋겠어요."
+      placeholder: "예: 캐릭터 능력치 페이지에서 즐겨찾기한 캐릭터를 상단에 고정하고 싶어요."
     validations:
       required: true
   - type: textarea
     id: reason
     attributes:
       label: 왜 필요한가요?
-      description: 이 기능이 있으면 어떤 점이 좋을지 알려주세요.
+      description: 이 기능이 어떤 상황에서 도움이 되는지 알려주세요.
+      placeholder: "예: 자주 비교하는 캐릭터를 매번 찾기 귀찮아서요."
     validations:
-      required: false
+      required: true
   - type: dropdown
     id: category
     attributes:
@@ -30,14 +31,15 @@ body:
         - 가이드
         - 스토리
         - 공지사항
+        - 검색
         - 홈/전체
-        - 기타
+        - 새로운 기능
     validations:
-      required: false
+      required: true
   - type: textarea
     id: reference
     attributes:
       label: 참고 자료
-      description: 참고할 만한 링크나 스크린샷이 있다면 첨부해주세요.
+      description: 참고할 만한 링크, 스크린샷, 다른 사이트 예시 등이 있다면 첨부해주세요.
     validations:
       required: false
