@@ -249,7 +249,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
     setVisibleCount(PAGE_SIZE);
   }, [catFilter, search]);
 
-  const flatVisible = filtered.slice(0, visibleCount);
+  const flatVisible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
   const hasMore = visibleCount < filtered.length;
 
   const grouped = useMemo(() => {
@@ -293,12 +293,14 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
       setViewingId(viewableList[viewingIdx + 1].id);
   }, [viewingIdx, viewableList]);
 
+  const closeViewer = useCallback(() => setViewingId(null), []);
+
   return (
     <>
       {viewingStory && viewingStory.images.length > 0 && (
         <StoryViewer
           story={viewingStory}
-          onClose={() => setViewingId(null)}
+          onClose={closeViewer}
           onPrev={goPrev}
           onNext={goNext}
           hasPrev={viewingIdx > 0}

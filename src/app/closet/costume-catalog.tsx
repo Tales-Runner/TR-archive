@@ -25,12 +25,18 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
   );
 
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (yearFilter) params.set("year", yearFilter);
-    if (search.trim()) params.set("q", search.trim());
-    if (sortBy !== "date") params.set("sort", sortBy);
-    const qs = params.toString();
-    router.replace(qs ? `?${qs}` : "?", { scroll: false });
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      if (yearFilter) params.set("year", yearFilter);
+      if (search.trim()) params.set("q", search.trim());
+      if (sortBy !== "date") params.set("sort", sortBy);
+      const qs = params.toString();
+      const target = qs ? `?${qs}` : window.location.pathname;
+      if (target !== window.location.pathname + window.location.search) {
+        router.replace(target, { scroll: false });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
   }, [yearFilter, search, sortBy, router]);
 
   const filtered = useMemo(() => {

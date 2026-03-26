@@ -172,7 +172,9 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       if (m.mapTypeCd !== null) typeCount[m.mapTypeCd] = (typeCount[m.mapTypeCd] || 0) + 1;
       yearCount[m.openDt.slice(0, 4)] = (yearCount[m.openDt.slice(0, 4)] || 0) + 1;
     }
-    return { typeCount, yearCount };
+    const maxType = Math.max(...Object.values(typeCount), 0);
+    const maxYear = Math.max(...Object.values(yearCount), 0);
+    return { typeCount, yearCount, maxType, maxYear };
   }, [maps]);
 
   const storyStats = useMemo(() => {
@@ -182,7 +184,8 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       yearCount[s.openYear] = (yearCount[s.openYear] || 0) + 1;
       if (s.category === 1) webtoon++; else video++;
     }
-    return { yearCount, webtoon, video, totalImages: stories.reduce((sum, s) => sum + s.images.length, 0) };
+    const maxYear = Math.max(...Object.values(yearCount), 0);
+    return { yearCount, webtoon, video, totalImages: stories.reduce((sum, s) => sum + s.images.length, 0), maxYear };
   }, [stories]);
 
   const costumeStats = useMemo(() => {
@@ -192,7 +195,8 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       yearCount[c.openYear] = (yearCount[c.openYear] || 0) + 1;
       totalItems += c.detail?.itemList.length ?? 0;
     }
-    return { yearCount, totalItems };
+    const maxYear = Math.max(...Object.values(yearCount), 0);
+    return { yearCount, totalItems, maxYear };
   }, [costumes]);
 
   const gachaStats = useMemo(() => {
@@ -446,7 +450,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                 .map(([type, count]) => (
                   <div key={type} className="flex items-center gap-3">
                     <span className="text-sm text-white/70 w-20">{MAP_TYPE_NAMES[Number(type)] ?? type}</span>
-                    <Bar value={count} max={Math.max(...Object.values(mapStats.typeCount))} color="bg-red-400" />
+                    <Bar value={count} max={mapStats.maxType} color="bg-red-400" />
                     <span className="text-sm text-white/50 tabular-nums w-6 text-right">{count}</span>
                   </div>
                 ))}
@@ -458,7 +462,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
               {Object.entries(mapStats.yearCount).sort().map(([year, count]) => (
                 <div key={year} className="flex items-center gap-3">
                   <span className="text-sm text-white/70 w-12">{year}</span>
-                  <Bar value={count} max={Math.max(...Object.values(mapStats.yearCount))} />
+                  <Bar value={count} max={mapStats.maxYear} />
                   <span className="text-sm text-white/50 tabular-nums w-6 text-right">{count}</span>
                 </div>
               ))}
@@ -471,7 +475,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                 {Object.entries(storyStats.yearCount).map(([year, count]) => (
                   <div key={year} className="flex items-center gap-3">
                     <span className="text-sm text-white/70 w-16 truncate">{year}</span>
-                    <Bar value={count} max={Math.max(...Object.values(storyStats.yearCount))} color="bg-blue-400" />
+                    <Bar value={count} max={storyStats.maxYear} color="bg-blue-400" />
                     <span className="text-sm text-white/50 tabular-nums w-6 text-right">{count}</span>
                   </div>
                 ))}
@@ -482,7 +486,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                 {Object.entries(costumeStats.yearCount).map(([year, count]) => (
                   <div key={year} className="flex items-center gap-3">
                     <span className="text-sm text-white/70 w-16 truncate">{year}</span>
-                    <Bar value={count} max={Math.max(...Object.values(costumeStats.yearCount))} color="bg-pink-400" />
+                    <Bar value={count} max={costumeStats.maxYear} color="bg-pink-400" />
                     <span className="text-sm text-white/50 tabular-nums w-6 text-right">{count}</span>
                   </div>
                 ))}

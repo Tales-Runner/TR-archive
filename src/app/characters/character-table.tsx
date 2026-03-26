@@ -319,18 +319,16 @@ export function CharacterTable({
   function toggleCompare(id: number, e: React.MouseEvent) {
     e.stopPropagation();
     const c = characters.find((x) => x.id === id);
-    setCompareIds((prev) => {
-      if (prev.includes(id)) {
-        if (c) toast(`${c.characterNm} 비교에서 제거`);
-        return prev.filter((x) => x !== id);
-      }
-      if (prev.length < 3) {
-        if (c) toast(`${c.characterNm} 비교에 추가 (${prev.length + 1}/3)`);
-        return [...prev, id];
-      }
+    const had = compareIds.includes(id);
+    if (had) {
+      setCompareIds(compareIds.filter((x) => x !== id));
+      if (c) toast(`${c.characterNm} 비교에서 제거`);
+    } else if (compareIds.length < 3) {
+      setCompareIds([...compareIds, id]);
+      if (c) toast(`${c.characterNm} 비교에 추가 (${compareIds.length + 1}/3)`);
+    } else {
       toast("최대 3명까지 비교할 수 있습니다");
-      return prev;
-    });
+    }
   }
 
   const filtered = useMemo(() => {

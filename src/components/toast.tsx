@@ -17,18 +17,29 @@ export function useToast() {
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextId = useRef(0);
+  const timers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  useEffect(() => {
+    return () => {
+      for (const t of timers.current) clearTimeout(t);
+    };
+  }, []);
 
   const push = useCallback((message: string) => {
     const id = nextId.current++;
     setToasts((prev) => [...prev.slice(-2), { id, message, leaving: false }]);
-    setTimeout(() => {
+    const t1 = setTimeout(() => {
       setToasts((prev) =>
         prev.map((t) => (t.id === id ? { ...t, leaving: true } : t)),
       );
-      setTimeout(() => {
+      const t2 = setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
+        timers.current.delete(t2);
       }, 250);
+      timers.current.add(t2);
+      timers.current.delete(t1);
     }, 2000);
+    timers.current.add(t1);
   }, []);
 
   return (
