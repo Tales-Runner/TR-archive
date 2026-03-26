@@ -75,7 +75,7 @@ function CharacterModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6"
+        className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6 animate-scale-in"
       >
         <button
           onClick={onClose}
@@ -198,7 +198,7 @@ function CompareModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6"
+        className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6 animate-scale-in"
       >
         <button
           onClick={onClose}

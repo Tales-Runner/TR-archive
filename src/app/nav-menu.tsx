@@ -68,7 +68,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
               </span>
             </button>
             {openGroup === group.label && (
-              <div className="absolute top-full left-0 mt-1 min-w-[160px] rounded-xl border border-white/10 bg-[#1a1530]/95 backdrop-blur-md py-1 shadow-xl">
+              <div className="absolute top-full left-0 mt-1 min-w-[160px] rounded-xl border border-white/10 bg-[#1a1530]/95 backdrop-blur-md py-1 shadow-xl animate-slide-down">
                 {group.items.map((item) => (
                   <Link
                     key={item.href}
@@ -112,7 +112,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="absolute top-full left-0 right-0 z-40 md:hidden border-b border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md max-h-[70vh] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 z-40 md:hidden border-b border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md max-h-[70vh] overflow-y-auto animate-slide-down">
           {groups.map((group) => (
             <div key={group.label} className="px-4 py-2">
               <div className="text-[10px] uppercase tracking-wider text-white/30 mb-1">

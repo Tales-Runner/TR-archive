@@ -49,7 +49,7 @@ function StoryViewer({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0812]">
       {barVisible && (
-        <div className="shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-3">
+        <div className="shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-3 animate-slide-down">
           <div className="min-w-0">
             <h2 className="text-sm font-bold text-white/90 truncate">
               {story.subject}
@@ -105,7 +105,7 @@ function StoryViewer({
       {/* Bottom nav bar - toggle on tap */}
       {barVisible && (
       <div
-        className="shrink-0 flex items-center justify-between border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md px-4 py-3"
+        className="shrink-0 flex items-center justify-between border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md px-4 py-3 animate-slide-up"
       >
         <button
           onClick={(e) => { e.stopPropagation(); if (hasPrev) onPrev(); }}
@@ -259,7 +259,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
         {grouped.map(({ year, items }) => (
           <section key={year}>
             <h2 className="mb-4 text-lg font-bold text-white/70">{year}</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 stagger-grid">
               {items.map((s) => (
                 <button
                   key={s.id}

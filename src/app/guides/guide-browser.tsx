@@ -157,7 +157,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
       </div>
 
       {/* List */}
-      <div className="space-y-2">
+      <div className="space-y-2 stagger-grid">
         {filtered.map((g) => (
           <button
             key={g.id}

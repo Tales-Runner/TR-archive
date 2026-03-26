@@ -90,7 +90,7 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#13101f] shadow-2xl overflow-hidden"
+            className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#13101f] shadow-2xl overflow-hidden animate-scale-in"
           >
             <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/30 shrink-0">

@@ -101,7 +101,7 @@ export function MapCatalog({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6"
+            className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6 animate-scale-in"
           >
             <button
               onClick={() => setSelectedId(null)}
@@ -176,7 +176,7 @@ export function MapCatalog({
       )}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-grid">
         {filtered.map((m) => (
           <button
             key={m.id}

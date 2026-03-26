@@ -20,6 +20,63 @@ body {
   color: var(--color-text);
 }
 
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out both;
+}
+.animate-scale-in {
+  animation: scale-in 0.25s ease-out both;
+}
+.animate-slide-down {
+  animation: slide-down 0.2s ease-out both;
+}
+.animate-slide-up {
+  animation: slide-up 0.2s ease-out both;
+}
+
+/* Staggered grid children */
+.stagger-grid > * {
+  animation: fade-in-up 0.4s ease-out both;
+}
+.stagger-grid > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-grid > *:nth-child(2) { animation-delay: 30ms; }
+.stagger-grid > *:nth-child(3) { animation-delay: 60ms; }
+.stagger-grid > *:nth-child(4) { animation-delay: 90ms; }
+.stagger-grid > *:nth-child(5) { animation-delay: 120ms; }
+.stagger-grid > *:nth-child(6) { animation-delay: 150ms; }
+.stagger-grid > *:nth-child(7) { animation-delay: 180ms; }
+.stagger-grid > *:nth-child(8) { animation-delay: 210ms; }
+.stagger-grid > *:nth-child(9) { animation-delay: 240ms; }
+.stagger-grid > *:nth-child(n+10) { animation-delay: 270ms; }
+
 /* Guide HTML content (from official API) */
 .guide-content {
   color: rgba(255, 255, 255, 0.8);

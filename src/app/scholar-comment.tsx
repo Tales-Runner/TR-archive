@@ -77,7 +77,7 @@ function CommentBox({ lines }: Props) {
   const mainChar = CHARS[main.char];
 
   return (
-    <div className="mb-6 rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm px-4 py-3">
+    <div className="mb-6 rounded-xl border border-white/10 bg-black/40 backdrop-blur-sm px-4 py-3 animate-fade-in">
       <div className="flex items-start gap-3">
         <Avatar char={mainChar} size={32} />
         <div className="min-w-0 flex-1">
