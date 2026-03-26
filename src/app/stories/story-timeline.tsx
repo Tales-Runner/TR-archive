@@ -168,7 +168,7 @@ function StoryViewer({
           >
             {seriesEntries.map((s) => (
               <option key={s.name} value={s.name}>
-                {s.name} ({s.episodes.length}화)
+                {s.name} ({s.episodes.length}부)
               </option>
             ))}
           </select>
