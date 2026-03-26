@@ -48,21 +48,22 @@ function StoryViewer({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0812]">
-      {/* Header */}
-      <div className="shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-3">
-        <div className="min-w-0">
-          <h2 className="text-sm font-bold text-white/90 truncate">
-            {story.subject}
-          </h2>
-          <p className="text-[11px] text-white/30">{formatDate(story.openDt)}</p>
+      {barVisible && (
+        <div className="shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-3">
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold text-white/90 truncate">
+              {story.subject}
+            </h2>
+            <p className="text-[11px] text-white/30">{formatDate(story.openDt)}</p>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
+            className="shrink-0 ml-4 rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white/50 hover:bg-white/10 hover:text-white/80 transition-colors"
+          >
+            닫기
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="shrink-0 ml-4 rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white/50 hover:bg-white/10 hover:text-white/80 transition-colors"
-        >
-          닫기
-        </button>
-      </div>
+      )}
 
       {/* Content */}
       <div id="story-scroll" className="flex-1 overflow-y-auto" onClick={() => setBarVisible((v) => !v)}>
