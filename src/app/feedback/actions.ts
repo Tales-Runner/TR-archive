@@ -1,7 +1,7 @@
 "use server";
 
 const GITHUB_REPO = "Tales-Runner/TR-archive";
-const GITHUB_TOKEN = process.env.GITHUB_ISSUE_TOKEN; // fine-grained PAT (Issues: write)
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 const CATEGORY_LABELS: Record<string, string> = {
   bug: "버그 제보",
