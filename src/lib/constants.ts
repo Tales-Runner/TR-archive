@@ -36,6 +36,11 @@ export const GUIDE_CATEGORY_NAMES: Record<number, string> = {
   14: "광장",
 };
 
+// ── Map Types ─────────────────────────────────────────
+export const MAP_TYPE_NAMES: Record<number, string> = {
+  0: "PVP", 1: "협동", 2: "하드코어", 3: "트레이닝", 4: "럼블", 5: "서바이벌", 6: "아케이드",
+};
+
 // ── Search ────────────────────────────────────────────
 export const SEARCH_TYPE_COLORS: Record<string, string> = {
   런너: "text-teal-300 bg-teal-600/20",

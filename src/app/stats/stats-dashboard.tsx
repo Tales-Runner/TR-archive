@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Character, MapItem, CostumeItem, StoryItem, ProbabilityData } from "@/lib/types";
-import { CHARACTER_CATEGORY_LABEL, STORY_CATEGORY_LABEL, getLevelLabel } from "@/lib/constants";
+import { getLevelLabel, MAP_TYPE_NAMES } from "@/lib/constants";
 
 interface Props {
   characters: Character[];
@@ -89,7 +89,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
     return { typeCount, yearCount };
   }, [maps]);
 
-  const typeNames: Record<number, string> = { 0: "PVP", 1: "협동", 2: "하드코어", 3: "트레이닝", 4: "럼블", 5: "서바이벌", 6: "아케이드" };
+  const typeNames = MAP_TYPE_NAMES;
 
   // Story stats
   const storyStats = useMemo(() => {
