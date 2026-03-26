@@ -101,11 +101,10 @@ function StoryViewer({
         </div>
       </div>
 
-      {/* Bottom nav bar - slide up on tap */}
+      {/* Bottom nav bar - toggle on tap */}
+      {barVisible && (
       <div
-        className={`shrink-0 flex items-center justify-between border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md px-4 py-3 transition-transform duration-300 ${
-          barVisible ? "translate-y-0" : "translate-y-full"
-        }`}
+        className="shrink-0 flex items-center justify-between border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md px-4 py-3"
       >
         <button
           onClick={(e) => { e.stopPropagation(); if (hasPrev) onPrev(); }}
@@ -133,6 +132,7 @@ function StoryViewer({
           다음화 →
         </button>
       </div>
+      )}
     </div>
   );
 }
