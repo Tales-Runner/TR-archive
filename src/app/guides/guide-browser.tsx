@@ -106,7 +106,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
           {/* Content */}
           {selected.partList[activePart] && (
             <div
-              className="guide-content p-5"
+              className="guide-content p-3 sm:p-5"
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(selected.partList[activePart].contents),
               }}
@@ -121,7 +121,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
     <>
       {/* Filters */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap rounded-lg border border-white/10 overflow-hidden text-sm">
+        <div className="flex overflow-x-auto rounded-lg border border-white/10 text-sm">
           <button
             onClick={() => setCatFilter(null)}
             className={`px-3 py-1.5 transition-colors ${
@@ -151,7 +151,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
           placeholder="뭘 알고 싶어?"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50"
+          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
         <span className="text-xs text-white/30">{filtered.length}개</span>
       </div>

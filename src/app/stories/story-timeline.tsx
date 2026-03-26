@@ -110,7 +110,7 @@ function StoryViewer({
         <button
           onClick={(e) => { e.stopPropagation(); if (hasPrev) onPrev(); }}
           disabled={!hasPrev}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${
+          className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm min-h-[44px] transition-colors ${
             hasPrev
               ? "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
               : "text-white/15 cursor-not-allowed"
@@ -119,12 +119,12 @@ function StoryViewer({
           ← 이전화
         </button>
 
-        <span className="text-xs text-white/30">{story.subject}</span>
+        <span className="text-xs text-white/30 truncate min-w-0 mx-2">{story.subject}</span>
 
         <button
           onClick={(e) => { e.stopPropagation(); if (hasNext) onNext(); }}
           disabled={!hasNext}
-          className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors ${
+          className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm min-h-[44px] transition-colors ${
             hasNext
               ? "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
               : "text-white/15 cursor-not-allowed"
@@ -249,7 +249,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
           placeholder="어떤 이야기를 찾고 있어?"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50"
+          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
         <span className="text-xs text-white/30">{filtered.length}개</span>
       </div>

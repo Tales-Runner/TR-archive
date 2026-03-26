@@ -107,7 +107,7 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
   return (
     <div className="space-y-6">
       {/* Group selector */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex overflow-x-auto gap-2 pb-1">
         {groupNames.map((g) => (
           <button
             key={g}

@@ -63,6 +63,7 @@ export default function Home() {
             alt="엘림스 스마일"
             width={320}
             height={320}
+            style={{ maxWidth: "min(320px, 70vw)" }}
             className="drop-shadow-[0_0_40px_rgba(45,212,191,0.25)] select-none"
             draggable={false}
           />
@@ -75,7 +76,7 @@ export default function Home() {
       {/* Recent updates */}
       <div className="mx-auto max-w-6xl w-full px-4 py-8">
         <h2 className="text-lg font-bold text-accent-light mb-4">최근 업데이트</h2>
-        <div className="grid gap-6 sm:grid-cols-3">
+        <div className="grid gap-3 sm:gap-6 sm:grid-cols-3">
           {/* Recent Maps */}
           <div>
             <Link href="/maps" className="text-sm font-medium text-teal-400 hover:text-teal-300 mb-2 block">맵 도감 →</Link>

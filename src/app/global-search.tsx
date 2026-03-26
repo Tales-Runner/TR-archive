@@ -103,7 +103,7 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="캐릭터, 맵, 코스튬, 가이드, 스토리 검색..."
-                className="flex-1 bg-transparent text-sm text-white/90 placeholder:text-white/25 outline-none"
+                className="flex-1 bg-transparent text-base text-white/90 placeholder:text-white/25 outline-none"
               />
               <kbd
                 onClick={() => { setOpen(false); setQuery(""); }}

@@ -44,7 +44,7 @@ export function MapCatalog({
     <>
       {/* Filters */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap rounded-lg border border-white/10 overflow-hidden text-sm">
+        <div className="flex overflow-x-auto rounded-lg border border-white/10 text-sm">
           <button
             onClick={() => setTypeFilter(null)}
             className={`px-3 py-1.5 transition-colors ${
@@ -88,7 +88,7 @@ export function MapCatalog({
           placeholder="맵 이름이나 태그로 찾기..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50"
+          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
         <span className="text-xs text-white/30">{filtered.length}개</span>
       </div>
@@ -101,7 +101,7 @@ export function MapCatalog({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6 animate-scale-in"
+            className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-4 sm:p-6 animate-scale-in"
           >
             <button
               onClick={() => setSelectedId(null)}

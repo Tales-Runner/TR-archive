@@ -75,7 +75,7 @@ function CharacterModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6 animate-scale-in"
+        className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-4 sm:p-6 animate-scale-in"
       >
         <button
           onClick={onClose}
@@ -198,7 +198,7 @@ function CompareModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-6 animate-scale-in"
+        className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-4 sm:p-6 animate-scale-in"
       >
         <button
           onClick={onClose}
@@ -389,7 +389,7 @@ export function CharacterTable({
 
       {/* Compare bar */}
       {compareIds.length > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-teal-500/20 bg-teal-950/30 px-4 py-2.5">
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-teal-500/20 bg-teal-950/30 px-3 sm:px-4 py-2.5 overflow-x-auto">
           <span className="text-xs text-teal-300 font-medium">비교</span>
           {compareIds.map((id) => {
             const c = characters.find((x) => x.id === id);
@@ -449,7 +449,7 @@ export function CharacterTable({
           placeholder="캐릭터 검색..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50"
+          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
         <span className="ml-auto text-xs text-white/30">
           {sorted.length}명
