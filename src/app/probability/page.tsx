@@ -19,7 +19,7 @@ export default function ProbabilityPage() {
       </p>
       <ScholarComment
         elims="크큭. 이건 조수가 만든 거라 정확하지 않을 수도 있다고. 결과가 이상하면 나한테 따지지 말고."
-        r="...공식 확률 데이터 그대로입니다. 왜 그렇게 말하는 건지 모르겠어요."
+        r="...공식 확률 데이터 그대로예요. 엘림스가 왜 그렇게 말하는 건지는 잘 모르겠어요."
       />
       <ProbabilityCalculator data={data} />
     </div>

@@ -22,7 +22,7 @@ export default function MapsPage() {
       </p>
       <CharacterComment
         lines={[
-          { char: "drHell", text: "런너? 자네인가. 맵 정보를 찾고 있다면 잘 왔어. 내 연구실에서 정리해 둔 자료들이지." },
+          { char: "drHell", text: "런너들! 맵 정보를 찾고 있다면 잘 왔다네. 내 연구실에서 정리해 둔 자료들이라네." },
           { char: "kai", text: "...조심히 봐. 아빠가 만든 맵도 있으니까." },
         ]}
       />
