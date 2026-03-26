@@ -23,7 +23,7 @@ export default function StatsPage() {
       </p>
       <ScholarComment
         elims="데이터를 모으기만 하면 뭐하나. 분석을 해야 의미가 있지."
-        r="...숫자를 보면 뭔가 느껴져요. 이게 감정인지는 잘 모르겠지만."
+        r="...정리하다 보니 패턴이 보여요. 신기해요."
       />
       <StatsDashboard
         characters={charactersJson as Character[]}
