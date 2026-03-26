@@ -49,6 +49,15 @@ npx tsx scripts/fetch-data.ts
 공식 API에서 캐릭터, 맵, 코스튬, 가이드, 스토리 데이터를 수집합니다.
 GitHub Actions으로 매일 자동 실행됩니다.
 
+## 기여하기
+
+버그 제보, 기능 요청, 코드 기여 모두 환영합니다.
+
+- [Issue 생성하기](https://github.com/Tales-Runner/TR-archive/issues/new/choose) — 버그 제보 / 기능 요청
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — 기여 가이드
+
+main 브랜치는 보호되어 있습니다. PR을 통해 기여해주세요.
+
 ## 데이터 출처
 
 [테일즈런너 공식 홈페이지](https://tr.rhaon.co.kr) API
