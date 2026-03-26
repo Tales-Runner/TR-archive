@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Character, MapItem, CostumeItem, StoryItem, ProbabilityData } from "@/lib/types";
-import { getLevelLabel, getLevelRank, MAP_TYPE_NAMES, IMAGE_CDN } from "@/lib/constants";
+import { getLevelLabel, getLevelRank, MAP_TYPE_NAMES } from "@/lib/constants";
 
 interface Props {
   characters: Character[];
@@ -24,10 +24,12 @@ function Bar({ value, max, color = "bg-teal-500" }: { value: number; max: number
   );
 }
 
-function Section({ title, children, accent }: { title: string; children: React.ReactNode; accent?: string }) {
+function Section({ title, children, accent, sub }: { title: string; children: React.ReactNode; accent?: string; sub?: string }) {
   return (
     <div className="rounded-xl border border-white/10 bg-surface-card p-4 sm:p-5 animate-fade-in">
-      <h3 className={`text-sm font-bold mb-4 ${accent ?? "text-accent-light"}`}>{title}</h3>
+      <h3 className={`text-sm font-bold mb-1 ${accent ?? "text-accent-light"}`}>{title}</h3>
+      {sub && <p className="text-xs text-white/30 mb-4">{sub}</p>}
+      {!sub && <div className="mb-4" />}
       {children}
     </div>
   );
@@ -44,10 +46,10 @@ function Trivia({ q, a, detail }: { q: string; a: string; detail?: string }) {
   );
 }
 
-function CharCard({ c, badge, stat }: { c: Character; badge: string; stat: string }) {
+function CharCard({ c, badge, stat, badgeColor }: { c: Character; badge: string; stat: string; badgeColor?: string }) {
   return (
     <div className="relative rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-4 text-center overflow-hidden">
-      <div className="absolute top-2 right-2 rounded-full bg-teal-600/30 px-2 py-0.5 text-[9px] font-bold text-teal-300">{badge}</div>
+      <div className={`absolute top-2 right-2 rounded-full px-2 py-0.5 text-[9px] font-bold ${badgeColor ?? "bg-teal-600/30 text-teal-300"}`}>{badge}</div>
       <img src={c.circularImageUrl} alt={c.characterNm} width={56} height={56} className="mx-auto rounded-full ring-2 ring-white/10 mb-2" />
       <div className="text-sm font-bold text-white/90">{c.characterNm}</div>
       <div className="text-[11px] text-teal-400">{c.catchPhrase}</div>
@@ -77,28 +79,18 @@ function VsCard({ left, right, label }: { left: { name: string; img: string; val
   );
 }
 
-function Podium({ top3 }: { top3: { c: Character; value: number }[] }) {
-  if (top3.length < 3) return null;
-  const order = [top3[1], top3[0], top3[2]]; // 2nd, 1st, 3rd
-  const heights = ["h-16", "h-24", "h-12"];
-  const medals = ["text-gray-400", "text-yellow-400", "text-amber-700"];
-  const ranks = ["2nd", "1st", "3rd"];
+const MOTION_KEYS = [
+  { key: "revivalMotion", label: "부활", desc: "추락 후 복귀 속도" },
+  { key: "hurdleMotion", label: "허들", desc: "장애물 넘는 속도" },
+  { key: "landingMotion", label: "착지", desc: "점프 후 착지 속도" },
+  { key: "angryMotion", label: "분노", desc: "분노 스킬 발동" },
+  { key: "swimmingMotion", label: "수영", desc: "수영 구간 속도" },
+  { key: "beehiveMotion", label: "벌집", desc: "벌집 경직 시간" },
+  { key: "electricShockMotion", label: "감전", desc: "감전 지속 시간" },
+  { key: "stunMotion", label: "스턴", desc: "스턴 지속 시간" },
+] as const;
 
-  return (
-    <div className="flex items-end justify-center gap-2 mb-4">
-      {order.map((entry, i) => (
-        <div key={entry.c.id} className="flex flex-col items-center w-24">
-          <img src={entry.c.circularImageUrl} alt="" width={i === 1 ? 48 : 36} height={i === 1 ? 48 : 36} className="rounded-full ring-2 ring-white/10 mb-1" />
-          <div className="text-xs font-bold text-white/80 truncate w-full text-center">{entry.c.characterNm}</div>
-          <div className="text-[10px] text-white/40 tabular-nums">{entry.value}</div>
-          <div className={`${heights[i]} w-full rounded-t-lg bg-white/[0.04] border border-white/10 border-b-0 mt-1 flex items-end justify-center pb-1`}>
-            <span className={`text-xs font-black ${medals[i]}`}>{ranks[i]}</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
+type MotionKey = typeof MOTION_KEYS[number]["key"];
 
 /* ── Dashboard ───────────────────────────────────────── */
 
@@ -107,14 +99,15 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
 
   const visibleChars = useMemo(() => characters.filter((c) => c.isView), [characters]);
 
-  const charStats = useMemo(() => {
+  /* ── Character analysis ── */
+  const charAnalysis = useMemo(() => {
     const mbti: Record<string, number> = {};
     const blood: Record<string, number> = {};
     let tallest = visibleChars[0];
     let shortest = visibleChars[0];
-    let fastest = visibleChars[0];
-    let slowest = visibleChars[0];
-    let strongest = visibleChars[0];
+
+    // Stat distribution patterns
+    const statPatterns: { c: Character; total: number; type: string }[] = [];
 
     for (const c of visibleChars) {
       if (c.mbti && c.mbti !== "?") mbti[c.mbti] = (mbti[c.mbti] || 0) + 1;
@@ -125,27 +118,53 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
         if (h > parseFloat(tallest.height || "0")) tallest = c;
         if (h < parseFloat(shortest.height || "999")) shortest = c;
       }
-      if (c.maximumSpeed > fastest.maximumSpeed) fastest = c;
-      if (c.maximumSpeed < slowest.maximumSpeed) slowest = c;
 
       const total = c.maximumSpeed + c.acceleration + c.control + c.power;
-      const bestTotal = strongest.maximumSpeed + strongest.acceleration + strongest.control + strongest.power;
-      if (total > bestTotal) strongest = c;
+      const maxStat = Math.max(c.maximumSpeed, c.acceleration, c.control, c.power);
+      let type = "균형형";
+      if (c.power === maxStat && c.power >= 5) type = "파워형";
+      else if (c.maximumSpeed === maxStat && c.maximumSpeed >= 5) type = "스피드형";
+      else if (c.acceleration === maxStat && c.acceleration >= 5) type = "가속형";
+      else if (c.control === maxStat && c.control >= 5) type = "컨트롤형";
+      statPatterns.push({ c, total, type });
     }
 
-    const sortedMbti = Object.entries(mbti).sort((a, b) => b[1] - a[1]);
-    const sortedBlood = Object.entries(blood).sort((a, b) => b[1] - a[1]);
+    const total14 = statPatterns.filter((p) => p.total === 14).length;
+    const total15 = statPatterns.filter((p) => p.total >= 15).length;
 
-    return { mbti: sortedMbti, blood: sortedBlood, tallest, shortest, fastest, slowest, strongest };
+    const typeCounts: Record<string, number> = {};
+    for (const p of statPatterns) typeCounts[p.type] = (typeCounts[p.type] || 0) + 1;
+
+    return {
+      mbti: Object.entries(mbti).sort((a, b) => b[1] - a[1]),
+      blood: Object.entries(blood).sort((a, b) => b[1] - a[1]),
+      tallest, shortest,
+      total14, total15,
+      typeCounts: Object.entries(typeCounts).sort((a, b) => b[1] - a[1]),
+    };
   }, [visibleChars]);
 
-  const ranked = useMemo(() =>
-    [...visibleChars]
-      .map((c) => ({ c, value: c.maximumSpeed + c.acceleration + c.control + c.power }))
-      .sort((a, b) => b.value - a.value),
-    [visibleChars],
-  );
+  /* ── Motion time rankings ── */
+  const motionRankings = useMemo(() => {
+    // Total motion time (lower = better)
+    const withTotal = visibleChars.map((c) => {
+      const sum = MOTION_KEYS.reduce((s, m) => s + parseFloat(c[m.key as keyof Character] as string), 0);
+      return { c, total: sum };
+    });
+    const sortedByTotal = [...withTotal].sort((a, b) => a.total - b.total);
 
+    // Per-motion bests
+    const perMotion = MOTION_KEYS.map((m) => {
+      const sorted = [...visibleChars].sort((a, b) =>
+        parseFloat(a[m.key as keyof Character] as string) - parseFloat(b[m.key as keyof Character] as string)
+      );
+      return { ...m, best: sorted[0], worst: sorted[sorted.length - 1] };
+    });
+
+    return { sortedByTotal, perMotion };
+  }, [visibleChars]);
+
+  /* ── Map stats ── */
   const mapStats = useMemo(() => {
     const typeCount: Record<number, number> = {};
     const yearCount: Record<string, number> = {};
@@ -207,7 +226,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
 
   const tabs = [
     { id: "overview" as const, label: "한눈에 보기" },
-    { id: "characters" as const, label: "런너 랭킹" },
+    { id: "characters" as const, label: "런너 분석" },
     { id: "content" as const, label: "콘텐츠" },
     { id: "gacha" as const, label: "변경권" },
     { id: "exp" as const, label: "경험치" },
@@ -232,7 +251,6 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       {/* ── 한눈에 보기 ──────────────────────────── */}
       {tab === "overview" && (
         <div className="space-y-4 stagger-grid">
-          {/* Hero numbers */}
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-xl border border-teal-500/20 bg-gradient-to-br from-teal-950/40 to-transparent p-4 text-center">
               <div className="text-3xl font-black text-teal-300 tabular-nums">{visibleChars.length}</div>
@@ -248,14 +266,21 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
             </div>
           </div>
 
-          {/* Champion spotlight */}
-          <div className="grid gap-3 sm:grid-cols-3">
-            <CharCard c={charStats.strongest} badge="최강" stat={`총합 ${ranked[0].value}`} />
-            <CharCard c={charStats.fastest} badge="최속" stat={`속도 ${charStats.fastest.maximumSpeed}`} />
-            <CharCard c={charStats.tallest} badge="최장신" stat={charStats.tallest.height} />
-          </div>
+          {/* Motion time champions */}
+          <Section title="모션이 가장 빠른 런너 TOP 3" sub="스탯 총합(14)은 모두 같으니, 진짜 차이는 모션 시간에서 나온다" accent="text-emerald-400">
+            <div className="grid gap-3 sm:grid-cols-3">
+              {motionRankings.sortedByTotal.slice(0, 3).map((entry, i) => (
+                <CharCard
+                  key={entry.c.id}
+                  c={entry.c}
+                  badge={["1st", "2nd", "3rd"][i]}
+                  stat={`모션 총합 ${entry.total.toFixed(2)}s`}
+                  badgeColor={i === 0 ? "bg-yellow-500/30 text-yellow-300" : i === 1 ? "bg-gray-500/30 text-gray-300" : "bg-amber-800/30 text-amber-600"}
+                />
+              ))}
+            </div>
+          </Section>
 
-          {/* Fun trivia row */}
           <div className="grid gap-3 sm:grid-cols-2">
             <Trivia
               q="경험치의 절반을 모으면 어디까지 갈까?"
@@ -269,52 +294,85 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
             />
           </div>
 
-          {/* VS */}
           <VsCard
-            left={{ name: charStats.tallest.characterNm, img: charStats.tallest.circularImageUrl, value: charStats.tallest.height }}
-            right={{ name: charStats.shortest.characterNm, img: charStats.shortest.circularImageUrl, value: charStats.shortest.height }}
+            left={{ name: charAnalysis.tallest.characterNm, img: charAnalysis.tallest.circularImageUrl, value: charAnalysis.tallest.height }}
+            right={{ name: charAnalysis.shortest.characterNm, img: charAnalysis.shortest.circularImageUrl, value: charAnalysis.shortest.height }}
             label="신장 대결"
           />
         </div>
       )}
 
-      {/* ── 런너 랭킹 ───────────────────────────── */}
+      {/* ── 런너 분석 ────────────────────────────── */}
       {tab === "characters" && (
         <div className="space-y-6 stagger-grid">
-          {/* Podium */}
-          <Section title="스탯 총합 TOP 10" accent="text-yellow-400">
-            <Podium top3={ranked.slice(0, 3)} />
-            <div className="space-y-1.5">
-              {ranked.slice(0, 10).map((entry, i) => (
-                <div key={entry.c.id} className="flex items-center gap-3">
-                  <span className={`w-5 text-right text-xs font-bold tabular-nums ${i < 3 ? "text-yellow-400" : "text-white/30"}`}>{i + 1}</span>
-                  <img src={entry.c.circularImageUrl} alt="" width={24} height={24} className="rounded-full shrink-0" />
-                  <span className="text-sm text-white/80 w-24 truncate">{entry.c.characterNm}</span>
-                  <Bar value={entry.value} max={ranked[0].value} />
-                  <span className="text-sm font-bold text-white/70 tabular-nums w-8 text-right">{entry.value}</span>
+          {/* Stat total distribution */}
+          <Section title="스탯 총합 분포" sub="기본 총합 14는 전원 동일. 재분배로 +1 되면 15가 된다" accent="text-teal-400">
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
+                <div className="text-2xl font-black text-white/70 tabular-nums">{charAnalysis.total14}</div>
+                <div className="text-xs text-white/40">총합 14 (기본)</div>
+              </div>
+              <div className="rounded-xl border border-teal-500/20 bg-teal-950/20 p-4 text-center">
+                <div className="text-2xl font-black text-teal-300 tabular-nums">{charAnalysis.total15}</div>
+                <div className="text-xs text-white/40">총합 15 (재분배)</div>
+              </div>
+            </div>
+          </Section>
+
+          {/* Stat pattern distribution */}
+          <Section title="스탯 배분 유형" sub="가장 높은 스탯(5 이상) 기준으로 분류" accent="text-violet-400">
+            <div className="space-y-2">
+              {charAnalysis.typeCounts.map(([type, count]) => (
+                <div key={type} className="flex items-center gap-3">
+                  <span className="text-sm text-white/70 w-20">{type}</span>
+                  <Bar value={count} max={charAnalysis.typeCounts[0][1] as number} color="bg-violet-500" />
+                  <span className="text-sm text-white/50 tabular-nums w-8 text-right">{count}명</span>
                 </div>
               ))}
             </div>
           </Section>
 
-          {/* VS cards */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <VsCard
-              left={{ name: charStats.fastest.characterNm, img: charStats.fastest.circularImageUrl, value: `속도 ${charStats.fastest.maximumSpeed}` }}
-              right={{ name: charStats.slowest.characterNm, img: charStats.slowest.circularImageUrl, value: `속도 ${charStats.slowest.maximumSpeed}` }}
-              label="속도 양극단"
-            />
-            <VsCard
-              left={{ name: charStats.tallest.characterNm, img: charStats.tallest.circularImageUrl, value: charStats.tallest.height }}
-              right={{ name: charStats.shortest.characterNm, img: charStats.shortest.circularImageUrl, value: charStats.shortest.height }}
-              label="신장 양극단"
-            />
-          </div>
+          {/* Motion time ranking - the REAL tier list */}
+          <Section title="모션 시간 총합 랭킹" sub="모든 모션 시간의 합. 낮을수록 유리하다" accent="text-emerald-400">
+            <div className="space-y-1.5">
+              {motionRankings.sortedByTotal.slice(0, 10).map((entry, i) => (
+                <div key={entry.c.id} className="flex items-center gap-3">
+                  <span className={`w-5 text-right text-xs font-bold tabular-nums ${i < 3 ? "text-emerald-400" : "text-white/30"}`}>{i + 1}</span>
+                  <img src={entry.c.circularImageUrl} alt="" width={24} height={24} className="rounded-full shrink-0" />
+                  <span className="text-sm text-white/80 w-24 truncate">{entry.c.characterNm}</span>
+                  <Bar value={1 / entry.total} max={1 / motionRankings.sortedByTotal[0].total} color="bg-emerald-500" />
+                  <span className="text-sm font-bold text-white/70 tabular-nums w-14 text-right">{entry.total.toFixed(2)}s</span>
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          {/* Per-motion bests */}
+          <Section title="모션별 최고 / 최저" sub="각 모션에서 가장 빠른 캐릭터와 가장 느린 캐릭터">
+            <div className="grid gap-2 sm:grid-cols-2">
+              {motionRankings.perMotion.map((m) => (
+                <div key={m.key} className="flex items-center gap-2 rounded-lg bg-white/[0.02] px-3 py-2">
+                  <div className="w-12">
+                    <div className="text-xs font-bold text-white/60">{m.label}</div>
+                    <div className="text-[9px] text-white/25">{m.desc}</div>
+                  </div>
+                  <div className="flex-1 flex items-center gap-2 text-xs">
+                    <img src={m.best.circularImageUrl} alt="" width={20} height={20} className="rounded-full" />
+                    <span className="text-emerald-400 font-bold tabular-nums">{parseFloat(m.best[m.key as keyof Character] as string).toFixed(2)}s</span>
+                  </div>
+                  <div className="flex-1 flex items-center gap-2 text-xs justify-end">
+                    <span className="text-red-400/70 tabular-nums">{parseFloat(m.worst[m.key as keyof Character] as string).toFixed(2)}s</span>
+                    <img src={m.worst.circularImageUrl} alt="" width={20} height={20} className="rounded-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Section>
 
           {/* MBTI */}
           <Section title="MBTI 분포 — 동화나라 성격 지도" accent="text-violet-400">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-              {charStats.mbti.slice(0, 4).map(([type, count]) => (
+              {charAnalysis.mbti.slice(0, 4).map(([type, count]) => (
                 <div key={type} className="rounded-lg bg-violet-500/10 border border-violet-500/20 p-2.5 text-center">
                   <div className="text-lg font-black text-violet-300">{type}</div>
                   <div className="text-xs text-white/40">{count}명</div>
@@ -322,39 +380,40 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
               ))}
             </div>
             <div className="space-y-1.5">
-              {charStats.mbti.map(([type, count]) => (
+              {charAnalysis.mbti.map(([type, count]) => (
                 <div key={type} className="flex items-center gap-3">
                   <span className="text-sm text-white/70 w-12 font-mono">{type}</span>
-                  <Bar value={count} max={charStats.mbti[0][1] as number} color="bg-violet-500" />
+                  <Bar value={count} max={charAnalysis.mbti[0][1] as number} color="bg-violet-500" />
                   <span className="text-sm text-white/50 tabular-nums w-6 text-right">{count}</span>
                 </div>
               ))}
             </div>
-            {charStats.mbti.length > 0 && (
-              <p className="mt-3 text-xs text-white/30">
-                동화나라에서 가장 흔한 성격: <span className="text-violet-300 font-bold">{charStats.mbti[0][0]}</span> ({charStats.mbti[0][1]}명)
-              </p>
-            )}
           </Section>
 
-          {/* Blood type */}
-          <Section title="혈액형 분포">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {charStats.blood.map(([type, count], i) => (
-                <div key={type} className={`rounded-xl p-4 text-center ${i === 0 ? "bg-red-500/10 border border-red-500/20" : "bg-white/[0.03] border border-white/5"}`}>
-                  <div className={`text-2xl font-black ${i === 0 ? "text-red-300" : "text-white/70"}`}>{type}</div>
-                  <div className="text-lg font-bold text-white/60 tabular-nums">{count}명</div>
-                </div>
-              ))}
-            </div>
-          </Section>
+          {/* Blood type + VS */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Section title="혈액형 분포">
+              <div className="grid grid-cols-2 gap-3">
+                {charAnalysis.blood.map(([type, count], i) => (
+                  <div key={type} className={`rounded-xl p-4 text-center ${i === 0 ? "bg-red-500/10 border border-red-500/20" : "bg-white/[0.03] border border-white/5"}`}>
+                    <div className={`text-2xl font-black ${i === 0 ? "text-red-300" : "text-white/70"}`}>{type}</div>
+                    <div className="text-lg font-bold text-white/60 tabular-nums">{count}명</div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+            <VsCard
+              left={{ name: charAnalysis.tallest.characterNm, img: charAnalysis.tallest.circularImageUrl, value: charAnalysis.tallest.height }}
+              right={{ name: charAnalysis.shortest.characterNm, img: charAnalysis.shortest.circularImageUrl, value: charAnalysis.shortest.height }}
+              label="신장 양극단"
+            />
+          </div>
         </div>
       )}
 
       {/* ── 콘텐츠 ──────────────────────────────── */}
       {tab === "content" && (
         <div className="space-y-6 stagger-grid">
-          {/* Content overview cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="rounded-xl border border-red-500/20 bg-gradient-to-br from-red-950/30 to-transparent p-4 text-center">
               <div className="text-2xl font-black text-red-300 tabular-nums">{maps.length}</div>
@@ -437,7 +496,6 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       {/* ── 변경권 ───────────────────────────────── */}
       {tab === "gacha" && (
         <div className="space-y-6 stagger-grid">
-          {/* Dramatic worst odds */}
           <div className="rounded-xl border border-red-500/20 bg-gradient-to-br from-red-950/30 to-transparent p-5 text-center">
             <div className="text-[10px] font-bold text-red-400/70 uppercase tracking-wider mb-2">최악의 확률</div>
             <div className="text-4xl font-black text-red-300 tabular-nums mb-1">{gachaStats.lowestProb}%</div>
@@ -455,10 +513,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
             <Trivia q="63.2% 확률에 도달하려면?" a={`${Math.round(100 / gachaStats.lowestProb).toLocaleString()}회`} detail="기대값 = 1/p" />
           </div>
 
-          <Section title="확률별 기대 시행 횟수" accent="text-amber-400">
-            <p className="text-xs text-white/40 mb-3">
-              1번 이상 성공할 확률 63.2%에 도달하는 횟수
-            </p>
+          <Section title="확률별 기대 시행 횟수" accent="text-amber-400" sub="1번 이상 성공할 확률 63.2%에 도달하는 횟수">
             <div className="space-y-2">
               {[0.005, 0.01, 0.05, 0.1, 0.5, 1, 5, 10].map((p) => (
                 <div key={p} className="flex items-center gap-3">
@@ -475,8 +530,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       {/* ── 경험치 ───────────────────────────────── */}
       {tab === "exp" && (
         <div className="space-y-6 stagger-grid">
-          {/* EXP curve */}
-          <Section title="레벨 경험치 곡선">
+          <Section title="레벨 경험치 곡선" sub="로그 스케일 — 실제 차이는 훨씬 극적">
             <div className="h-48 flex items-end gap-px">
               {levels.map((l) => {
                 const pct = levels[levels.length - 1].exp > 0
@@ -496,10 +550,8 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
               <span>Lv.1</span>
               <span>Lv.{levels[levels.length - 1].level}</span>
             </div>
-            <p className="text-xs text-white/30 mt-2">로그 스케일 — 실제 차이는 훨씬 극적</p>
           </Section>
 
-          {/* Trivia cards */}
           <div className="grid gap-3 sm:grid-cols-2">
             <Trivia
               q="전체 경험치의 딱 절반을 모으면?"
@@ -513,7 +565,6 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
             />
           </div>
 
-          {/* Final boss stat */}
           <div className="rounded-xl border border-teal-500/20 bg-gradient-to-br from-teal-950/40 to-transparent p-5 text-center">
             <div className="text-[10px] font-bold text-teal-400/70 uppercase tracking-wider mb-2">최종 보스</div>
             <div className="flex items-center justify-center gap-2 mb-1">
