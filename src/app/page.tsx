@@ -5,11 +5,7 @@ import costumesJson from "@/data/costumes.json";
 import storiesJson from "@/data/stories.json";
 import type { MapItem, CostumeItem, StoryItem } from "@/lib/types";
 import { formatDate } from "@/lib/format";
-
-const ELIMS = {
-  mainImage:
-    "https://trimage.rhaon.co.kr/images/trintro/character/mainImageUrl/2d8NfCsBO9RRDObt3pw8NA.png",
-};
+import { ELIMS_MAIN } from "@/lib/constants";
 
 const recentMaps = (mapsJson as MapItem[]).slice(0, 3);
 const recentCostumes = (costumesJson as CostumeItem[]).slice(0, 3);
@@ -59,7 +55,7 @@ export default function Home() {
         {/* Character */}
         <div className="relative z-10 mb-0 translate-y-4">
           <img
-            src={ELIMS.mainImage}
+            src={ELIMS_MAIN}
             alt="엘림스 스마일"
             width={320}
             height={320}

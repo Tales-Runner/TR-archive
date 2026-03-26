@@ -1,29 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { ELIMS_CIRCULAR, R_CIRCULAR, KAI_CIRCULAR } from "@/lib/constants";
 
 const CHARS = {
   elims: {
     name: "엘림스 스마일",
-    img: "https://trimage.rhaon.co.kr/images/trintro/character/circularImageUrl/6awBZmzKmUkV8JVC43yMRH.png",
+    img: ELIMS_CIRCULAR,
     color: "text-teal-400",
     ring: "ring-teal-500/30",
   },
   r: {
     name: "R",
-    img: "https://trimage.rhaon.co.kr/images/trintro/character/circularImageUrl/56I8dLyaJYn91ixXLnYsAm.png",
+    img: R_CIRCULAR,
     color: "text-white/40",
     ring: "ring-white/10",
   },
   drHell: {
     name: "닥터헬",
-    img: "", // NPC — 이니셜 아바타 사용
+    img: "",
     color: "text-red-400",
     ring: "ring-red-500/30",
   },
   kai: {
     name: "카이",
-    img: "https://trimage.rhaon.co.kr/images/trintro/character/circularImageUrl/0KztxwgQ2iCDS7LMFEz9Jd.png",
+    img: KAI_CIRCULAR,
     color: "text-purple-400",
     ring: "ring-purple-500/30",
   },

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { TYPEWRITER_SPEED_MS } from "@/lib/constants";
 
 const FIRST_VISIT = [
   "...뭐야, 또 왔군.",
@@ -53,7 +54,7 @@ export function VNScene({ choices }: { choices: Choice[] }) {
         clearInterval(timer);
         setIsTyping(false);
       }
-    }, 40);
+    }, TYPEWRITER_SPEED_MS);
     return () => clearInterval(timer);
   }, [dialogIdx, currentText]);
 

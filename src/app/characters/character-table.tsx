@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import type { Character, SortKey, SortDir } from "@/lib/types";
+import { CHARACTER_CATEGORY, CHARACTER_CATEGORY_LABEL, STAT_MAX, STAT_TOTAL_MAX } from "@/lib/constants";
 
 const STAT_COLS: { key: SortKey; label: string }[] = [
   { key: "maximumSpeed", label: "속도" },
@@ -99,7 +100,7 @@ function CharacterModal({
             </h2>
             <p className="text-sm text-teal-400">{c.catchPhrase}</p>
             <p className="text-xs text-white/30 mt-0.5">
-              {c.category === 0 ? "런너" : "스토리"} 캐릭터
+              {CHARACTER_CATEGORY_LABEL[c.category] ?? "기타"} 캐릭터
             </p>
           </div>
         </div>
@@ -432,8 +433,8 @@ export function CharacterTable({
         <div className="flex rounded-lg border border-white/10 overflow-hidden text-sm">
           {[
             { label: "전체", value: null },
-            { label: "런너", value: 0 },
-            { label: "스토리", value: 1 },
+            { label: "런너", value: CHARACTER_CATEGORY.RUNNER },
+            { label: "스토리", value: CHARACTER_CATEGORY.STORY },
           ].map((opt) => (
             <button
               key={String(opt.value)}
@@ -525,7 +526,7 @@ export function CharacterTable({
                       <td key={col.key} className="px-3 py-2.5">
                         {statBar(
                           getValue(c, col.key),
-                          col.key === "totalStat" ? 16 : 6,
+                          col.key === "totalStat" ? STAT_TOTAL_MAX : STAT_MAX,
                         )}
                       </td>
                     ))}

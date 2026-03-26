@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { formatIsoDate } from "@/lib/format";
+import { API_BASE, SITE_BASE } from "@/lib/constants";
 
-const API = "https://tr.rhaon.co.kr/webb/main/notices";
+const API = `${API_BASE}/main/notices`;
 
 interface Notice {
   id: number;
@@ -85,7 +86,7 @@ export function NoticesFeed() {
       <div className="text-center py-12 text-white/30 text-sm">
         공지사항을 불러올 수 없습니다.{" "}
         <a
-          href="https://tr.rhaon.co.kr/news/notices"
+          href={`${SITE_BASE}/news/notices`}
           target="_blank"
           rel="noopener noreferrer"
           className="underline text-teal-400"
@@ -130,7 +131,7 @@ export function NoticesFeed() {
         {filtered.map((n) => (
           <a
             key={n.id}
-            href={`https://tr.rhaon.co.kr/news/notices/${n.id}`}
+            href={`${SITE_BASE}/news/notices/${n.id}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-white/[0.03]"

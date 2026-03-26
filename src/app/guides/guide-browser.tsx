@@ -3,21 +3,7 @@
 import { useState, useMemo } from "react";
 import DOMPurify from "dompurify";
 import type { GuideItem } from "@/lib/types";
-
-const CATEGORY_NAMES: Record<number, string> = {
-  1: "조작법",
-  2: "커뮤니티",
-  3: "시스템",
-  4: "성장",
-  5: "게임플레이",
-  6: "팜",
-  7: "공원",
-  9: "레벨",
-  10: "보안",
-  11: "VIP",
-  12: "시작하기",
-  14: "광장",
-};
+import { GUIDE_CATEGORY_NAMES as CATEGORY_NAMES } from "@/lib/constants";
 
 export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
   const [catFilter, setCatFilter] = useState<number | null>(null);

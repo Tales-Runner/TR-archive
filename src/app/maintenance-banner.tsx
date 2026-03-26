@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_BASE } from "@/lib/constants";
 
-const API = "https://tr.rhaon.co.kr/webb/code/maintenance";
+const API = `${API_BASE}/code/maintenance`;
 
 export function MaintenanceBanner() {
   const [info, setInfo] = useState<{ subject?: string } | null>(null);

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { StoryItem } from "@/lib/types";
 import { formatDate, youtubeId } from "@/lib/format";
+import { STORY_CATEGORY, STORY_CATEGORY_LABEL, SITE_BASE } from "@/lib/constants";
 
 function StoryViewer({
   story,
@@ -224,24 +225,24 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
             전체
           </button>
           <button
-            onClick={() => setCatFilter(1)}
+            onClick={() => setCatFilter(STORY_CATEGORY.WEBTOON)}
             className={`px-3 py-1.5 transition-colors ${
-              catFilter === 1
+              catFilter === STORY_CATEGORY.WEBTOON
                 ? "bg-teal-600 text-white font-medium"
                 : "bg-white/5 text-white/40 hover:bg-white/10"
             }`}
           >
-            웹툰
+            {STORY_CATEGORY_LABEL[STORY_CATEGORY.WEBTOON]}
           </button>
           <button
-            onClick={() => setCatFilter(2)}
+            onClick={() => setCatFilter(STORY_CATEGORY.VIDEO)}
             className={`px-3 py-1.5 transition-colors ${
-              catFilter === 2
+              catFilter === STORY_CATEGORY.VIDEO
                 ? "bg-teal-600 text-white font-medium"
                 : "bg-white/5 text-white/40 hover:bg-white/10"
             }`}
           >
-            영상
+            {STORY_CATEGORY_LABEL[STORY_CATEGORY.VIDEO]}
           </button>
         </div>
         <input
@@ -267,7 +268,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
                     s.images.length > 0
                       ? setViewingId(s.id)
                       : window.open(
-                          `https://tr.rhaon.co.kr/archive/trstory/${s.id}`,
+                          `${SITE_BASE}/archive/trstory/${s.id}`,
                           "_blank"
                         )
                   }
@@ -288,12 +289,12 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
                     <div className="flex items-center gap-2">
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          s.category === 1
+                          s.category === STORY_CATEGORY.WEBTOON
                             ? "bg-emerald-500/20 text-emerald-300"
                             : "bg-blue-500/20 text-blue-300"
                         }`}
                       >
-                        {s.category === 1 ? "웹툰" : "영상"}
+                        {STORY_CATEGORY_LABEL[s.category]}
                       </span>
                       <span className="text-[11px] text-white/30">
                         {formatDate(s.openDt)}

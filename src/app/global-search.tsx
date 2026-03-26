@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { SEARCH_TYPE_COLORS } from "@/lib/constants";
 
 export interface SearchEntry {
   type: string;
@@ -10,14 +11,6 @@ export interface SearchEntry {
   href: string;
   img?: string;
 }
-
-const TYPE_COLORS: Record<string, string> = {
-  런너: "text-teal-300 bg-teal-600/20",
-  맵: "text-red-300 bg-red-600/20",
-  코스튬: "text-pink-300 bg-pink-600/20",
-  가이드: "text-amber-300 bg-amber-600/20",
-  스토리: "text-blue-300 bg-blue-600/20",
-};
 
 export function GlobalSearch({ index }: { index: SearchEntry[] }) {
   const [open, setOpen] = useState(false);
@@ -130,7 +123,7 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
                       <div className="text-sm text-white/80 truncate">{r.label}</div>
                       <div className="text-[11px] text-white/30 truncate">{r.sub}</div>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${TYPE_COLORS[r.type] ?? "text-white/40 bg-white/5"}`}>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${SEARCH_TYPE_COLORS[r.type] ?? "text-white/40 bg-white/5"}`}>
                       {r.type}
                     </span>
                   </button>
