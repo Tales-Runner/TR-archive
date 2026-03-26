@@ -15,7 +15,7 @@ const STAT_COLS: { key: SortKey; label: string; tip: string }[] = [
   { key: "totalStat", label: "합계", tip: "4대 스탯 합산" },
 ];
 
-const MOTION_COLS: { key: SortKey; label: string }[] = [
+const MOTION_COLS: { key: SortKey; label: string; tip?: string }[] = [
   { key: "revivalMotion", label: "부활" },
   { key: "hurdleMotion", label: "허들" },
   { key: "landingMotion", label: "착지" },
@@ -485,29 +485,22 @@ export function CharacterTable({
                 </button>
               </th>
               <th className="px-3 py-2.5 min-w-[120px]">고유능력</th>
-              {cols.map((col) => (
-                <th key={col.key} className="px-3 py-2.5 whitespace-nowrap">
-                  {"tip" in col ? (
-                    <Tooltip text={(col as { tip: string }).tip}>
-                      <button
-                        onClick={() => toggleSort(col.key)}
-                        className="hover:text-white/70"
-                      >
-                        {col.label}
-                        {sortIndicator(col.key)}
-                      </button>
-                    </Tooltip>
-                  ) : (
-                    <button
-                      onClick={() => toggleSort(col.key)}
-                      className="hover:text-white/70"
-                    >
-                      {col.label}
-                      {sortIndicator(col.key)}
-                    </button>
-                  )}
-                </th>
-              ))}
+              {cols.map((col) => {
+                const btn = (
+                  <button
+                    onClick={() => toggleSort(col.key)}
+                    className="hover:text-white/70"
+                  >
+                    {col.label}
+                    {sortIndicator(col.key)}
+                  </button>
+                );
+                return (
+                  <th key={col.key} className="px-3 py-2.5 whitespace-nowrap">
+                    {col.tip ? <Tooltip text={col.tip}>{btn}</Tooltip> : btn}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>

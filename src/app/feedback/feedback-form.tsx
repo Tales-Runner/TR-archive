@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 import { submitFeedback } from "./actions";
-
-const CATEGORIES = [
-  { value: "bug", label: "버그 제보", desc: "사이트 오류나 깨짐" },
-  { value: "feature", label: "기능 건의", desc: "이런 기능이 있으면 좋겠다" },
-  { value: "data", label: "데이터 오류", desc: "정보가 틀려요" },
-  { value: "other", label: "기타", desc: "그 외 하고 싶은 말" },
-];
+import { FEEDBACK_CATEGORIES } from "./categories";
 
 export function FeedbackForm() {
   const [category, setCategory] = useState("feature");
@@ -77,7 +71,7 @@ export function FeedbackForm() {
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-white/50">분류</legend>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {CATEGORIES.map((cat) => (
+          {FEEDBACK_CATEGORIES.map((cat) => (
             <label
               key={cat.value}
               className={`cursor-pointer rounded-xl border p-3 text-center transition-all hover:border-teal-500/30 hover:bg-white/[0.04] ${

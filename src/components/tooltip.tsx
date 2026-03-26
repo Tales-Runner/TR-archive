@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 export function Tooltip({
   text,
@@ -10,11 +10,9 @@ export function Tooltip({
   children: React.ReactNode;
 }) {
   const [show, setShow] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
   return (
     <div
-      ref={ref}
       className="relative inline-flex"
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}

@@ -1,14 +1,9 @@
 "use server";
 
+import { CATEGORY_LABEL_MAP } from "./categories";
+
 const GITHUB_REPO = "Tales-Runner/TR-archive";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-
-const CATEGORY_LABELS: Record<string, string> = {
-  bug: "버그 제보",
-  feature: "기능 건의",
-  data: "데이터 오류",
-  other: "기타",
-};
 
 interface FeedbackResult {
   ok: boolean;
@@ -42,7 +37,7 @@ export async function submitFeedback(
     return { ok: false, message: "서버 설정 오류: 토큰이 없습니다. 관리자에게 문의해 주세요." };
   }
 
-  const label = CATEGORY_LABELS[category] ?? "기타";
+  const label = CATEGORY_LABEL_MAP[category] ?? "기타";
   const issueTitle = `[${label}] ${title}`;
   const issueBody = [
     `**분류:** ${label}`,

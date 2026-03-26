@@ -170,7 +170,8 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
     const yearCount: Record<string, number> = {};
     for (const m of maps) {
       if (m.mapTypeCd !== null) typeCount[m.mapTypeCd] = (typeCount[m.mapTypeCd] || 0) + 1;
-      yearCount[m.openDt.slice(0, 4)] = (yearCount[m.openDt.slice(0, 4)] || 0) + 1;
+      const y = m.openDt.slice(0, 4);
+      yearCount[y] = (yearCount[y] || 0) + 1;
     }
     const maxType = Math.max(...Object.values(typeCount), 0);
     const maxYear = Math.max(...Object.values(yearCount), 0);
