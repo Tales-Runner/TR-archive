@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { MapItem, MapType } from "@/lib/types";
-import { formatDate, youtubeId } from "@/lib/format";
+import { formatDate, youtubeId, isSafeImageUrl } from "@/lib/format";
+import { useDebouncedValue } from "@/lib/use-debounce";
+import { db, type MapEntry } from "@/lib/db";
 import { EmptyState } from "@/components/empty-state";
 
 export function MapCatalog({
@@ -26,29 +28,39 @@ export function MapCatalog({
     searchParams.get("sort") === "name" ? "name" : "date",
   );
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [mapRecords, setMapRecords] = useState<Map<number, MapEntry>>(new Map());
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const params = new URLSearchParams();
-      if (typeFilter !== null) params.set("type", String(typeFilter));
-      if (search.trim()) params.set("q", search.trim());
-      if (sortBy !== "date") params.set("sort", sortBy);
-      const qs = params.toString();
-      const target = qs ? `?${qs}` : window.location.pathname;
-      if (target !== window.location.pathname + window.location.search) {
-        router.replace(target, { scroll: false });
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [typeFilter, search, sortBy, router]);
+    db.maps.getAll().then((entries) => setMapRecords(new Map(entries.map((e) => [e.id, e]))));
+  }, []);
+
+  const saveMapRecord = useCallback(async (id: number, personalBest: string) => {
+    const entry: MapEntry = { id, clearedAt: personalBest ? Date.now() : null, personalBest };
+    await db.maps.put(entry);
+    setMapRecords((prev) => new Map(prev).set(id, entry));
+  }, []);
+
+  const debouncedSearch = useDebouncedValue(search, 200);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (typeFilter !== null) params.set("type", String(typeFilter));
+    if (debouncedSearch.trim()) params.set("q", debouncedSearch.trim());
+    if (sortBy !== "date") params.set("sort", sortBy);
+    const qs = params.toString();
+    const target = qs ? `?${qs}` : window.location.pathname;
+    if (target !== window.location.pathname + window.location.search) {
+      router.replace(target, { scroll: false });
+    }
+  }, [typeFilter, debouncedSearch, sortBy, router]);
 
   const filtered = useMemo(() => {
     let list = maps;
     if (typeFilter !== null) {
       list = list.filter((m) => m.mapTypeCd === typeFilter);
     }
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.trim().toLowerCase();
       list = list.filter(
         (m) =>
           m.subject.toLowerCase().includes(q) ||
@@ -59,7 +71,7 @@ export function MapCatalog({
       list = [...list].sort((a, b) => a.subject.localeCompare(b.subject, "ko"));
     }
     return list;
-  }, [maps, typeFilter, search, sortBy]);
+  }, [maps, typeFilter, debouncedSearch, sortBy]);
 
   // Close modal on Escape
   useEffect(() => {
@@ -161,7 +173,7 @@ export function MapCatalog({
               </span>
             </div>
 
-            {selected.thumbnail && (
+            {selected.thumbnail && isSafeImageUrl(selected.thumbnail) && (
               <img
                 src={selected.thumbnail}
                 alt={selected.subject}
@@ -197,6 +209,18 @@ export function MapCatalog({
                 />
               </div>
             )}
+
+            {/* Personal best */}
+            <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+              <h3 className="mb-2 text-xs font-medium text-white/40">내 기록</h3>
+              <input
+                type="text"
+                value={mapRecords.get(selected.id)?.personalBest ?? ""}
+                onChange={(e) => saveMapRecord(selected.id, e.target.value)}
+                placeholder="예: 1:23.45 / 클리어 완료"
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50"
+              />
+            </div>
 
             {selected.hashTagSubject && (
               <div className="mt-4 flex flex-wrap gap-1.5">

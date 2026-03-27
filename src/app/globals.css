@@ -128,6 +128,23 @@ button:active:not(:disabled) {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
+/* Webtoon viewer */
+@keyframes bar-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; pointer-events: none; }
+}
+@keyframes bar-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.viewer-bar-visible {
+  animation: bar-fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.viewer-bar-hidden {
+  animation: bar-fade-out 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  pointer-events: none;
+}
+
 /* Dark select dropdown */
 select option {
   background: #13101f;

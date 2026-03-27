@@ -1,9 +1,29 @@
 "use server";
 
+import { headers } from "next/headers";
 import { CATEGORY_LABEL_MAP } from "./categories";
 
 const GITHUB_REPO = "Tales-Runner/TR-archive";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+
+/* ── Rate Limiter ─────────────────────────────────────── */
+const rateLimitMap = new Map<string, number[]>();
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 5;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = (rateLimitMap.get(ip) ?? []).filter(
+    (t) => now - t < RATE_WINDOW_MS,
+  );
+  if (timestamps.length >= RATE_MAX) {
+    rateLimitMap.set(ip, timestamps);
+    return false;
+  }
+  timestamps.push(now);
+  rateLimitMap.set(ip, timestamps);
+  return true;
+}
 
 interface FeedbackResult {
   ok: boolean;
@@ -15,6 +35,12 @@ export async function submitFeedback(
   _prev: FeedbackResult | null,
   formData: FormData,
 ): Promise<FeedbackResult> {
+  const h = await headers();
+  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!checkRateLimit(ip)) {
+    return { ok: false, message: "요청이 너무 많습니다. 1분 후 다시 시도해 주세요." };
+  }
+
   const category = formData.get("category") as string;
   const title = (formData.get("title") as string)?.trim();
   const body = (formData.get("body") as string)?.trim();
@@ -67,9 +93,8 @@ export async function submitFeedback(
     });
 
     if (!res.ok) {
-      const err = await res.text();
-      console.error("GitHub API error:", res.status, err);
-      return { ok: false, message: `전송 실패 (${res.status}). 잠시 후 다시 시도해 주세요.` };
+      console.error("GitHub API error:", res.status);
+      return { ok: false, message: "건의 전송에 실패했습니다. 잠시 후 다시 시도해 주세요." };
     }
 
     const issue = await res.json();

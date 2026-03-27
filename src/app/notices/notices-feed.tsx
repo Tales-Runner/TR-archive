@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { formatIsoDate } from "@/lib/format";
-import { API_BASE, SITE_BASE } from "@/lib/constants";
+import { SITE_BASE } from "@/lib/constants";
+import { useDebouncedValue } from "@/lib/use-debounce";
 import { EmptyState } from "@/components/empty-state";
 
-const API = `${API_BASE}/main/notices`;
+const API = "/api/notices";
 
 interface Notice {
   id: number;
@@ -51,7 +52,7 @@ export function NoticesFeed() {
         return r.json();
       })
       .then((data) => {
-        if (data.resCd === "0000") {
+        if (data?.resCd === "0000" && Array.isArray(data.result?.list)) {
           setNotices(data.result.list);
         } else {
           setError(true);
@@ -67,17 +68,19 @@ export function NoticesFeed() {
     [notices]
   );
 
+  const debouncedSearch = useDebouncedValue(search, 200);
+
   const filtered = useMemo(() => {
     let list = categorized;
     if (catFilter !== "all") {
       list = list.filter((n) => n.cat === catFilter);
     }
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.trim().toLowerCase();
       list = list.filter((n) => n.subject.toLowerCase().includes(q));
     }
     return list;
-  }, [categorized, catFilter, search]);
+  }, [categorized, catFilter, debouncedSearch]);
 
   if (loading) {
     return (

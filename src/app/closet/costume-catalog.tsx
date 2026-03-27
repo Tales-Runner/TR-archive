@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { CostumeItem } from "@/lib/types";
 import { formatDate } from "@/lib/format";
+import { useDebouncedValue } from "@/lib/use-debounce";
+import { useFavorites } from "@/lib/use-favorites";
 import { EmptyState } from "@/components/empty-state";
 
 export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
@@ -19,34 +21,34 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
     searchParams.get("sort") === "name" ? "name" : "date",
   );
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const favs = useFavorites();
 
   const years = useMemo(
     () => [...new Set(costumes.map((c) => c.openYear))],
     [costumes]
   );
 
+  const debouncedSearch = useDebouncedValue(search, 200);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const params = new URLSearchParams();
-      if (yearFilter) params.set("year", yearFilter);
-      if (search.trim()) params.set("q", search.trim());
-      if (sortBy !== "date") params.set("sort", sortBy);
-      const qs = params.toString();
-      const target = qs ? `?${qs}` : window.location.pathname;
-      if (target !== window.location.pathname + window.location.search) {
-        router.replace(target, { scroll: false });
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [yearFilter, search, sortBy, router]);
+    const params = new URLSearchParams();
+    if (yearFilter) params.set("year", yearFilter);
+    if (debouncedSearch.trim()) params.set("q", debouncedSearch.trim());
+    if (sortBy !== "date") params.set("sort", sortBy);
+    const qs = params.toString();
+    const target = qs ? `?${qs}` : window.location.pathname;
+    if (target !== window.location.pathname + window.location.search) {
+      router.replace(target, { scroll: false });
+    }
+  }, [yearFilter, debouncedSearch, sortBy, router]);
 
   const filtered = useMemo(() => {
     let list = costumes;
     if (yearFilter) {
       list = list.filter((c) => c.openYear === yearFilter);
     }
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.trim().toLowerCase();
       list = list.filter(
         (c) =>
           c.subject.toLowerCase().includes(q) ||
@@ -57,7 +59,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
       list = [...list].sort((a, b) => a.subject.localeCompare(b.subject, "ko"));
     }
     return list;
-  }, [costumes, yearFilter, search, sortBy]);
+  }, [costumes, yearFilter, debouncedSearch, sortBy]);
 
   // Close modal on Escape
   useEffect(() => {
@@ -136,12 +138,43 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
             onClick={(e) => e.stopPropagation()}
             className="relative max-h-[85vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-4 sm:p-6 animate-scale-in"
           >
-            <button
-              onClick={() => setSelectedId(null)}
-              className="absolute top-4 right-4 z-10 rounded-lg bg-black/50 px-3 py-1 text-sm text-white/40 hover:bg-white/10 hover:text-white/70"
-            >
-              닫기
-            </button>
+            <div className="absolute top-4 right-4 z-10 flex gap-2">
+              {favs.isCostumeFav(selected.id) ? (
+                <div className="flex rounded-lg overflow-hidden border border-pink-500/30">
+                  <button
+                    onClick={() => favs.updateCostumeStatus(selected.id, "owned")}
+                    className={`px-2 py-1 text-[10px] transition-colors ${favs.getCostume(selected.id)?.status === "owned" ? "bg-teal-600/30 text-teal-300" : "bg-black/50 text-white/40 hover:bg-white/10"}`}
+                  >
+                    보유
+                  </button>
+                  <button
+                    onClick={() => favs.updateCostumeStatus(selected.id, "wishlist")}
+                    className={`px-2 py-1 text-[10px] transition-colors ${favs.getCostume(selected.id)?.status === "wishlist" ? "bg-amber-600/30 text-amber-300" : "bg-black/50 text-white/40 hover:bg-white/10"}`}
+                  >
+                    위시
+                  </button>
+                  <button
+                    onClick={() => favs.toggleCostume(selected.id)}
+                    className="px-2 py-1 text-[10px] bg-black/50 text-pink-300 hover:bg-white/10"
+                  >
+                    ♥
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => favs.toggleCostume(selected.id)}
+                  className="rounded-lg bg-black/50 px-3 py-1 text-sm text-white/40 hover:bg-white/10"
+                >
+                  ♡
+                </button>
+              )}
+              <button
+                onClick={() => setSelectedId(null)}
+                className="rounded-lg bg-black/50 px-3 py-1 text-sm text-white/40 hover:bg-white/10 hover:text-white/70"
+              >
+                닫기
+              </button>
+            </div>
 
             <h2 className="text-xl font-bold text-white/90 mb-1">
               {selected.subject}

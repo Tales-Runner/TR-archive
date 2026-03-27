@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { SEARCH_TYPE_COLORS } from "@/lib/constants";
+import { isSafeImageUrl } from "@/lib/format";
 
 export interface SearchEntry {
   type: string;
@@ -152,7 +153,7 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
                       i === selectedIndex ? "bg-white/10" : "hover:bg-white/5"
                     }`}
                   >
-                    {r.img ? (
+                    {r.img && isSafeImageUrl(r.img) ? (
                       <img src={r.img} alt="" width={24} height={24} className="rounded-full shrink-0" loading="lazy" />
                     ) : (
                       <div className="w-6 h-6 rounded-full bg-white/5 shrink-0" />

@@ -43,6 +43,16 @@ const CHOICES = [
     label: "이 세계의 이야기가 궁금해",
     sub: "스토리",
   },
+  {
+    href: "/lore",
+    label: "세계관의 흐름이 궁금해",
+    sub: "연대기",
+  },
+  {
+    href: "/relationships",
+    label: "인물들의 관계가 궁금해",
+    sub: "관계도",
+  },
 ];
 
 export default function Home() {

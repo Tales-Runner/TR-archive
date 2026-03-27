@@ -6,6 +6,7 @@ const API = "/api/maintenance";
 export function MaintenanceBanner() {
   const [info, setInfo] = useState<{ subject?: string } | null>(null);
   const [error, setError] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -16,7 +17,10 @@ export function MaintenanceBanner() {
         return r.json();
       })
       .then((data) => {
-        if (data?.resCd === "0000" && data.result?.info) {
+        if (
+          data?.resCd === "0000" &&
+          typeof data.result?.info?.subject === "string"
+        ) {
           setInfo(data.result.info);
         }
       })
@@ -26,9 +30,15 @@ export function MaintenanceBanner() {
     return () => ac.abort();
   }, []);
 
-  if (error) {
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => setDismissed(true), 3000);
+    return () => clearTimeout(timer);
+  }, [error]);
+
+  if (error && !dismissed) {
     return (
-      <div className="bg-red-900/60 text-white/70 text-center text-xs py-1.5 px-4">
+      <div className="bg-red-900/60 text-white/70 text-center text-xs py-1.5 px-4 animate-fade-in">
         점검 정보를 불러올 수 없습니다
       </div>
     );

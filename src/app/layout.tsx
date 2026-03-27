@@ -79,6 +79,13 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "세계관",
+    items: [
+      { href: "/lore", label: "연대기" },
+      { href: "/relationships", label: "인물 관계도" },
+    ],
+  },
+  {
     label: "아카이브",
     items: [
       { href: "/maps", label: "맵 도감" },

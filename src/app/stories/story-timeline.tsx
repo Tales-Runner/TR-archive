@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import type { StoryItem } from "@/lib/types";
-import { formatDate, youtubeId } from "@/lib/format";
+import { formatDate, youtubeId, isSafeImageUrl } from "@/lib/format";
 import { STORY_CATEGORY, STORY_CATEGORY_LABEL, SITE_BASE } from "@/lib/constants";
+import { useDebouncedValue } from "@/lib/use-debounce";
+import { db } from "@/lib/db";
 import { EmptyState } from "@/components/empty-state";
 
 const PAGE_SIZE = 12;
@@ -41,6 +43,38 @@ function buildSeriesMap(stories: StoryItem[]): Map<string, SeriesInfo> {
   return map;
 }
 
+/* ── Lazy-loaded webtoon image with skeleton + fade-in ── */
+function WebtoonImage({ src, alt, priority }: { src: string; alt: string; priority?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(!!priority);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (inView) return;
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); observer.disconnect(); } },
+      { rootMargin: "800px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [inView]);
+
+  return (
+    <div ref={ref} className="w-full min-h-[200px]" style={{ background: loaded ? "transparent" : "rgba(255,255,255,0.03)" }}>
+      {inView && (
+        <img
+          src={src}
+          alt={alt}
+          className={`w-full block transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+          onLoad={() => setLoaded(true)}
+        />
+      )}
+    </div>
+  );
+}
+
 function StoryViewer({
   story,
   onClose,
@@ -50,6 +84,9 @@ function StoryViewer({
   hasNext,
   seriesMap,
   onJump,
+  isRead,
+  onMarkRead,
+  nextStoryTitle,
 }: {
   story: StoryItem;
   onClose: () => void;
@@ -59,35 +96,102 @@ function StoryViewer({
   hasNext: boolean;
   seriesMap: Map<string, SeriesInfo>;
   onJump: (id: number) => void;
+  isRead?: boolean;
+  onMarkRead?: () => void;
+  nextStoryTitle?: string;
 }) {
-  const [barVisible, setBarVisible] = useState(false);
+  const [barVisible, setBarVisible] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const autoHideTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const markedReadRef = useRef(false);
 
+  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, []);
 
+  // Auto-hide bars after 3s on entry
+  useEffect(() => {
+    autoHideTimerRef.current = setTimeout(() => setBarVisible(false), 3000);
+    return () => clearTimeout(autoHideTimerRef.current);
+  }, []);
+
+  // Reset on episode change
+  useEffect(() => {
+    markedReadRef.current = !!isRead;
+    setScrollProgress(0);
+    // Restore scroll position
+    db.stories.get(story.id).then((entry) => {
+      const progress = entry?.scrollProgress;
+      if (typeof progress === "number" && progress > 0.05) {
+        requestAnimationFrame(() => {
+          const el = scrollRef.current;
+          if (el) el.scrollTop = progress * (el.scrollHeight - el.clientHeight);
+        });
+      } else {
+        scrollRef.current?.scrollTo(0, 0);
+      }
+    });
+  }, [story.id, isRead]);
+
+  // Keyboard
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft" && hasPrev) onPrev();
-      if (e.key === "ArrowRight" && hasNext) onNext();
+      if ((e.key === "ArrowLeft" || e.key === "j") && hasPrev) onPrev();
+      if ((e.key === "ArrowRight" || e.key === "k") && hasNext) onNext();
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose, onPrev, onNext, hasPrev, hasNext]);
 
+  // Save scroll position on unmount
   useEffect(() => {
-    document.getElementById("story-scroll")?.scrollTo(0, 0);
+    const storyId = story.id;
+    return () => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const progress = el.scrollTop / Math.max(el.scrollHeight - el.clientHeight, 1);
+      db.stories.get(storyId).then((existing) => {
+        db.stories.put({ id: storyId, readAt: existing?.readAt ?? 0, scrollProgress: progress });
+      });
+    };
   }, [story.id]);
+
+  // Scroll handler: progress + auto-hide + auto-read
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const progress = el.scrollTop / Math.max(el.scrollHeight - el.clientHeight, 1);
+    setScrollProgress(Math.min(progress, 1));
+
+    // Auto-hide bars while scrolling
+    setBarVisible(false);
+    clearTimeout(scrollTimerRef.current);
+    clearTimeout(autoHideTimerRef.current);
+    scrollTimerRef.current = setTimeout(() => setBarVisible(true), 2000);
+
+    // Auto-mark read at 80%
+    if (progress >= 0.8 && !markedReadRef.current) {
+      markedReadRef.current = true;
+      onMarkRead?.();
+    }
+  }, [onMarkRead]);
+
+  const toggleBar = useCallback(() => {
+    clearTimeout(scrollTimerRef.current);
+    clearTimeout(autoHideTimerRef.current);
+    setBarVisible((v) => !v);
+  }, []);
 
   const hasVideo = story.images.some((img) => img.movieUrl);
   const videoUrl = story.images.find((img) => img.movieUrl)?.movieUrl;
   const vid = videoUrl ? youtubeId(videoUrl.trim()) : null;
 
-  // Current series info
   const currentKey = getSeriesKey(story);
   const currentSeries = currentKey ? seriesMap.get(currentKey) : undefined;
   const seriesEntries = useMemo(
@@ -95,27 +199,34 @@ function StoryViewer({
     [seriesMap],
   );
 
+  const barClass = barVisible ? "viewer-bar-visible" : "viewer-bar-hidden";
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0812]">
-      {barVisible && (
-        <div className="shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-3 animate-slide-down">
-          <div className="min-w-0">
-            <h2 className="text-sm font-bold text-white/90 truncate">
-              {story.subject}
-            </h2>
-            <p className="text-[11px] text-white/30">{formatDate(story.openDt)}</p>
-          </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="shrink-0 ml-4 rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white/50 hover:bg-white/10 hover:text-white/80 transition-colors"
-          >
-            닫기
-          </button>
-        </div>
-      )}
+      {/* ── Progress bar ── */}
+      <div className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-white/5">
+        <div
+          className="h-full bg-teal-500 transition-[width] duration-150"
+          style={{ width: `${scrollProgress * 100}%` }}
+        />
+      </div>
 
-      {/* Content */}
-      <div id="story-scroll" className="flex-1 overflow-y-auto" onClick={() => setBarVisible((v) => !v)}>
+      {/* ── Top bar ── */}
+      <div className={`shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-2 ${barClass}`}>
+        <div className="min-w-0">
+          <h2 className="text-sm font-bold text-white/90 truncate">{story.subject}</h2>
+          <p className="text-[11px] text-white/30">{formatDate(story.openDt)}</p>
+        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          className="shrink-0 ml-3 rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white/50 hover:bg-white/10 transition-colors"
+        >
+          닫기
+        </button>
+      </div>
+
+      {/* ── Content ── */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto" onScroll={handleScroll} onClick={toggleBar}>
         {hasVideo && vid ? (
           <div className="mx-auto max-w-3xl p-4">
             <div className="aspect-video rounded-xl overflow-hidden">
@@ -128,97 +239,97 @@ function StoryViewer({
             </div>
           </div>
         ) : (
-          <div className="mx-auto max-w-2xl">
-            {story.images.map((img, i) => (
-              <img
-                key={i}
-                src={img.imageUrl}
-                alt={`${story.subject} - ${i + 1}`}
-                className="w-full"
-                loading={i < 3 ? "eager" : "lazy"}
-              />
-            ))}
+          <div className="mx-auto max-w-3xl">
+            {story.images
+              .filter((img) => isSafeImageUrl(img.imageUrl))
+              .map((img, i) => (
+                <WebtoonImage
+                  key={`${story.id}-${i}`}
+                  src={img.imageUrl}
+                  alt={`${story.subject} - ${i + 1}`}
+                  priority={i < 3}
+                />
+              ))}
           </div>
         )}
 
-        <div className="py-8 text-center">
-          <button
-            onClick={(e) => { e.stopPropagation(); onClose(); }}
-            className="rounded-lg bg-white/5 px-5 py-2 text-sm text-white/50 hover:bg-white/10 hover:text-white/80 transition-colors"
-          >
-            목록으로 돌아가기
-          </button>
+        {/* ── Episode end CTA ── */}
+        <div className="py-12 text-center space-y-4" onClick={(e) => e.stopPropagation()}>
+          {hasNext ? (
+            <>
+              <p className="text-xs text-white/30">다음 이야기</p>
+              <button
+                onClick={onNext}
+                className="rounded-xl bg-teal-600 px-8 py-3.5 text-sm font-medium text-white hover:bg-teal-500 transition-colors"
+              >
+                다음화 →{nextStoryTitle ? ` ${nextStoryTitle}` : ""}
+              </button>
+            </>
+          ) : (
+            <p className="text-sm text-white/30">마지막 화입니다</p>
+          )}
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={onClose}
+              className="rounded-lg bg-white/5 px-5 py-2 text-sm text-white/50 hover:bg-white/10 transition-colors"
+            >
+              목록으로
+            </button>
+            {isRead && (
+              <span className="text-xs text-teal-400/60">읽음 ✓</span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Bottom nav bar - toggle on tap */}
-      {barVisible && (
-      <div className="shrink-0 border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md animate-slide-up">
-        {/* Series selector */}
-        <div className="flex items-center gap-2 px-4 pt-3 pb-1">
+      {/* ── Bottom nav bar ── */}
+      <div className={`shrink-0 border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md ${barClass}`} onClick={(e) => e.stopPropagation()}>
+        {/* Series + episode selector (single row) */}
+        <div className="flex items-center gap-2 px-4 py-2">
           <select
             value={currentKey}
             onChange={(e) => {
               const series = seriesMap.get(e.target.value);
-              if (series && series.episodes.length > 0) {
-                onJump(series.episodes[0].id);
-              }
+              if (series && series.episodes.length > 0) onJump(series.episodes[0].id);
             }}
-            onClick={(e) => e.stopPropagation()}
-            className="flex-1 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/70 outline-none focus:border-teal-500/50 truncate"
+            className="flex-1 min-w-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white/70 outline-none focus:border-teal-500/50 truncate"
           >
             {seriesEntries.map((s) => (
-              <option key={s.name} value={s.name}>
-                {s.name}
-              </option>
+              <option key={s.name} value={s.name}>{s.name}</option>
             ))}
           </select>
           {currentSeries && currentSeries.episodes.length >= 2 && (
             <select
               value={story.id}
               onChange={(e) => onJump(Number(e.target.value))}
-              onClick={(e) => e.stopPropagation()}
-              className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/70 outline-none focus:border-teal-500/50"
+              className="shrink-0 rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-xs text-white/70 outline-none focus:border-teal-500/50"
             >
               {currentSeries.episodes.map((ep, i) => (
-                <option key={ep.id} value={ep.id}>
-                  {i + 1}화 — {ep.subject}
-                </option>
+                <option key={ep.id} value={ep.id}>{i + 1}화 — {ep.subject}</option>
               ))}
             </select>
           )}
         </div>
 
-        {/* Prev / Next */}
-        <div className="flex items-center justify-between px-4 py-2">
+        {/* Prev / Next (compact) */}
+        <div className="flex items-center justify-between px-4 pb-2">
           <button
-            onClick={(e) => { e.stopPropagation(); if (hasPrev) onPrev(); }}
+            onClick={() => { if (hasPrev) onPrev(); }}
             disabled={!hasPrev}
-            className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm min-h-[44px] transition-colors ${
-              hasPrev
-                ? "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
-                : "text-white/15 cursor-not-allowed"
-            }`}
+            className={`rounded-lg px-4 py-2.5 text-sm min-h-[44px] transition-colors ${hasPrev ? "bg-white/5 text-white/70 hover:bg-white/10" : "text-white/15 cursor-not-allowed"}`}
           >
             ← 이전화
           </button>
-
-          <span className="text-xs text-white/30 truncate min-w-0 mx-2">{story.subject}</span>
-
+          <span className="text-[10px] text-white/20 tabular-nums">{Math.round(scrollProgress * 100)}%</span>
           <button
-            onClick={(e) => { e.stopPropagation(); if (hasNext) onNext(); }}
+            onClick={() => { if (hasNext) onNext(); }}
             disabled={!hasNext}
-            className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm min-h-[44px] transition-colors ${
-              hasNext
-                ? "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white/90"
-                : "text-white/15 cursor-not-allowed"
-            }`}
+            className={`rounded-lg px-4 py-2.5 text-sm min-h-[44px] transition-colors ${hasNext ? "bg-white/5 text-white/70 hover:bg-white/10" : "text-white/15 cursor-not-allowed"}`}
           >
             다음화 →
           </button>
         </div>
       </div>
-      )}
     </div>
   );
 }
@@ -228,14 +339,31 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
   const [search, setSearch] = useState("");
   const [viewingId, setViewingId] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [readIds, setReadIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    db.stories.getAll().then((entries) => setReadIds(new Set(entries.map((e) => e.id))));
+  }, []);
+
+  const toggleRead = useCallback(async (id: number) => {
+    if (readIds.has(id)) {
+      await db.stories.remove(id);
+      setReadIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
+    } else {
+      await db.stories.put({ id, readAt: Date.now() });
+      setReadIds((prev) => new Set(prev).add(id));
+    }
+  }, [readIds]);
+
+  const debouncedSearch = useDebouncedValue(search, 200);
 
   const filtered = useMemo(() => {
     let list = stories;
     if (catFilter !== null) {
       list = list.filter((s) => s.category === catFilter);
     }
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.trim().toLowerCase();
       list = list.filter(
         (s) =>
           s.subject.toLowerCase().includes(q) ||
@@ -243,7 +371,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
       );
     }
     return list;
-  }, [stories, catFilter, search]);
+  }, [stories, catFilter, debouncedSearch]);
 
   // Reset pagination when filter changes
   useEffect(() => {
@@ -308,6 +436,11 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
           hasNext={viewingIdx < viewableList.length - 1}
           seriesMap={seriesMap}
           onJump={setViewingId}
+          isRead={readIds.has(viewingStory.id)}
+          onMarkRead={() => {
+            if (!readIds.has(viewingStory.id)) toggleRead(viewingStory.id);
+          }}
+          nextStoryTitle={viewingIdx < viewableList.length - 1 ? viewableList[viewingIdx + 1].subject : undefined}
         />
       )}
 
@@ -385,6 +518,11 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         className="object-cover transition-transform group-hover:scale-105"
                       />
+                      {readIds.has(s.id) && (
+                        <div className="absolute top-2 right-2 rounded-full bg-teal-600/80 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                          읽음
+                        </div>
+                      )}
                     </div>
                     <div className="p-3">
                       <h3 className="text-sm font-medium text-white/90 line-clamp-2 mb-1">

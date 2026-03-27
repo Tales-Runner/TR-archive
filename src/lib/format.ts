@@ -15,3 +15,19 @@ export function youtubeId(url: string): string | null {
   );
   return m ? m[1] : null;
 }
+
+const ALLOWED_IMAGE_HOSTS = ["trimage.rhaon.co.kr", "tr.rhaon.co.kr"];
+
+export function isSafeImageUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return (
+      parsed.protocol === "https:" &&
+      ALLOWED_IMAGE_HOSTS.some(
+        (h) => parsed.hostname === h || parsed.hostname.endsWith(`.${h}`),
+      )
+    );
+  } catch {
+    return false;
+  }
+}

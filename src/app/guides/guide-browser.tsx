@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import DOMPurify from "dompurify";
 import type { GuideItem } from "@/lib/types";
 import { GUIDE_CATEGORY_NAMES as CATEGORY_NAMES } from "@/lib/constants";
+import { useDebouncedValue } from "@/lib/use-debounce";
 import { EmptyState } from "@/components/empty-state";
 
 export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
@@ -17,13 +18,15 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
     return cats.sort((a, b) => a - b);
   }, [guides]);
 
+  const debouncedSearch = useDebouncedValue(search, 200);
+
   const filtered = useMemo(() => {
     let list = guides;
     if (catFilter !== null) {
       list = list.filter((g) => g.category === catFilter);
     }
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.trim().toLowerCase();
       list = list.filter(
         (g) =>
           g.subject.toLowerCase().includes(q) ||
@@ -31,7 +34,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
       );
     }
     return list;
-  }, [guides, catFilter, search]);
+  }, [guides, catFilter, debouncedSearch]);
 
   const selected = selectedId !== null ? guides.find((g) => g.id === selectedId) : null;
 

@@ -3,6 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import type { Character, SortKey, SortDir } from "@/lib/types";
 import { CHARACTER_CATEGORY, CHARACTER_CATEGORY_LABEL, STAT_MAX, STAT_TOTAL_MAX } from "@/lib/constants";
+import { useDebouncedValue } from "@/lib/use-debounce";
+import { useFavorites } from "@/lib/use-favorites";
 import { useToast } from "@/components/toast";
 import { Tooltip } from "@/components/tooltip";
 import { EmptyState } from "@/components/empty-state";
@@ -70,10 +72,23 @@ function motionCell(value: string, best: number, worst: number) {
 function CharacterModal({
   c,
   onClose,
+  isFav,
+  onToggleFav,
+  memo,
+  tags,
+  onMemoChange,
+  onTagsChange,
 }: {
   c: Character;
   onClose: () => void;
+  isFav: boolean;
+  onToggleFav: () => void;
+  memo: string;
+  tags: string[];
+  onMemoChange: (m: string) => void;
+  onTagsChange: (t: string[]) => void;
 }) {
+  const [tagInput, setTagInput] = useState("");
   const total = c.maximumSpeed + c.acceleration + c.control + c.power;
   return (
     <div
@@ -86,12 +101,20 @@ function CharacterModal({
         onClick={(e) => e.stopPropagation()}
         className="relative max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-[#13101f] p-4 sm:p-6 animate-scale-in"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 rounded-lg bg-white/5 px-3 py-1 text-sm text-white/40 hover:bg-white/10"
-        >
-          ✕
-        </button>
+        <div className="absolute top-4 right-4 flex gap-2">
+          <button
+            onClick={onToggleFav}
+            className={`rounded-lg px-3 py-1 text-sm transition-colors ${isFav ? "bg-pink-600/20 text-pink-300" : "bg-white/5 text-white/40 hover:bg-white/10"}`}
+          >
+            {isFav ? "♥" : "♡"}
+          </button>
+          <button
+            onClick={onClose}
+            className="rounded-lg bg-white/5 px-3 py-1 text-sm text-white/40 hover:bg-white/10"
+          >
+            ✕
+          </button>
+        </div>
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-5">
@@ -181,6 +204,39 @@ function CharacterModal({
               </div>
             ))}
         </div>
+
+        {/* Favorites: memo & tags */}
+        {isFav && (
+          <div className="mt-4 rounded-xl border border-pink-500/20 bg-pink-950/10 p-3 space-y-3">
+            <textarea
+              value={memo}
+              onChange={(e) => onMemoChange(e.target.value)}
+              placeholder="메모 (예: 허들 빠름, 메인 캐릭)"
+              rows={2}
+              className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50"
+            />
+            <div>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {tags.map((tag) => (
+                  <span key={tag} className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/70">
+                    {tag}
+                    <button onClick={() => onTagsChange(tags.filter((t) => t !== tag))} className="text-white/30 hover:text-white/60">✕</button>
+                  </span>
+                ))}
+              </div>
+              <form onSubmit={(e) => { e.preventDefault(); const v = tagInput.trim(); if (v && !tags.includes(v)) { onTagsChange([...tags, v]); setTagInput(""); } }} className="flex gap-1.5">
+                <input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  placeholder="태그 추가..."
+                  maxLength={20}
+                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50"
+                />
+                <button type="submit" className="rounded-lg bg-white/5 px-2 py-1 text-[10px] text-white/40 hover:bg-white/10">+</button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -320,6 +376,7 @@ export function CharacterTable({
   const [compareIds, setCompareIds] = useState<number[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const toast = useToast();
+  const favs = useFavorites();
 
   // Close modals on Escape
   useEffect(() => {
@@ -349,11 +406,13 @@ export function CharacterTable({
     }
   }
 
+  const debouncedSearch = useDebouncedValue(search, 200);
+
   const filtered = useMemo(() => {
     let list = characters.filter((c) => c.isView);
     if (catFilter !== null) list = list.filter((c) => c.category === catFilter);
-    if (search.trim()) {
-      const q = search.trim().toLowerCase();
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.trim().toLowerCase();
       list = list.filter(
         (c) =>
           c.characterNm.toLowerCase().includes(q) ||
@@ -362,7 +421,7 @@ export function CharacterTable({
       );
     }
     return list;
-  }, [characters, catFilter, search]);
+  }, [characters, catFilter, debouncedSearch]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -409,7 +468,16 @@ export function CharacterTable({
     <div>
       {/* Character detail modal */}
       {selectedChar && (
-        <CharacterModal c={selectedChar} onClose={() => setSelectedId(null)} />
+        <CharacterModal
+          c={selectedChar}
+          onClose={() => setSelectedId(null)}
+          isFav={favs.isRunnerFav(selectedChar.id)}
+          onToggleFav={() => favs.toggleRunner(selectedChar.id)}
+          memo={favs.getRunner(selectedChar.id)?.memo ?? ""}
+          tags={favs.getRunner(selectedChar.id)?.tags ?? []}
+          onMemoChange={(m) => favs.updateRunnerMemo(selectedChar.id, m)}
+          onTagsChange={(t) => favs.updateRunnerTags(selectedChar.id, t)}
+        />
       )}
 
       {/* Compare modal */}
