@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import type { CostumeItem } from "@/lib/types";
 import { formatDate } from "@/lib/format";
 import { EmptyState } from "@/components/empty-state";
@@ -57,6 +58,16 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
     }
     return list;
   }, [costumes, yearFilter, search, sortBy]);
+
+  // Close modal on Escape
+  useEffect(() => {
+    if (selectedId === null) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setSelectedId(null);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [selectedId]);
 
   const selected = selectedId !== null ? costumes.find((c) => c.id === selectedId) : null;
 
@@ -117,6 +128,8 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
       {selected?.detail && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
           onClick={() => setSelectedId(null)}
         >
           <div
@@ -144,12 +157,13 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
                   key={item.itemId}
                   className="group rounded-xl border border-white/10 bg-white/[0.02] overflow-hidden"
                 >
-                  <div className="aspect-square overflow-hidden bg-white/5 relative">
-                    <img
+                  <div className="relative aspect-square overflow-hidden bg-white/5">
+                    <Image
                       src={item.imageUrl}
                       alt={item.itemSubject}
-                      className="h-full w-full object-contain p-2"
-                      loading="lazy"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 33vw"
+                      className="object-contain p-2"
                     />
                     {item.motionImageUrl && (
                       <video
@@ -217,12 +231,13 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
               onClick={() => setSelectedId(c.id)}
               className="card-hover group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left hover:border-teal-500/30 hover:bg-white/[0.03]"
             >
-              <div className="aspect-[4/3] overflow-hidden bg-white/5">
-                <img
+              <div className="relative aspect-[4/3] overflow-hidden bg-white/5">
+                <Image
                   src={c.thumbnail}
                   alt={c.subject}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover transition-transform group-hover:scale-105"
                 />
               </div>
               <div className="p-3">

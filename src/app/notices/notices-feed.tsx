@@ -43,8 +43,13 @@ export function NoticesFeed() {
 
   useEffect(() => {
     const ac = new AbortController();
+    let unmounted = false;
+    const timeout = setTimeout(() => ac.abort(), 8000);
     fetch(API, { signal: ac.signal })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((data) => {
         if (data.resCd === "0000") {
           setNotices(data.result.list);
@@ -52,9 +57,9 @@ export function NoticesFeed() {
           setError(true);
         }
       })
-      .catch(() => { if (!ac.signal.aborted) setError(true); })
-      .finally(() => { if (!ac.signal.aborted) setLoading(false); });
-    return () => ac.abort();
+      .catch(() => { if (!unmounted) setError(true); })
+      .finally(() => { clearTimeout(timeout); if (!unmounted) setLoading(false); });
+    return () => { unmounted = true; ac.abort(); clearTimeout(timeout); };
   }, []);
 
   const categorized = useMemo(

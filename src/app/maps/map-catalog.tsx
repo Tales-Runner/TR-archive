@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import type { MapItem, MapType } from "@/lib/types";
 import { formatDate, youtubeId } from "@/lib/format";
 import { EmptyState } from "@/components/empty-state";
@@ -59,6 +60,16 @@ export function MapCatalog({
     }
     return list;
   }, [maps, typeFilter, search, sortBy]);
+
+  // Close modal on Escape
+  useEffect(() => {
+    if (selectedId === null) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setSelectedId(null);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [selectedId]);
 
   const selected = selectedId !== null ? maps.find((m) => m.id === selectedId) : null;
 
@@ -122,6 +133,8 @@ export function MapCatalog({
       {selected && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
           onClick={() => setSelectedId(null)}
         >
           <div
@@ -153,6 +166,7 @@ export function MapCatalog({
                 src={selected.thumbnail}
                 alt={selected.subject}
                 className="mb-4 w-full rounded-xl"
+                loading="lazy"
               />
             )}
 
@@ -211,12 +225,13 @@ export function MapCatalog({
               onClick={() => setSelectedId(m.id)}
               className="card-hover group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left hover:border-teal-500/30 hover:bg-white/[0.03]"
             >
-              <div className="aspect-video overflow-hidden bg-white/5">
-                <img
+              <div className="relative aspect-video overflow-hidden bg-white/5">
+                <Image
                   src={m.thumbnail}
                   alt={m.subject}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform group-hover:scale-105"
                 />
               </div>
               <div className="p-3">

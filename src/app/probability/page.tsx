@@ -5,8 +5,12 @@ import probabilityJson from "@/data/probability.json";
 import type { ProbabilityData } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "변경권 계산기 - 엘림스의 비공식 아카이브",
+  title: "변경권 계산기 - 엘림스 스마일의 비공식 아카이브",
   description: "테일즈런너 변경권 확률 조회 및 기대값 시뮬레이션",
+  openGraph: {
+    title: "변경권 계산기 - 엘림스 스마일의 비공식 아카이브",
+    description: "테일즈런너 변경권 확률 조회 및 기대값 시뮬레이션",
+  },
 };
 
 export default function ProbabilityPage() {

@@ -91,14 +91,14 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
           )}
 
           {/* Content */}
-          {selected.partList[activePart] && (
-            <div
-              className="guide-content p-3 sm:p-5"
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(selected.partList[activePart].contents),
-              }}
-            />
-          )}
+          {selected.partList[activePart] && (() => {
+            try {
+              const html = DOMPurify.sanitize(selected.partList[activePart].contents ?? "");
+              return <div className="guide-content p-3 sm:p-5" dangerouslySetInnerHTML={{ __html: html }} />;
+            } catch {
+              return <div className="p-5 text-sm text-white/40">콘텐츠를 표시할 수 없습니다</div>;
+            }
+          })()}
         </div>
       </div>
     );

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import { NavMenu, type NavGroup } from "./nav-menu";
 import { GlobalSearch, type SearchEntry } from "./global-search";
 import { MaintenanceBanner } from "./maintenance-banner";
 import { ToastProvider } from "@/components/toast";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { ErrorBoundary } from "@/components/error-boundary";
 import charactersJson from "@/data/characters.json";
 import mapsJson from "@/data/maps.json";
 import costumesJson from "@/data/costumes.json";
@@ -35,14 +37,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "엘림스의 비공식 아카이브 - 테일즈런너",
+  title: "엘림스 스마일의 비공식 아카이브 - 테일즈런너",
   description:
     "테일즈런너 캐릭터 능력치 비교, 변경권 확률, 맵 도감, 코스튬, 가이드, 스토리 뷰어",
   openGraph: {
-    title: "엘림스의 비공식 아카이브",
+    title: "엘림스 스마일의 비공식 아카이브",
     description:
       "내가 정리해 둔 비공식 아카이브다. 공식엔 없는 것들도 있지.",
-    siteName: "엘림스의 비공식 아카이브",
+    siteName: "엘림스 스마일의 비공식 아카이브",
     type: "website",
     images: [
       {
@@ -55,7 +57,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "엘림스의 비공식 아카이브",
+    title: "엘림스 스마일의 비공식 아카이브",
     description:
       "내가 정리해 둔 비공식 아카이브다. 공식엔 없는 것들도 있지.",
   },
@@ -117,15 +119,15 @@ export default function RootLayout({
               href="/"
               className="flex items-center gap-2 text-lg font-bold text-teal-300 tracking-tight"
             >
-              <img
+              <Image
                 src="https://trimage.rhaon.co.kr/images/trintro/character/circularImageUrl/6awBZmzKmUkV8JVC43yMRH.png"
                 alt=""
                 width={28}
                 height={28}
                 className="rounded-full ring-1 ring-teal-500/30"
               />
-              <span className="hidden sm:inline">엘림스의 비공식 아카이브</span>
-              <span className="sm:hidden">엘림스 아카이브</span>
+              <span className="hidden sm:inline">엘림스 스마일의 비공식 아카이브</span>
+              <span className="sm:hidden">엘림스 스마일 아카이브</span>
             </Link>
             <NavMenu groups={NAV_GROUPS} />
             <div className="ml-auto">
@@ -133,7 +135,9 @@ export default function RootLayout({
             </div>
           </div>
         </header>
-        <main className="flex-1 flex flex-col">{children}</main>
+        <main className="flex-1 flex flex-col">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
         <footer className="border-t border-white/5 bg-[#0f0b1a] py-6 text-center text-xs text-white/25">
           비공식 아카이브 &middot; 감정 에너지로 빚어낸 기록들 &middot;{" "}
           <a
@@ -144,7 +148,7 @@ export default function RootLayout({
           >
             공식 홈페이지
           </a>
-          {" "}&middot; 엘림스의 비공식 아카이브
+          {" "}&middot; 엘림스 스마일의 비공식 아카이브
         </footer>
         <ScrollToTop />
         </ToastProvider>

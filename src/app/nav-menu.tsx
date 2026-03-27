@@ -93,6 +93,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
         onClick={() => setMobileOpen(!mobileOpen)}
         className="md:hidden rounded-md p-2 text-white/50 hover:bg-white/5 hover:text-white/80"
         aria-label="메뉴"
+        aria-expanded={mobileOpen}
       >
         <svg
           width="20"

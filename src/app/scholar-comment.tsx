@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ELIMS_CIRCULAR, R_CIRCULAR, KAI_CIRCULAR } from "@/lib/constants";
 
 const CHARS = {
@@ -50,7 +51,7 @@ interface SimpleProps {
 function Avatar({ char, size }: { char: typeof CHARS[CharKey]; size: number }) {
   if (char.img) {
     return (
-      <img
+      <Image
         src={char.img}
         alt={char.name}
         width={size}

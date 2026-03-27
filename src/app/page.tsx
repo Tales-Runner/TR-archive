@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { VNScene } from "./vn-scene";
 import mapsJson from "@/data/maps.json";
 import costumesJson from "@/data/costumes.json";
@@ -54,7 +55,7 @@ export default function Home() {
 
         {/* Character */}
         <div className="relative z-10 mb-0 translate-y-4">
-          <img
+          <Image
             src={ELIMS_MAIN}
             alt="엘림스 스마일"
             width={320}
@@ -62,6 +63,7 @@ export default function Home() {
             style={{ maxWidth: "min(320px, 70vw)" }}
             className="drop-shadow-[0_0_40px_rgba(45,212,191,0.25)] select-none"
             draggable={false}
+            priority
           />
         </div>
 
@@ -79,7 +81,7 @@ export default function Home() {
             <div className="space-y-2">
               {recentMaps.map((m) => (
                 <Link key={m.id} href="/maps" className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors">
-                  <img src={m.thumbnail} alt="" className="w-12 h-8 rounded object-cover shrink-0" />
+                  <Image src={m.thumbnail} alt="" width={48} height={32} className="w-12 h-8 rounded object-cover shrink-0" />
                   <div className="min-w-0">
                     <div className="text-sm text-white/80 truncate">{m.subject}</div>
                     <div className="text-[10px] text-white/30">{formatDate(m.openDt)}</div>
@@ -95,7 +97,7 @@ export default function Home() {
             <div className="space-y-2">
               {recentCostumes.map((c) => (
                 <Link key={c.id} href="/closet" className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors">
-                  <img src={c.thumbnail} alt="" className="w-12 h-8 rounded object-cover shrink-0" />
+                  <Image src={c.thumbnail} alt="" width={48} height={32} className="w-12 h-8 rounded object-cover shrink-0" />
                   <div className="min-w-0">
                     <div className="text-sm text-white/80 truncate">{c.subject}</div>
                     <div className="text-[10px] text-white/30">{formatDate(c.openDt)}</div>
@@ -111,7 +113,7 @@ export default function Home() {
             <div className="space-y-2">
               {recentStories.map((s) => (
                 <Link key={s.id} href="/stories" className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors">
-                  <img src={s.thumbnail} alt="" className="w-12 h-8 rounded object-cover shrink-0" />
+                  <Image src={s.thumbnail} alt="" width={48} height={32} className="w-12 h-8 rounded object-cover shrink-0" />
                   <div className="min-w-0">
                     <div className="text-sm text-white/80 truncate">{s.subject}</div>
                     <div className="text-[10px] text-white/30">{formatDate(s.openDt)}</div>

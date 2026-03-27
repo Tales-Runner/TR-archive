@@ -5,8 +5,12 @@ import charactersJson from "@/data/characters.json";
 import type { Character } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "캐릭터 비교 - 엘림스의 비공식 아카이브",
+  title: "캐릭터 비교 - 엘림스 스마일의 비공식 아카이브",
   description: "테일즈런너 35캐릭터 스탯·모션 시간 비교",
+  openGraph: {
+    title: "캐릭터 비교 - 엘림스 스마일의 비공식 아카이브",
+    description: "테일즈런너 35캐릭터 스탯·모션 시간 비교",
+  },
 };
 
 export default function CharactersPage() {

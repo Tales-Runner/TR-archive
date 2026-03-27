@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { Character, SortKey, SortDir } from "@/lib/types";
 import { CHARACTER_CATEGORY, CHARACTER_CATEGORY_LABEL, STAT_MAX, STAT_TOTAL_MAX } from "@/lib/constants";
 import { useToast } from "@/components/toast";
 import { Tooltip } from "@/components/tooltip";
 import { EmptyState } from "@/components/empty-state";
+import Image from "next/image";
 
 const STAT_COLS: { key: SortKey; label: string; tip: string }[] = [
   { key: "maximumSpeed", label: "속도", tip: "최고 이동 속도" },
@@ -77,6 +78,8 @@ function CharacterModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      role="dialog"
+      aria-modal="true"
       onClick={onClose}
     >
       <div
@@ -92,7 +95,7 @@ function CharacterModal({
 
         {/* Header */}
         <div className="flex items-center gap-4 mb-5">
-          <img
+          <Image
             src={c.mainImageUrl}
             alt={c.characterNm}
             width={80}
@@ -200,6 +203,8 @@ function CompareModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      role="dialog"
+      aria-modal="true"
       onClick={onClose}
     >
       <div
@@ -221,7 +226,7 @@ function CompareModal({
           <div />
           {chars.map((c) => (
             <div key={c.id} className="text-center">
-              <img
+              <Image
                 src={c.circularImageUrl}
                 alt={c.characterNm}
                 width={48}
@@ -315,6 +320,19 @@ export function CharacterTable({
   const [compareIds, setCompareIds] = useState<number[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const toast = useToast();
+
+  // Close modals on Escape
+  useEffect(() => {
+    if (selectedId === null && !showCompare) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        if (showCompare) setShowCompare(false);
+        else setSelectedId(null);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [selectedId, showCompare]);
 
   function toggleCompare(id: number, e: React.MouseEvent) {
     e.stopPropagation();
@@ -410,7 +428,7 @@ export function CharacterTable({
             const c = characters.find((x) => x.id === id);
             return c ? (
               <span key={id} className="flex items-center gap-1 rounded-full bg-white/10 pl-1 pr-2 py-0.5">
-                <img src={c.circularImageUrl} alt="" width={18} height={18} className="rounded-full" />
+                <Image src={c.circularImageUrl} alt="" width={18} height={18} className="rounded-full" />
                 <span className="text-xs text-white/70">{c.characterNm}</span>
                 <button onClick={() => setCompareIds((p) => p.filter((x) => x !== id))} className="text-white/30 hover:text-white/60 text-[10px] ml-0.5">✕</button>
               </span>
@@ -518,13 +536,12 @@ export function CharacterTable({
                     >
                       {compareIds.includes(c.id) ? "✓" : ""}
                     </button>
-                    <img
+                    <Image
                       src={c.circularImageUrl}
                       alt={c.characterNm}
                       width={30}
                       height={30}
                       className="rounded-full ring-1 ring-white/10"
-                      loading="lazy"
                     />
                     <div>
                       <div className="leading-tight text-white/90">

@@ -5,8 +5,12 @@ import guidesJson from "@/data/guides.json";
 import type { GuideItem } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "게임 가이드 - 엘림스의 비공식 아카이브",
+  title: "게임 가이드 - 엘림스 스마일의 비공식 아카이브",
   description: "테일즈런너 공식 게임 가이드 모음",
+  openGraph: {
+    title: "게임 가이드 - 엘림스 스마일의 비공식 아카이브",
+    description: "테일즈런너 공식 게임 가이드 모음",
+  },
 };
 
 export default function GuidesPage() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import Image from "next/image";
 import type { StoryItem } from "@/lib/types";
 import { formatDate, youtubeId } from "@/lib/format";
 import { STORY_CATEGORY, STORY_CATEGORY_LABEL, SITE_BASE } from "@/lib/constants";
@@ -168,7 +169,7 @@ function StoryViewer({
           >
             {seriesEntries.map((s) => (
               <option key={s.name} value={s.name}>
-                {s.name} ({s.episodes.length}부)
+                {s.name}
               </option>
             ))}
           </select>
@@ -376,12 +377,13 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
                     }
                     className="card-hover group rounded-xl border border-white/10 bg-surface-card overflow-hidden text-left hover:border-teal-500/30 hover:bg-white/[0.03]"
                   >
-                    <div className="aspect-[3/4] overflow-hidden bg-white/5">
-                      <img
+                    <div className="relative aspect-[3/4] overflow-hidden bg-white/5">
+                      <Image
                         src={s.thumbnail}
                         alt={s.subject}
-                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                        loading="lazy"
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover transition-transform group-hover:scale-105"
                       />
                     </div>
                     <div className="p-3">

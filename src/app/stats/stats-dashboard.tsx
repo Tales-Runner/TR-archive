@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import type { Character, MapItem, CostumeItem, StoryItem, ProbabilityData } from "@/lib/types";
 import { getLevelLabel, getLevelRank, MAP_TYPE_NAMES } from "@/lib/constants";
 
@@ -50,7 +51,7 @@ function CharCard({ c, badge, stat, badgeColor }: { c: Character; badge: string;
   return (
     <div className="relative rounded-xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent p-4 text-center overflow-hidden">
       <div className={`absolute top-2 right-2 rounded-full px-2 py-0.5 text-[9px] font-bold ${badgeColor ?? "bg-teal-600/30 text-teal-300"}`}>{badge}</div>
-      <img src={c.circularImageUrl} alt={c.characterNm} width={56} height={56} className="mx-auto rounded-full ring-2 ring-white/10 mb-2" />
+      <Image src={c.circularImageUrl} alt={c.characterNm} width={56} height={56} className="mx-auto rounded-full ring-2 ring-white/10 mb-2" />
       <div className="text-sm font-bold text-white/90">{c.characterNm}</div>
       <div className="text-[11px] text-teal-400">{c.catchPhrase}</div>
       <div className="text-xs text-white/40 mt-1">{stat}</div>
@@ -64,13 +65,13 @@ function VsCard({ left, right, label }: { left: { name: string; img: string; val
       <div className="text-[10px] font-bold text-white/30 text-center mb-3">{label}</div>
       <div className="flex items-center gap-3">
         <div className="flex-1 text-center">
-          <img src={left.img} alt="" width={40} height={40} className="mx-auto rounded-full ring-1 ring-white/10 mb-1" />
+          <Image src={left.img} alt="" width={40} height={40} className="mx-auto rounded-full ring-1 ring-white/10 mb-1" />
           <div className="text-xs font-bold text-white/80">{left.name}</div>
           <div className="text-sm font-bold text-teal-300 tabular-nums">{left.value}</div>
         </div>
         <div className="text-lg font-black text-white/10">VS</div>
         <div className="flex-1 text-center">
-          <img src={right.img} alt="" width={40} height={40} className="mx-auto rounded-full ring-1 ring-white/10 mb-1" />
+          <Image src={right.img} alt="" width={40} height={40} className="mx-auto rounded-full ring-1 ring-white/10 mb-1" />
           <div className="text-xs font-bold text-white/80">{right.name}</div>
           <div className="text-sm font-bold text-amber-300 tabular-nums">{right.value}</div>
         </div>
@@ -167,12 +168,18 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
     });
     const sortedByTotal = [...withTotal].sort((a, b) => a.total - b.total);
 
-    // Per-motion bests
+    // Per-motion bests (single-pass O(n) per motion instead of O(n log n) sort)
     const perMotion = MOTION_KEYS.map((m) => {
-      const sorted = [...visibleChars].sort((a, b) =>
-        parseFloat(a[m.key as keyof Character] as string) - parseFloat(b[m.key as keyof Character] as string)
-      );
-      return { ...m, best: sorted[0], worst: sorted[sorted.length - 1] };
+      let best = visibleChars[0];
+      let worst = visibleChars[0];
+      let bestVal = parseFloat(best[m.key as keyof Character] as string);
+      let worstVal = bestVal;
+      for (let i = 1; i < visibleChars.length; i++) {
+        const val = parseFloat(visibleChars[i][m.key as keyof Character] as string);
+        if (val < bestVal) { best = visibleChars[i]; bestVal = val; }
+        if (val > worstVal) { worst = visibleChars[i]; worstVal = val; }
+      }
+      return { ...m, best, worst };
     });
 
     return { sortedByTotal, perMotion };
@@ -352,7 +359,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {chars.map((c) => (
-                        <img key={c.id} src={c.circularImageUrl} alt={c.characterNm} title={c.characterNm} width={22} height={22} className="rounded-full ring-1 ring-white/10" />
+                        <Image key={c.id} src={c.circularImageUrl} alt={c.characterNm} title={c.characterNm} width={22} height={22} className="rounded-full ring-1 ring-white/10" />
                       ))}
                     </div>
                   </div>
@@ -367,7 +374,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
               {motionRankings.sortedByTotal.slice(0, 10).map((entry, i) => (
                 <div key={entry.c.id} className="flex items-center gap-3">
                   <span className={`w-5 text-right text-xs font-bold tabular-nums ${i < 3 ? "text-emerald-400" : "text-white/30"}`}>{i + 1}</span>
-                  <img src={entry.c.circularImageUrl} alt="" width={24} height={24} className="rounded-full shrink-0" />
+                  <Image src={entry.c.circularImageUrl} alt="" width={24} height={24} className="rounded-full shrink-0" />
                   <span className="text-sm text-white/80 w-24 truncate">{entry.c.characterNm}</span>
                   <Bar value={1 / entry.total} max={1 / motionRankings.sortedByTotal[0].total} color="bg-emerald-500" />
                   <span className="text-sm font-bold text-white/70 tabular-nums w-14 text-right">{entry.total.toFixed(2)}s</span>
@@ -386,12 +393,12 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                     <div className="text-[9px] text-white/25">{m.desc}</div>
                   </div>
                   <div className="flex-1 flex items-center gap-2 text-xs">
-                    <img src={m.best.circularImageUrl} alt="" width={20} height={20} className="rounded-full" />
+                    <Image src={m.best.circularImageUrl} alt="" width={20} height={20} className="rounded-full" />
                     <span className="text-emerald-400 font-bold tabular-nums">{parseFloat(m.best[m.key as keyof Character] as string).toFixed(2)}s</span>
                   </div>
                   <div className="flex-1 flex items-center gap-2 text-xs justify-end">
                     <span className="text-red-400/70 tabular-nums">{parseFloat(m.worst[m.key as keyof Character] as string).toFixed(2)}s</span>
-                    <img src={m.worst.circularImageUrl} alt="" width={20} height={20} className="rounded-full" />
+                    <Image src={m.worst.circularImageUrl} alt="" width={20} height={20} className="rounded-full" />
                   </div>
                 </div>
               ))}
@@ -413,7 +420,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                     <div className="flex flex-wrap gap-1.5">
                       {chars.map((c) => (
                         <div key={c.id} className="flex items-center gap-1 rounded-full bg-white/5 pl-0.5 pr-2 py-0.5" title={c.characterNm}>
-                          <img src={c.circularImageUrl} alt={c.characterNm} width={20} height={20} className="rounded-full" />
+                          <Image src={c.circularImageUrl} alt={c.characterNm} width={20} height={20} className="rounded-full" />
                           <span className="text-[10px] text-white/50">{c.characterNm}</span>
                         </div>
                       ))}
@@ -438,7 +445,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {chars.map((c) => (
-                          <img key={c.id} src={c.circularImageUrl} alt={c.characterNm} title={c.characterNm} width={22} height={22} className="rounded-full ring-1 ring-white/10" />
+                          <Image key={c.id} src={c.circularImageUrl} alt={c.characterNm} title={c.characterNm} width={22} height={22} className="rounded-full ring-1 ring-white/10" />
                         ))}
                       </div>
                     </div>

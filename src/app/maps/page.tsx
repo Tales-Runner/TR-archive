@@ -7,8 +7,12 @@ import mapTypesJson from "@/data/map-types.json";
 import type { MapItem, MapType } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "맵 백과 - 엘림스의 비공식 아카이브",
+  title: "맵 백과 - 엘림스 스마일의 비공식 아카이브",
   description: "테일즈런너 전체 맵 목록 및 상세 정보",
+  openGraph: {
+    title: "맵 백과 - 엘림스 스마일의 비공식 아카이브",
+    description: "테일즈런너 전체 맵 목록 및 상세 정보",
+  },
 };
 
 export default function MapsPage() {
@@ -26,7 +30,19 @@ export default function MapsPage() {
           { char: "kai", text: "...우리 아빠가 만든 것도 있어." },
         ]}
       />
-      <Suspense><MapCatalog maps={maps} types={types} /></Suspense>
+      <Suspense fallback={
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-white/10 bg-surface-card overflow-hidden">
+              <div className="aspect-video skeleton" />
+              <div className="p-3 space-y-2">
+                <div className="h-4 w-3/4 skeleton" />
+                <div className="h-3 w-1/2 skeleton" />
+              </div>
+            </div>
+          ))}
+        </div>
+      }><MapCatalog maps={maps} types={types} /></Suspense>
     </div>
   );
 }

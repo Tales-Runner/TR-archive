@@ -5,8 +5,12 @@ import storiesJson from "@/data/stories.json";
 import type { StoryItem } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "스토리 - 엘림스의 비공식 아카이브",
+  title: "스토리 - 엘림스 스마일의 비공식 아카이브",
   description: "테일즈런너 스토리 타임라인",
+  openGraph: {
+    title: "스토리 - 엘림스 스마일의 비공식 아카이브",
+    description: "테일즈런너 스토리 타임라인",
+  },
 };
 
 export default function StoriesPage() {

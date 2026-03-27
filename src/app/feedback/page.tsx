@@ -3,8 +3,12 @@ import { FeedbackForm } from "./feedback-form";
 import { ScholarComment } from "../scholar-comment";
 
 export const metadata: Metadata = {
-  title: "건의함 - 엘림스의 비공식 아카이브",
+  title: "건의함 - 엘림스 스마일의 비공식 아카이브",
   description: "아카이브에 대한 건의, 버그 제보, 데이터 오류 신고",
+  openGraph: {
+    title: "건의함 - 엘림스 스마일의 비공식 아카이브",
+    description: "아카이브에 대한 건의, 버그 제보, 데이터 오류 신고",
+  },
 };
 
 export default function FeedbackPage() {

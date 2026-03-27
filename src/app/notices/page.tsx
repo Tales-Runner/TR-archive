@@ -2,8 +2,12 @@ import type { Metadata } from "next";
 import { NoticesFeed } from "./notices-feed";
 
 export const metadata: Metadata = {
-  title: "공지사항 - 엘림스의 비공식 아카이브",
+  title: "공지사항 - 엘림스 스마일의 비공식 아카이브",
   description: "테일즈런너 공지사항 및 이벤트",
+  openGraph: {
+    title: "공지사항 - 엘림스 스마일의 비공식 아카이브",
+    description: "테일즈런너 공지사항 및 이벤트",
+  },
 };
 
 export default function NoticesPage() {
