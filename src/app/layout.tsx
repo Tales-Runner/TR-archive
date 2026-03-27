@@ -126,8 +126,7 @@ export default function RootLayout({
                 height={28}
                 className="rounded-full ring-1 ring-teal-500/30"
               />
-              <span className="hidden sm:inline">엘림스 스마일의 비공식 아카이브</span>
-              <span className="sm:hidden">엘림스 스마일 아카이브</span>
+              엘림스 스마일의 비공식 아카이브
             </Link>
             <NavMenu groups={NAV_GROUPS} />
             <div className="ml-auto">
