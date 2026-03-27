@@ -204,12 +204,11 @@ function StoryViewer({
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0812]">
       {/* ── Progress bar ── */}
-      <div className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-white/5">
-        <div
-          className="h-full bg-teal-500 transition-[width] duration-150"
-          style={{ width: `${scrollProgress * 100}%` }}
-        />
-      </div>
+      {scrollProgress > 0 && (
+        <div className="fixed top-0 left-0 z-[60] h-[2px]" style={{ width: `${scrollProgress * 100}%` }}>
+          <div className="h-full w-full bg-teal-500" />
+        </div>
+      )}
 
       {/* ── Top bar ── */}
       <div className={`shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-2 ${barClass}`}>
