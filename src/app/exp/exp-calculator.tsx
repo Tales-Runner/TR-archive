@@ -59,6 +59,9 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
   // Fish EXP
   const [fishExp, setFishExp] = useState(0);
 
+  // Average EXP per game
+  const [expPerGame, setExpPerGame] = useState(0);
+
   const currentLevel = levelFromRank(curRankIdx, curColorIdx);
   const targetLevel = levelFromRank(tgtRankIdx, tgtColorIdx);
 
@@ -108,8 +111,10 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
       }
     }
 
-    return { totalNeeded, remaining, segments };
-  }, [levels, currentLevel, currentExp, targetLevel]);
+    const gamesNeeded = expPerGame > 0 ? Math.ceil(remaining / expPerGame) : null;
+
+    return { totalNeeded, remaining, segments, gamesNeeded };
+  }, [levels, currentLevel, currentExp, targetLevel, expPerGame]);
 
   function colorsForRank(rankIdx: number) {
     const rank = LEVEL_RANKS[rankIdx];
@@ -190,6 +195,22 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
         )}
       </div>
 
+      {/* Average EXP per game */}
+      <div className="rounded-xl border border-white/10 bg-surface-card p-4">
+        <h3 className="text-sm font-medium text-white/50 mb-3">게임당 평균 경험치</h3>
+        <input
+          type="number"
+          min={0}
+          value={expPerGame || ""}
+          onChange={(e) => setExpPerGame(Math.max(0, Number(e.target.value)))}
+          placeholder="한 판당 얻는 평균 EXP 입력"
+          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base font-bold text-white/90 tabular-nums outline-none focus:border-teal-500/50 placeholder:text-white/20 placeholder:font-normal sm:text-sm sm:py-2.5"
+        />
+        <p className="mt-1.5 text-[11px] text-white/25">
+          입력 시 목표까지 필요한 게임 수를 계산합니다.
+        </p>
+      </div>
+
       {/* Target level */}
       <div className="rounded-xl border border-white/10 bg-surface-card p-4">
         <h3 className="text-sm font-medium text-white/50 mb-3">목표 레벨</h3>
@@ -247,6 +268,19 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
               </div>
             </div>
           </div>
+
+          {result.gamesNeeded !== null && (
+            <div className="mb-5 rounded-lg bg-teal-950/30 border border-teal-500/20 px-4 py-3">
+              <div className="text-xs text-white/40">필요한 게임 수</div>
+              <div className="text-2xl font-bold text-teal-300 tabular-nums">
+                {result.gamesNeeded.toLocaleString()}
+                <span className="text-sm font-normal text-white/40 ml-1">판</span>
+              </div>
+              <div className="text-xs text-white/25 mt-0.5">
+                게임당 {expPerGame.toLocaleString()} EXP 기준
+              </div>
+            </div>
+          )}
 
           {result.totalNeeded > 0 && (
             <div className="mb-5">
