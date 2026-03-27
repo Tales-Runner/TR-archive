@@ -65,10 +65,20 @@ export const metadata: Metadata = {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    label: "분석",
+    label: "세계관",
     items: [
+      { href: "/stories", label: "스토리" },
+      { href: "/lore", label: "연대기" },
+      { href: "/relationships", label: "인물 관계도" },
+    ],
+  },
+  {
+    label: "도감",
+    items: [
+      { href: "/closet", label: "코스튬" },
       { href: "/characters", label: "런너 능력치" },
-      { href: "/stats", label: "통계" },
+      { href: "/maps", label: "맵 도감" },
+      { href: "/guides", label: "가이드" },
     ],
   },
   {
@@ -76,28 +86,13 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/probability", label: "변경권 확률" },
       { href: "/exp", label: "경험치 계산기" },
-    ],
-  },
-  {
-    label: "세계관",
-    items: [
-      { href: "/lore", label: "연대기" },
-      { href: "/relationships", label: "인물 관계도" },
-    ],
-  },
-  {
-    label: "아카이브",
-    items: [
-      { href: "/maps", label: "맵 도감" },
-      { href: "/closet", label: "코스튬" },
-      { href: "/guides", label: "가이드" },
-      { href: "/stories", label: "스토리" },
-      { href: "/notices", label: "공지사항" },
+      { href: "/stats", label: "통계" },
     ],
   },
   {
     label: "커뮤니티",
     items: [
+      { href: "/notices", label: "공지사항" },
       { href: "/feedback", label: "건의함" },
     ],
   },
