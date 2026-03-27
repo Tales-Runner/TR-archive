@@ -78,7 +78,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
         <div className="flex overflow-x-auto rounded-lg border border-white/10 text-sm">
           <button
             onClick={() => setYearFilter(null)}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${
               yearFilter === null
                 ? "bg-teal-600 text-white font-medium"
                 : "bg-white/5 text-white/40 hover:bg-white/10"
@@ -90,7 +90,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
             <button
               key={y}
               onClick={() => setYearFilter(y)}
-              className={`px-3 py-1.5 transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${
                 yearFilter === y
                   ? "bg-teal-600 text-white font-medium"
                   : "bg-white/5 text-white/40 hover:bg-white/10"

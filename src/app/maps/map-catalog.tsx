@@ -83,7 +83,7 @@ export function MapCatalog({
         <div className="flex overflow-x-auto rounded-lg border border-white/10 text-sm">
           <button
             onClick={() => setTypeFilter(null)}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${
               typeFilter === null
                 ? "bg-teal-600 text-white font-medium"
                 : "bg-white/5 text-white/40 hover:bg-white/10"
@@ -95,7 +95,7 @@ export function MapCatalog({
             <button
               key={t.codeId}
               onClick={() => setTypeFilter(t.codeId)}
-              className={`px-3 py-1.5 transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${
                 typeFilter === t.codeId
                   ? "bg-teal-600 text-white font-medium"
                   : "bg-white/5 text-white/40 hover:bg-white/10"

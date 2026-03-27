@@ -117,7 +117,7 @@ export function NoticesFeed() {
             <button
               key={cat}
               onClick={() => setCatFilter(cat)}
-              className={`px-3 py-1.5 transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${
                 catFilter === cat
                   ? "bg-teal-600 text-white font-medium"
                   : "bg-white/5 text-white/40 hover:bg-white/10"

@@ -265,7 +265,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`shrink-0 px-4 py-2 font-medium transition-colors ${
+            className={`shrink-0 whitespace-nowrap px-4 py-2 font-medium transition-colors ${
               tab === t.id ? "bg-teal-600 text-white" : "bg-white/5 text-white/40 hover:bg-white/10"
             }`}
           >
@@ -277,18 +277,18 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       {/* ── 한눈에 보기 ──────────────────────────── */}
       {tab === "overview" && (
         <div className="space-y-4 stagger-grid">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-xl border border-teal-500/20 bg-gradient-to-br from-teal-950/40 to-transparent p-4 text-center">
-              <div className="text-3xl font-black text-teal-300 tabular-nums">{visibleChars.length}</div>
-              <div className="text-xs text-white/40">플레이 캐릭터</div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="rounded-xl border border-teal-500/20 bg-gradient-to-br from-teal-950/40 to-transparent p-3 sm:p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-black text-teal-300 tabular-nums">{visibleChars.length}</div>
+              <div className="text-[10px] sm:text-xs text-white/40">플레이 캐릭터</div>
             </div>
-            <div className="rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-950/40 to-transparent p-4 text-center">
-              <div className="text-3xl font-black text-blue-300 tabular-nums">{maps.length}</div>
-              <div className="text-xs text-white/40">맵</div>
+            <div className="rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-950/40 to-transparent p-3 sm:p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-black text-blue-300 tabular-nums">{maps.length}</div>
+              <div className="text-[10px] sm:text-xs text-white/40">맵</div>
             </div>
-            <div className="rounded-xl border border-pink-500/20 bg-gradient-to-br from-pink-950/40 to-transparent p-4 text-center">
-              <div className="text-3xl font-black text-pink-300 tabular-nums">{stories.length}</div>
-              <div className="text-xs text-white/40">스토리</div>
+            <div className="rounded-xl border border-pink-500/20 bg-gradient-to-br from-pink-950/40 to-transparent p-3 sm:p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-black text-pink-300 tabular-nums">{stories.length}</div>
+              <div className="text-[10px] sm:text-xs text-white/40">스토리</div>
             </div>
           </div>
 
@@ -465,22 +465,22 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       {/* ── 콘텐츠 ──────────────────────────────── */}
       {tab === "content" && (
         <div className="space-y-6 stagger-grid">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="rounded-xl border border-red-500/20 bg-gradient-to-br from-red-950/30 to-transparent p-4 text-center">
-              <div className="text-2xl font-black text-red-300 tabular-nums">{maps.length}</div>
-              <div className="text-xs text-white/40">맵</div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+            <div className="rounded-xl border border-red-500/20 bg-gradient-to-br from-red-950/30 to-transparent p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-black text-red-300 tabular-nums">{maps.length}</div>
+              <div className="text-[10px] sm:text-xs text-white/40">맵</div>
             </div>
-            <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/30 to-transparent p-4 text-center">
-              <div className="text-2xl font-black text-emerald-300 tabular-nums">{storyStats.webtoon}</div>
-              <div className="text-xs text-white/40">웹툰</div>
+            <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-950/30 to-transparent p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-black text-emerald-300 tabular-nums">{storyStats.webtoon}</div>
+              <div className="text-[10px] sm:text-xs text-white/40">웹툰</div>
             </div>
-            <div className="rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-950/30 to-transparent p-4 text-center">
-              <div className="text-2xl font-black text-blue-300 tabular-nums">{storyStats.video}</div>
-              <div className="text-xs text-white/40">영상</div>
+            <div className="rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-950/30 to-transparent p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-black text-blue-300 tabular-nums">{storyStats.video}</div>
+              <div className="text-[10px] sm:text-xs text-white/40">영상</div>
             </div>
-            <div className="rounded-xl border border-pink-500/20 bg-gradient-to-br from-pink-950/30 to-transparent p-4 text-center">
-              <div className="text-2xl font-black text-pink-300 tabular-nums">{costumes.length}</div>
-              <div className="text-xs text-white/40">코스튬</div>
+            <div className="rounded-xl border border-pink-500/20 bg-gradient-to-br from-pink-950/30 to-transparent p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-black text-pink-300 tabular-nums">{costumes.length}</div>
+              <div className="text-[10px] sm:text-xs text-white/40">코스튬</div>
             </div>
           </div>
 

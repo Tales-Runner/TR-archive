@@ -490,6 +490,7 @@ export function CharacterTable({
       </div>
 
       {/* Table */}
+      <p className="mb-2 text-[10px] text-white/20 sm:hidden">← 좌우로 스크롤하세요 →</p>
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface-card">
         <table className="w-full text-sm">
           <thead>

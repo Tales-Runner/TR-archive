@@ -78,7 +78,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
                 <button
                   key={part.partId}
                   onClick={() => setActivePart(i)}
-                  className={`shrink-0 px-4 py-2 text-sm transition-colors ${
+                  className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm transition-colors ${
                     i === activePart
                       ? "border-b-2 border-teal-500 text-teal-300 font-medium"
                       : "text-white/40 hover:text-white/60"
@@ -111,7 +111,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
         <div className="flex overflow-x-auto rounded-lg border border-white/10 text-sm">
           <button
             onClick={() => setCatFilter(null)}
-            className={`px-3 py-1.5 transition-colors ${
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${
               catFilter === null
                 ? "bg-teal-600 text-white font-medium"
                 : "bg-white/5 text-white/40 hover:bg-white/10"
@@ -123,7 +123,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
             <button
               key={cat}
               onClick={() => setCatFilter(cat)}
-              className={`px-3 py-1.5 transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${
                 catFilter === cat
                   ? "bg-teal-600 text-white font-medium"
                   : "bg-white/5 text-white/40 hover:bg-white/10"

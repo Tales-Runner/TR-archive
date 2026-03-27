@@ -112,7 +112,7 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
           <button
             key={g}
             onClick={() => handleGroupChange(g)}
-            className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+            className={`shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm transition-colors ${
               selectedGroup === g
                 ? "border-teal-500 bg-teal-600 text-white"
                 : "border-white/10 bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"
@@ -143,7 +143,7 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
 
       {/* Probability table */}
       {currentItem && (
-        <div className="rounded-xl border border-white/10 bg-surface-card overflow-hidden">
+        <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface-card overflow-hidden">
           <div className="border-b border-white/10 bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-white/70">
             {currentItem.itemNm} — 확률표
           </div>
@@ -234,7 +234,7 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
                 <h4 className="text-xs font-medium text-white/40 mb-2">
                   횟수별 누적 확률
                 </h4>
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-xs">
                   {[1, 5, 10, 20, 50].map((n) => {
                     const r = simulationResult[0];
                     const cum = calcCumulativeProb(r.singleProb, n);

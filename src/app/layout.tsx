@@ -110,7 +110,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#2dd4bf" />
       </head>
-      <body className="min-h-full flex flex-col bg-[#0f0b1a]">
+      <body className="min-h-full flex flex-col bg-[#0f0b1a] overflow-x-hidden">
         <ToastProvider>
         <MaintenanceBanner />
         <header className="relative sticky top-0 z-50 border-b border-white/5 bg-[#0f0b1a]/80 backdrop-blur-md">
