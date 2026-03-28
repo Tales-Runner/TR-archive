@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { CostumeItem } from "@/lib/types";
@@ -21,6 +21,8 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
     searchParams.get("sort") === "name" ? "name" : "date",
   );
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [activeVideoId, setActiveVideoId] = useState<number | null>(null);
+  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const favs = useFavorites();
 
   const years = useMemo(
@@ -69,6 +71,14 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
+  }, [selectedId]);
+
+  // Reset active video when modal closes
+  useEffect(() => {
+    if (selectedId === null) {
+      setActiveVideoId(null);
+      videoRefs.current.clear();
+    }
   }, [selectedId]);
 
   const selected = selectedId !== null ? costumes.find((c) => c.id === selectedId) : null;
@@ -200,22 +210,45 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
                     />
                     {item.motionImageUrl && (
                       <video
+                        ref={(el) => {
+                          if (el) videoRefs.current.set(item.itemId, el);
+                          else videoRefs.current.delete(item.itemId);
+                        }}
                         src={item.motionImageUrl}
                         muted
                         loop
                         playsInline
-                        className="absolute inset-0 h-full w-full object-contain p-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className={`absolute inset-0 h-full w-full object-contain p-2 transition-opacity ${
+                          activeVideoId === item.itemId
+                            ? "opacity-100"
+                            : "opacity-0 group-hover:opacity-100"
+                        }`}
                         onClick={(e) => {
-                          const v = e.currentTarget;
-                          v.paused ? v.play() : v.pause();
-                          v.classList.toggle("opacity-100");
-                          v.classList.toggle("opacity-0");
+                          e.stopPropagation();
+                          if (activeVideoId === item.itemId) {
+                            e.currentTarget.pause();
+                            e.currentTarget.currentTime = 0;
+                            setActiveVideoId(null);
+                          } else {
+                            // Pause the previously active video
+                            if (activeVideoId !== null) {
+                              const prev = videoRefs.current.get(activeVideoId);
+                              if (prev) {
+                                prev.pause();
+                                prev.currentTime = 0;
+                              }
+                            }
+                            e.currentTarget.play();
+                            setActiveVideoId(item.itemId);
+                          }
                         }}
                         onMouseEnter={(e) =>
                           (e.target as HTMLVideoElement).play()
                         }
                         onMouseLeave={(e) => {
                           const v = e.target as HTMLVideoElement;
+                          // Don't reset if this video is tap-activated
+                          if (activeVideoId === item.itemId) return;
                           v.pause();
                           v.currentTime = 0;
                         }}
@@ -228,7 +261,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
                     </p>
                     {item.motionImageUrl && (
                       <p className="text-[10px] text-white/30 mt-0.5">
-                        <span className="hidden sm:inline">호버</span>
+                        <span className="hidden sm:inline">호버 또는 클릭</span>
                         <span className="sm:hidden">탭</span>하면 모션 재생
                       </p>
                     )}

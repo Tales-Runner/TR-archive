@@ -251,7 +251,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
           <div className="grid gap-4 sm:grid-cols-2 mb-5">
             <div>
               <div className="text-xs text-white/40">총 필요 경험치</div>
-              <div className="text-2xl font-bold text-white/90 tabular-nums">
+              <div className="text-xl sm:text-2xl font-bold text-white/90 tabular-nums">
                 {result.totalNeeded.toLocaleString()}
               </div>
               <div className="text-xs text-white/30">
@@ -260,7 +260,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
             </div>
             <div>
               <div className="text-xs text-white/40">남은 경험치</div>
-              <div className="text-2xl font-bold text-teal-300 tabular-nums">
+              <div className="text-xl sm:text-2xl font-bold text-teal-300 tabular-nums">
                 {result.remaining.toLocaleString()}
               </div>
               <div className="text-xs text-white/30">
@@ -272,7 +272,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
           {result.gamesNeeded !== null && (
             <div className="mb-5 rounded-lg bg-teal-950/30 border border-teal-500/20 px-4 py-3">
               <div className="text-xs text-white/40">필요한 게임 수</div>
-              <div className="text-2xl font-bold text-teal-300 tabular-nums">
+              <div className="text-xl sm:text-2xl font-bold text-teal-300 tabular-nums">
                 {result.gamesNeeded.toLocaleString()}
                 <span className="text-sm font-normal text-white/40 ml-1">판</span>
               </div>

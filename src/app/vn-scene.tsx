@@ -99,7 +99,7 @@ export function VNScene({ choices }: { choices: Choice[] }) {
             <Link
               key={c.href}
               href={c.href}
-              className="group rounded-xl border border-white/10 bg-black/50 backdrop-blur-sm px-5 py-3 transition-all hover:border-teal-400/50 hover:bg-teal-950/50"
+              className="group rounded-xl border border-white/10 bg-black/50 backdrop-blur-sm px-5 py-3.5 transition-all hover:border-teal-400/50 hover:bg-teal-950/50"
             >
               <span className="text-sm font-medium text-white/90 group-hover:text-teal-300">
                 ▸ {c.label}

@@ -145,7 +145,7 @@ function CharacterModal({
         </div>
 
         {/* Stats */}
-        <div className="mb-4 grid grid-cols-3 sm:grid-cols-5 gap-2">
+        <div className="mb-4 grid grid-cols-2 sm:grid-cols-5 gap-2">
           {[
             { label: "속도", val: c.maximumSpeed },
             { label: "가속", val: c.acceleration },
@@ -519,13 +519,13 @@ export function CharacterTable({
         <div className="flex rounded-lg border border-white/10 overflow-hidden text-sm">
           <button
             onClick={() => setTab("stats")}
-            className={`px-3 py-1.5 font-medium transition-colors ${tab === "stats" ? "bg-teal-600 text-white" : "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"}`}
+            className={`px-3 py-2.5 font-medium transition-colors ${tab === "stats" ? "bg-teal-600 text-white" : "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"}`}
           >
             기본 스탯
           </button>
           <button
             onClick={() => setTab("motions")}
-            className={`px-3 py-1.5 font-medium transition-colors ${tab === "motions" ? "bg-teal-600 text-white" : "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"}`}
+            className={`px-3 py-2.5 font-medium transition-colors ${tab === "motions" ? "bg-teal-600 text-white" : "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"}`}
           >
             모션 시간
           </button>
@@ -558,7 +558,7 @@ export function CharacterTable({
       </div>
 
       {/* Table */}
-      <p className="mb-2 text-[10px] text-white/20 sm:hidden">← 좌우로 스크롤하세요 →</p>
+      <p className="mb-2 text-center text-xs text-white/30 py-1 sm:hidden">← 좌우로 스크롤하세요 →</p>
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface-card">
         <table className="w-full text-sm">
           <thead>
@@ -601,9 +601,13 @@ export function CharacterTable({
                   <div className="flex items-center gap-2.5">
                     <button
                       onClick={(e) => toggleCompare(c.id, e)}
-                      className={`shrink-0 w-5 h-5 rounded border text-[10px] flex items-center justify-center transition-colors ${compareIds.includes(c.id) ? "bg-teal-600 border-teal-500 text-white" : "border-white/20 text-transparent hover:border-white/40"}`}
+                      className="shrink-0 flex items-center justify-center w-9 h-9 -m-2"
                     >
-                      {compareIds.includes(c.id) ? "✓" : ""}
+                      <span
+                        className={`w-5 h-5 rounded border text-[10px] flex items-center justify-center transition-colors ${compareIds.includes(c.id) ? "bg-teal-600 border-teal-500 text-white" : "border-white/20 text-transparent hover:border-white/40"}`}
+                      >
+                        {compareIds.includes(c.id) ? "✓" : ""}
+                      </span>
                     </button>
                     <Image
                       src={c.circularImageUrl}

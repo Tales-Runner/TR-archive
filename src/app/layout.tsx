@@ -8,6 +8,7 @@ import { MaintenanceBanner } from "./maintenance-banner";
 import { ToastProvider } from "@/components/toast";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { YouTubeIcon, TwitterIcon, InstagramIcon, WebIcon } from "@/components/icons";
 import charactersJson from "@/data/characters.json";
 import mapsJson from "@/data/maps.json";
 import costumesJson from "@/data/costumes.json";
@@ -92,6 +93,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "커뮤니티",
     items: [
+      { href: "/channels", label: "공식 채널" },
       { href: "/notices", label: "공지사항" },
       { href: "/feedback", label: "건의함" },
     ],
@@ -139,17 +141,26 @@ export default function RootLayout({
         <main className="flex-1 flex flex-col">
           <ErrorBoundary>{children}</ErrorBoundary>
         </main>
-        <footer className="border-t border-white/5 bg-[#0f0b1a] py-6 text-center text-xs text-white/25">
-          비공식 아카이브 &middot; 감정 에너지로 빚어낸 기록들 &middot;{" "}
-          <a
-            href="https://tr.rhaon.co.kr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-white/50"
-          >
-            공식 홈페이지
-          </a>
-          {" "}&middot; 엘림스 스마일의 비공식 아카이브
+        <footer className="border-t border-white/5 bg-[#0f0b1a] py-6">
+          <div className="mx-auto max-w-6xl px-4 flex flex-col items-center gap-3">
+            <div className="flex items-center gap-4 text-white/30">
+              <a href="https://www.youtube.com/@rhaon_tr_official" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition-colors" aria-label="YouTube">
+                <YouTubeIcon className="h-[18px] w-[18px]" />
+              </a>
+              <a href="https://x.com/TR_Official_KR" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition-colors" aria-label="X (Twitter)">
+                <TwitterIcon className="h-4 w-4" />
+              </a>
+              <a href="https://www.instagram.com/rhaon_tr_official/" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition-colors" aria-label="Instagram">
+                <InstagramIcon className="h-4 w-4" />
+              </a>
+              <a href="https://tr.rhaon.co.kr" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition-colors" aria-label="공식 홈페이지">
+                <WebIcon className="h-4 w-4" />
+              </a>
+            </div>
+            <p className="text-xs text-white/25">
+              비공식 아카이브 &middot; 감정 에너지로 빚어낸 기록들 &middot; 엘림스 스마일의 비공식 아카이브
+            </p>
+          </div>
         </footer>
         <ScrollToTop />
         </ToastProvider>

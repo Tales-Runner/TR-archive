@@ -91,7 +91,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="md:hidden rounded-md p-2 text-white/50 hover:bg-white/5 hover:text-white/80"
+        className="md:hidden rounded-md p-2.5 text-white/50 hover:bg-white/5 hover:text-white/80"
         aria-label="메뉴"
         aria-expanded={mobileOpen}
       >
@@ -123,7 +123,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block rounded-md px-3 py-2 text-sm ${
+                  className={`block rounded-md px-3 py-3 text-sm ${
                     isActive(item.href)
                       ? "text-teal-300 bg-white/5"
                       : "text-white/60 hover:bg-white/5"
@@ -140,7 +140,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
               href="https://tr.rhaon.co.kr/news/notices"
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-md px-3 py-2 text-sm text-white/40 hover:bg-white/5"
+              className="block rounded-md px-3 py-3 text-sm text-white/40 hover:bg-white/5"
             >
               공지사항 ↗
             </a>

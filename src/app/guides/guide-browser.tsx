@@ -81,7 +81,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
                 <button
                   key={part.partId}
                   onClick={() => setActivePart(i)}
-                  className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm transition-colors ${
+                  className={`shrink-0 whitespace-nowrap px-4 py-2.5 text-sm transition-colors ${
                     i === activePart
                       ? "border-b-2 border-teal-500 text-teal-300 font-medium"
                       : "text-white/40 hover:text-white/60"

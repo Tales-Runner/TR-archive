@@ -279,15 +279,15 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
         <div className="space-y-4 stagger-grid">
           <div className="grid grid-cols-3 gap-2 sm:gap-3">
             <div className="rounded-xl border border-teal-500/20 bg-gradient-to-br from-teal-950/40 to-transparent p-3 sm:p-4 text-center">
-              <div className="text-2xl sm:text-3xl font-black text-teal-300 tabular-nums">{visibleChars.length}</div>
+              <div className="text-lg sm:text-2xl md:text-3xl font-black text-teal-300 tabular-nums">{visibleChars.length}</div>
               <div className="text-[10px] sm:text-xs text-white/40">플레이 캐릭터</div>
             </div>
             <div className="rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-950/40 to-transparent p-3 sm:p-4 text-center">
-              <div className="text-2xl sm:text-3xl font-black text-blue-300 tabular-nums">{maps.length}</div>
+              <div className="text-lg sm:text-2xl md:text-3xl font-black text-blue-300 tabular-nums">{maps.length}</div>
               <div className="text-[10px] sm:text-xs text-white/40">맵</div>
             </div>
             <div className="rounded-xl border border-pink-500/20 bg-gradient-to-br from-pink-950/40 to-transparent p-3 sm:p-4 text-center">
-              <div className="text-2xl sm:text-3xl font-black text-pink-300 tabular-nums">{stories.length}</div>
+              <div className="text-lg sm:text-2xl md:text-3xl font-black text-pink-300 tabular-nums">{stories.length}</div>
               <div className="text-[10px] sm:text-xs text-white/40">스토리</div>
             </div>
           </div>
@@ -377,7 +377,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                   <Image src={entry.c.circularImageUrl} alt="" width={24} height={24} className="rounded-full shrink-0" />
                   <span className="text-sm text-white/80 w-24 truncate">{entry.c.characterNm}</span>
                   <Bar value={1 / entry.total} max={1 / motionRankings.sortedByTotal[0].total} color="bg-emerald-500" />
-                  <span className="text-sm font-bold text-white/70 tabular-nums w-14 text-right">{entry.total.toFixed(2)}s</span>
+                  <span className="text-sm font-bold text-white/70 tabular-nums w-10 sm:w-14 text-right">{entry.total.toFixed(2)}s</span>
                 </div>
               ))}
             </div>

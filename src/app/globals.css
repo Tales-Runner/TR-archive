@@ -176,7 +176,25 @@ select option {
   border-color: rgba(255, 255, 255, 0.1) !important;
   border-radius: 0.75rem;
   padding: 12px;
+  max-width: 100%;
+  overflow: hidden;
 }
 .guide-content span {
   color: inherit !important;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Touch device: disable hover lift on cards to avoid sticky hover state */
+@media (hover: none) {
+  .card-hover:hover {
+    transform: none;
+  }
 }

@@ -112,7 +112,7 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
           <button
             key={g}
             onClick={() => handleGroupChange(g)}
-            className={`shrink-0 whitespace-nowrap rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+            className={`shrink-0 whitespace-nowrap rounded-lg border px-3 py-2 text-sm transition-colors ${
               selectedGroup === g
                 ? "border-teal-500 bg-teal-600 text-white"
                 : "border-white/10 bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"
@@ -143,7 +143,9 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
 
       {/* Probability table */}
       {currentItem && (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface-card overflow-hidden">
+        <div className="rounded-xl border border-white/10 bg-surface-card overflow-hidden">
+          <p className="text-center text-[10px] text-white/20 py-0.5 sm:hidden">&larr; 좌우로 스크롤 &rarr;</p>
+          <div className="overflow-x-auto">
           <div className="border-b border-white/10 bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-white/70">
             {currentItem.itemNm} — 확률표
           </div>
@@ -172,6 +174,7 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
