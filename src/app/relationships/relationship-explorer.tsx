@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Fragment, useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
 import type { Character } from "@/lib/types";
 import type { Dossier } from "@/data/dossier";
@@ -145,6 +145,7 @@ export function RelationshipExplorer({
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 200);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const dossierMap = useMemo(
     () => new Map(dossiers.map((d) => [d.characterId, d])),
@@ -167,6 +168,16 @@ export function RelationshipExplorer({
   const selectedChar = selectedId !== null ? characters.find((c) => c.id === selectedId) : null;
   const selectedDossier = selectedId !== null ? dossierMap.get(selectedId) : undefined;
 
+  useEffect(() => {
+    if (selectedChar && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [selectedId]);
+
+  const handleSelect = (id: number) => {
+    setSelectedId((prev) => (prev === id ? null : id));
+  };
+
   return (
     <>
       {/* Search */}
@@ -181,47 +192,48 @@ export function RelationshipExplorer({
         <span className="text-xs text-white/30">{charsWithDossier.length}명</span>
       </div>
 
-      {/* Character Grid */}
+      {/* Character Grid — DossierCard inserted inline after selected icon */}
       <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 mb-6">
         {charsWithDossier.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setSelectedId(c.id === selectedId ? null : c.id)}
-            className={`flex flex-col items-center gap-1 rounded-xl p-2 transition-all ${
-              selectedId === c.id
-                ? "bg-teal-600/20 ring-1 ring-teal-500/50"
-                : "hover:bg-white/5"
-            }`}
-          >
-            <Image
-              src={c.circularImageUrl}
-              alt={c.characterNm}
-              width={40}
-              height={40}
-              className="rounded-full ring-1 ring-white/10"
-            />
-            <span className="text-[10px] text-white/60 truncate w-full text-center">
-              {c.characterNm}
-            </span>
-          </button>
+          <Fragment key={c.id}>
+            <button
+              onClick={() => handleSelect(c.id)}
+              className={`flex flex-col items-center gap-1 rounded-xl p-2 transition-all ${
+                selectedId === c.id
+                  ? "bg-teal-600/20 ring-1 ring-teal-500/50"
+                  : "hover:bg-white/5"
+              }`}
+            >
+              <Image
+                src={c.circularImageUrl}
+                alt={c.characterNm}
+                width={40}
+                height={40}
+                className="rounded-full ring-1 ring-white/10"
+              />
+              <span className="text-[10px] text-white/60 truncate w-full text-center">
+                {c.characterNm}
+              </span>
+            </button>
+            {selectedId === c.id && selectedChar && selectedDossier && (
+              <div ref={cardRef} className="col-span-full py-2">
+                <DossierCard
+                  dossier={selectedDossier}
+                  character={selectedChar}
+                  allCharacters={characters}
+                  onSelectCharacter={handleSelect}
+                />
+              </div>
+            )}
+          </Fragment>
         ))}
       </div>
 
       {charsWithDossier.length === 0 && <EmptyState message="검색 결과가 없습니다" />}
 
-      {/* Dossier Card */}
-      {selectedChar && selectedDossier && (
-        <DossierCard
-          dossier={selectedDossier}
-          character={selectedChar}
-          allCharacters={characters}
-          onSelectCharacter={setSelectedId}
-        />
-      )}
-
-      {!selectedChar && (
+      {!selectedChar && charsWithDossier.length > 0 && (
         <div className="text-center py-12 text-sm text-white/20">
-          캐릭터를 선택하면 상세 도시에가 열립니다
+          캐릭터를 선택하면 상세 소개가 열립니다
         </div>
       )}
     </>

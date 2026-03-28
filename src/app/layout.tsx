@@ -70,7 +70,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/stories", label: "스토리" },
       { href: "/lore", label: "연대기" },
-      { href: "/relationships", label: "인물 관계도" },
+      { href: "/relationships", label: "인물 소개" },
     ],
   },
   {
