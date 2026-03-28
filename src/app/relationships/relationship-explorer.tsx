@@ -2,6 +2,7 @@
 
 import { Fragment, useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import type { Character } from "@/lib/types";
 import type { Dossier } from "@/data/dossier";
 import { STORY_ARCS } from "@/data/lore";
@@ -56,6 +57,14 @@ function DossierCard({
           )}
         </div>
       </div>
+      <div className="px-5 py-2 border-b border-white/10">
+        <Link
+          href="/characters"
+          className="text-xs text-teal-400 hover:text-teal-300 transition-colors"
+        >
+          능력치 보기 →
+        </Link>
+      </div>
 
       {/* Trivia */}
       <div className="p-5 border-b border-white/10">
@@ -95,7 +104,7 @@ function DossierCard({
                       <span className="text-xs text-white/70">{rel.targetName}</span>
                     )}
                     <p className="text-[11px] text-white/40 leading-relaxed">{rel.label}</p>
-                    <p className="text-[10px] text-white/20">출처: {rel.source}</p>
+                    <p className="text-[10px] text-white/40">출처: {rel.source}</p>
                   </div>
                 </div>
               );
@@ -118,7 +127,7 @@ function DossierCard({
         </div>
       )}
 
-      {/* Elims Note */}
+      {/* 감초 대사 — 캐릭터 해석 재검토 후 복원 예정
       <div className="p-5 space-y-2">
         <div className="flex gap-2">
           <span className="shrink-0 text-[10px] font-bold text-teal-400">엘림스</span>
@@ -131,6 +140,7 @@ function DossierCard({
           </div>
         )}
       </div>
+      */}
     </div>
   );
 }
@@ -189,7 +199,7 @@ export function RelationshipExplorer({
           onChange={(e) => setSearch(e.target.value)}
           className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
-        <span className="text-xs text-white/30">{charsWithDossier.length}명</span>
+        <span className="text-xs text-white/40">{charsWithDossier.length}명</span>
       </div>
 
       {/* Character Grid — DossierCard inserted inline after selected icon */}
@@ -232,7 +242,7 @@ export function RelationshipExplorer({
       {charsWithDossier.length === 0 && <EmptyState message="검색 결과가 없습니다" />}
 
       {!selectedChar && charsWithDossier.length > 0 && (
-        <div className="text-center py-12 text-sm text-white/20">
+        <div className="text-center py-12 text-sm text-white/40">
           캐릭터를 선택하면 상세 소개가 열립니다
         </div>
       )}

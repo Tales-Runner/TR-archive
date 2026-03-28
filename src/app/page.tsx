@@ -83,7 +83,7 @@ export default function Home() {
 
       {/* Recent updates */}
       <div className="mx-auto max-w-6xl w-full px-4 py-8">
-        <h2 className="text-lg font-bold text-accent-light mb-4">최근 업데이트</h2>
+        <h2 id="recent" className="text-lg font-bold text-accent-light mb-4">최근 업데이트</h2>
         <div className="grid gap-3 sm:gap-6 sm:grid-cols-3">
           {/* Recent Maps */}
           <div>
@@ -94,7 +94,7 @@ export default function Home() {
                   <Image src={m.thumbnail} alt="" width={48} height={32} className="w-12 h-8 rounded object-cover shrink-0" />
                   <div className="min-w-0">
                     <div className="text-sm text-white/80 truncate">{m.subject}</div>
-                    <div className="text-[10px] text-white/30">{formatDate(m.openDt)}</div>
+                    <div className="text-[10px] text-white/40">{formatDate(m.openDt)}</div>
                   </div>
                 </Link>
               ))}
@@ -110,7 +110,7 @@ export default function Home() {
                   <Image src={c.thumbnail} alt="" width={48} height={32} className="w-12 h-8 rounded object-cover shrink-0" />
                   <div className="min-w-0">
                     <div className="text-sm text-white/80 truncate">{c.subject}</div>
-                    <div className="text-[10px] text-white/30">{formatDate(c.openDt)}</div>
+                    <div className="text-[10px] text-white/40">{formatDate(c.openDt)}</div>
                   </div>
                 </Link>
               ))}
@@ -126,12 +126,19 @@ export default function Home() {
                   <Image src={s.thumbnail} alt="" width={48} height={32} className="w-12 h-8 rounded object-cover shrink-0" />
                   <div className="min-w-0">
                     <div className="text-sm text-white/80 truncate">{s.subject}</div>
-                    <div className="text-[10px] text-white/30">{formatDate(s.openDt)}</div>
+                    <div className="text-[10px] text-white/40">{formatDate(s.openDt)}</div>
                   </div>
                 </Link>
               ))}
             </div>
           </div>
+        </div>
+        <div className="mt-4 flex justify-center gap-4 text-xs text-white/40">
+          <Link href="/maps" className="hover:text-teal-300 transition-colors">맵 전체 보기</Link>
+          <span className="text-white/20">|</span>
+          <Link href="/closet" className="hover:text-teal-300 transition-colors">코스튬 전체 보기</Link>
+          <span className="text-white/20">|</span>
+          <Link href="/stories" className="hover:text-teal-300 transition-colors">스토리 전체 보기</Link>
         </div>
       </div>
     </div>

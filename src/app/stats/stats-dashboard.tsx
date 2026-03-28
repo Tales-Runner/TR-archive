@@ -29,7 +29,7 @@ function Section({ title, children, accent, sub }: { title: string; children: Re
   return (
     <div className="rounded-xl border border-white/10 bg-surface-card p-4 sm:p-5 animate-fade-in">
       <h3 className={`text-sm font-bold mb-1 ${accent ?? "text-accent-light"}`}>{title}</h3>
-      {sub && <p className="text-xs text-white/30 mb-4">{sub}</p>}
+      {sub && <p className="text-xs text-white/40 mb-4">{sub}</p>}
       {!sub && <div className="mb-4" />}
       {children}
     </div>
@@ -42,7 +42,7 @@ function Trivia({ q, a, detail }: { q: string; a: string; detail?: string }) {
       <div className="text-[10px] font-bold text-teal-400/70 uppercase tracking-wider mb-1">알고 있었어?</div>
       <div className="text-xs text-white/50 mb-2">{q}</div>
       <div className="text-lg font-bold text-white/90">{a}</div>
-      {detail && <div className="text-xs text-white/30 mt-1">{detail}</div>}
+      {detail && <div className="text-xs text-white/40 mt-1">{detail}</div>}
     </div>
   );
 }
@@ -62,7 +62,7 @@ function CharCard({ c, badge, stat, badgeColor }: { c: Character; badge: string;
 function VsCard({ left, right, label }: { left: { name: string; img: string; value: string }; right: { name: string; img: string; value: string }; label: string }) {
   return (
     <div className="rounded-xl border border-white/10 bg-surface-card p-4">
-      <div className="text-[10px] font-bold text-white/30 text-center mb-3">{label}</div>
+      <div className="text-[10px] font-bold text-white/40 text-center mb-3">{label}</div>
       <div className="flex items-center gap-3">
         <div className="flex-1 text-center">
           <Image src={left.img} alt="" width={40} height={40} className="mx-auto rounded-full ring-1 ring-white/10 mb-1" />
@@ -373,7 +373,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
             <div className="space-y-1.5">
               {motionRankings.sortedByTotal.slice(0, 10).map((entry, i) => (
                 <div key={entry.c.id} className="flex items-center gap-3">
-                  <span className={`w-5 text-right text-xs font-bold tabular-nums ${i < 3 ? "text-emerald-400" : "text-white/30"}`}>{i + 1}</span>
+                  <span className={`w-5 text-right text-xs font-bold tabular-nums ${i < 3 ? "text-emerald-400" : "text-white/40"}`}>{i + 1}</span>
                   <Image src={entry.c.circularImageUrl} alt="" width={24} height={24} className="rounded-full shrink-0" />
                   <span className="text-sm text-white/80 w-24 truncate">{entry.c.characterNm}</span>
                   <Bar value={1 / entry.total} max={1 / motionRankings.sortedByTotal[0].total} color="bg-emerald-500" />
@@ -390,7 +390,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                 <div key={m.key} className="flex items-center gap-2 rounded-lg bg-white/[0.02] px-3 py-2">
                   <div className="w-12">
                     <div className="text-xs font-bold text-white/60">{m.label}</div>
-                    <div className="text-[9px] text-white/25">{m.desc}</div>
+                    <div className="text-[9px] text-white/40">{m.desc}</div>
                   </div>
                   <div className="flex-1 flex items-center gap-2 text-xs">
                     <Image src={m.best.circularImageUrl} alt="" width={20} height={20} className="rounded-full" />
@@ -538,7 +538,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-white/30">총 {costumeStats.totalItems}개 아이템</p>
+              <p className="mt-3 text-xs text-white/40">총 {costumeStats.totalItems}개 아이템</p>
             </Section>
           </div>
         </div>
@@ -551,7 +551,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
             <div className="text-[10px] font-bold text-red-400/70 uppercase tracking-wider mb-2">최악의 확률</div>
             <div className="text-4xl font-black text-red-300 tabular-nums mb-1">{gachaStats.lowestProb}%</div>
             <div className="text-sm text-white/60">{gachaStats.lowestName}</div>
-            <div className="text-xs text-white/30 mt-1">
+            <div className="text-xs text-white/40 mt-1">
               {gachaStats.lowestTarget} — 약 <span className="text-red-300 font-bold">{Math.round(100 / gachaStats.lowestProb).toLocaleString()}번</span> 돌려야 한 번
             </div>
           </div>
@@ -597,7 +597,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
                 );
               })}
             </div>
-            <div className="flex justify-between text-[10px] text-white/20 mt-1">
+            <div className="flex justify-between text-[10px] text-white/40 mt-1">
               <span>Lv.1</span>
               <span>Lv.{levels[levels.length - 1].level}</span>
             </div>
@@ -623,7 +623,7 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
               <span className="text-2xl font-black text-white/90">{getLevelLabel(levelStats.maxLevel)}</span>
             </div>
             <div className="text-sm text-white/40 tabular-nums">{levelStats.maxExp.toLocaleString()} EXP</div>
-            <div className="text-xs text-white/25 mt-1">약 {(levelStats.maxExp / 1_000_000_000).toFixed(1)}B</div>
+            <div className="text-xs text-white/40 mt-1">약 {(levelStats.maxExp / 1_000_000_000).toFixed(1)}B</div>
           </div>
         </div>
       )}

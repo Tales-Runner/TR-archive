@@ -104,7 +104,7 @@ export function VNScene({ choices }: { choices: Choice[] }) {
               <span className="text-sm font-medium text-white/90 group-hover:text-teal-300">
                 ▸ {c.label}
               </span>
-              <span className="ml-2 text-xs text-white/30">{c.sub}</span>
+              <span className="ml-2 text-xs text-white/40">{c.sub}</span>
             </Link>
           ))}
         </div>

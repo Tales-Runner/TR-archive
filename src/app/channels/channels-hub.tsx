@@ -120,7 +120,7 @@ function YouTubeCard({ channel }: { channel: YouTubeChannel }) {
             <h3 className="text-base font-bold text-white/90 group-hover:text-teal-300 transition-colors">
               {channel.name}
             </h3>
-            <span className="text-xs text-white/30">{channel.handle}</span>
+            <span className="text-xs text-white/40">{channel.handle}</span>
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-white/50">
             {channel.description}
@@ -131,7 +131,7 @@ function YouTubeCard({ channel }: { channel: YouTubeChannel }) {
             ))}
           </div>
         </div>
-        <span className="shrink-0 text-white/20 group-hover:text-teal-400 transition-colors">
+        <span className="shrink-0 text-white/40 group-hover:text-teal-400 transition-colors">
           <ExternalLinkIcon />
         </span>
       </div>
@@ -157,7 +157,7 @@ function SocialCard({ account }: { account: SocialAccount }) {
         </div>
         <div className="text-xs text-white/35 truncate">{account.handle}</div>
       </div>
-      <span className="shrink-0 text-white/20 group-hover:text-teal-400 transition-colors">
+      <span className="shrink-0 text-white/40 group-hover:text-teal-400 transition-colors">
         <ExternalLinkIcon />
       </span>
     </a>
@@ -166,7 +166,7 @@ function SocialCard({ account }: { account: SocialAccount }) {
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white/30">
+    <h2 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white/40">
       <span className="h-px flex-1 bg-white/10" />
       <span>{children}</span>
       <span className="h-px flex-1 bg-white/10" />

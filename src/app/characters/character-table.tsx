@@ -9,6 +9,8 @@ import { useToast } from "@/components/toast";
 import { Tooltip } from "@/components/tooltip";
 import { EmptyState } from "@/components/empty-state";
 import Image from "next/image";
+import Link from "next/link";
+import { getDossier } from "@/data/dossier";
 
 const STAT_COLS: { key: SortKey; label: string; tip: string }[] = [
   { key: "maximumSpeed", label: "속도", tip: "최고 이동 속도" },
@@ -130,7 +132,7 @@ function CharacterModal({
               {c.characterNm}
             </h2>
             <p className="text-sm text-teal-400">{c.catchPhrase}</p>
-            <p className="text-xs text-white/30 mt-0.5">
+            <p className="text-xs text-white/40 mt-0.5">
               {CHARACTER_CATEGORY_LABEL[c.category] ?? "기타"} 캐릭터
             </p>
           </div>
@@ -176,7 +178,7 @@ function CharacterModal({
                   key={col.key}
                   className="rounded-lg bg-white/[0.03] px-2 py-1.5 text-center"
                 >
-                  <div className="text-[10px] text-white/30">{col.label}</div>
+                  <div className="text-[10px] text-white/40">{col.label}</div>
                   <div className="text-white/70 tabular-nums">{val}s</div>
                 </div>
               );
@@ -199,11 +201,20 @@ function CharacterModal({
             .filter((p) => p.val)
             .map((p) => (
               <div key={p.label} className="flex justify-between py-1 border-b border-white/5">
-                <span className="text-white/30">{p.label}</span>
+                <span className="text-white/40">{p.label}</span>
                 <span className="text-white/70">{p.val}</span>
               </div>
             ))}
         </div>
+
+        {getDossier(c.id) && (
+          <Link
+            href="/relationships"
+            className="mt-3 inline-block text-xs text-teal-400 hover:text-teal-300 transition-colors"
+          >
+            인물 소개 →
+          </Link>
+        )}
 
         {/* Favorites: memo & tags */}
         {isFav && (
@@ -220,7 +231,7 @@ function CharacterModal({
                 {tags.map((tag) => (
                   <span key={tag} className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/70">
                     {tag}
-                    <button onClick={() => onTagsChange(tags.filter((t) => t !== tag))} className="text-white/30 hover:text-white/60">✕</button>
+                    <button onClick={() => onTagsChange(tags.filter((t) => t !== tag))} className="text-white/40 hover:text-white/60">✕</button>
                   </span>
                 ))}
               </div>
@@ -498,7 +509,7 @@ export function CharacterTable({
               <span key={id} className="flex items-center gap-1 rounded-full bg-white/10 pl-1 pr-2 py-0.5">
                 <Image src={c.circularImageUrl} alt="" width={18} height={18} className="rounded-full" />
                 <span className="text-xs text-white/70">{c.characterNm}</span>
-                <button onClick={() => setCompareIds((p) => p.filter((x) => x !== id))} className="text-white/30 hover:text-white/60 text-[10px] ml-0.5">✕</button>
+                <button onClick={() => setCompareIds((p) => p.filter((x) => x !== id))} className="text-white/40 hover:text-white/60 text-[10px] ml-0.5">✕</button>
               </span>
             ) : null;
           })}
@@ -510,7 +521,7 @@ export function CharacterTable({
               비교하기
             </button>
           )}
-          <span className="text-[10px] text-white/30">{compareIds.length}/3</span>
+          <span className="text-[10px] text-white/40">{compareIds.length}/3</span>
         </div>
       )}
 
@@ -552,13 +563,13 @@ export function CharacterTable({
           onChange={(e) => setSearch(e.target.value)}
           className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
-        <span className="ml-auto text-xs text-white/30">
+        <span className="ml-auto text-xs text-white/40">
           {sorted.length}명
         </span>
       </div>
 
       {/* Table */}
-      <p className="mb-2 text-center text-xs text-white/30 py-1 sm:hidden">← 좌우로 스크롤하세요 →</p>
+      <p className="mb-2 text-center text-xs text-white/40 py-1 sm:hidden">← 좌우로 스크롤하세요 →</p>
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-surface-card">
         <table className="w-full text-sm">
           <thead>
@@ -620,13 +631,13 @@ export function CharacterTable({
                       <div className="leading-tight text-white/90">
                         {c.characterNm}
                       </div>
-                      <div className="text-[10px] font-normal text-white/30">
+                      <div className="text-[10px] font-normal text-white/40">
                         {c.catchPhrase}
                       </div>
                     </div>
                   </div>
                 </td>
-                <td className="px-3 py-2.5 text-xs text-white/30 max-w-[180px] truncate">
+                <td className="px-3 py-2.5 text-xs text-white/40 max-w-[180px] truncate">
                   {c.uniqueAbility}
                 </td>
                 {tab === "stats" ? (
@@ -661,7 +672,7 @@ export function CharacterTable({
       </div>
 
       {tab === "motions" && (
-        <p className="mt-3 text-xs text-white/30">
+        <p className="mt-3 text-xs text-white/40">
           <span className="font-bold text-emerald-400">초록</span> = 가장 빠름,{" "}
           <span className="text-red-400/70">빨강</span> = 가장 느림 (낮을수록
           좋음)

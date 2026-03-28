@@ -11,7 +11,7 @@
   --color-border: rgba(255, 255, 255, 0.08);
   --color-text: #ede8f5;
   --color-text-muted: rgba(255, 255, 255, 0.4);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: "Pretendard Variable", var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 

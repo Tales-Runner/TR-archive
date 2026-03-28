@@ -86,10 +86,10 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="hidden sm:flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/30 hover:bg-white/10 transition-colors"
+        className="hidden sm:flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/40 hover:bg-white/10 transition-colors"
       >
         검색
-        <kbd className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/20">⌘K</kbd>
+        <kbd className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/40">⌘K</kbd>
       </button>
 
       <button
@@ -116,7 +116,7 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
             className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#13101f] shadow-2xl overflow-hidden animate-scale-in"
           >
             <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/30 shrink-0">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/40 shrink-0">
                 <circle cx="9" cy="9" r="6" />
                 <path d="M13.5 13.5L17 17" />
               </svg>
@@ -127,13 +127,13 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="캐릭터, 맵, 코스튬, 가이드, 스토리 검색..."
-                className="flex-1 bg-transparent text-base text-white/90 placeholder:text-white/25 outline-none"
+                className="flex-1 bg-transparent text-base text-white/90 placeholder:text-white/40 outline-none"
                 aria-autocomplete="list"
                 aria-activedescendant={selectedIndex >= 0 ? `search-result-${selectedIndex}` : undefined}
               />
               <kbd
                 onClick={() => { setOpen(false); setQuery(""); }}
-                className="cursor-pointer rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/30 hover:text-white/50"
+                className="cursor-pointer rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/40 hover:text-white/50"
               >
                 ESC
               </kbd>
@@ -160,7 +160,7 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
                     )}
                     <div className="min-w-0 flex-1">
                       <div className="text-sm text-white/80 truncate">{r.label}</div>
-                      <div className="text-[11px] text-white/30 truncate">{r.sub}</div>
+                      <div className="text-[11px] text-white/40 truncate">{r.sub}</div>
                     </div>
                     <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${SEARCH_TYPE_COLORS[r.type] ?? "text-white/40 bg-white/5"}`}>
                       {r.type}
@@ -171,13 +171,13 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
             )}
 
             {query.trim() && results.length === 0 && (
-              <div className="py-8 text-center text-sm text-white/30">
+              <div className="py-8 text-center text-sm text-white/40">
                 결과 없음
               </div>
             )}
 
             {results.length > 0 && (
-              <div className="border-t border-white/5 px-4 py-2 text-[10px] text-white/20 flex gap-3">
+              <div className="border-t border-white/5 px-4 py-2 text-[10px] text-white/40 flex gap-3">
                 <span>↑↓ 이동</span>
                 <span>↵ 선택</span>
                 <span>esc 닫기</span>

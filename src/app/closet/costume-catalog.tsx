@@ -133,7 +133,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
           onChange={(e) => setSearch(e.target.value)}
           className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
-        <span className="text-xs text-white/30">{filtered.length}세트</span>
+        <span className="text-xs text-white/40">{filtered.length}세트</span>
       </div>
 
       {/* Detail modal */}
@@ -189,7 +189,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
             <h2 className="text-xl font-bold text-white/90 mb-1">
               {selected.subject}
             </h2>
-            <p className="text-xs text-white/30 mb-4">
+            <p className="text-xs text-white/40 mb-4">
               {formatDate(selected.openDt)}
             </p>
 
@@ -260,7 +260,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
                       {item.itemSubject}
                     </p>
                     {item.motionImageUrl && (
-                      <p className="text-[10px] text-white/30 mt-0.5">
+                      <p className="text-[10px] text-white/40 mt-0.5">
                         <span className="hidden sm:inline">호버 또는 클릭</span>
                         <span className="sm:hidden">탭</span>하면 모션 재생
                       </p>
@@ -275,7 +275,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
                 {selected.hashTagSubject.split(",").map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/30"
+                    className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/40"
                   >
                     {tag.trim()}
                   </span>
@@ -310,7 +310,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
                 <h3 className="text-sm font-medium text-white/90 truncate mb-0.5">
                   {c.subject}
                 </h3>
-                <p className="text-[11px] text-white/30">
+                <p className="text-[11px] text-white/40">
                   {formatDate(c.openDt)}
                 </p>
               </div>

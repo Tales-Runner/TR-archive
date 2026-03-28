@@ -144,7 +144,7 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
       {/* Probability table */}
       {currentItem && (
         <div className="rounded-xl border border-white/10 bg-surface-card overflow-hidden">
-          <p className="text-center text-[10px] text-white/20 py-0.5 sm:hidden">&larr; 좌우로 스크롤 &rarr;</p>
+          <p className="text-center text-[10px] text-white/40 py-0.5 sm:hidden">&larr; 좌우로 스크롤 &rarr;</p>
           <div className="overflow-x-auto">
           <div className="border-b border-white/10 bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-white/70">
             {currentItem.itemNm} — 확률표
@@ -228,7 +228,7 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
                     pct={r.cumulative}
                     label={`${r.cumulative.toFixed(2)}%`}
                   />
-                  <div className="text-xs text-white/30">
+                  <div className="text-xs text-white/40">
                     {tries}회 시행 시 1번 이상 나올 확률
                   </div>
                 </div>

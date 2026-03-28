@@ -130,7 +130,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
         <h3 className="text-sm font-medium text-white/50 mb-3">현재 레벨</h3>
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
-            <label className="block text-[11px] text-white/30 mb-1">계급</label>
+            <label className="block text-[11px] text-white/40 mb-1">계급</label>
             <select
               value={curRankIdx}
               onChange={(e) => {
@@ -145,7 +145,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
             </select>
           </div>
           <div>
-            <label className="block text-[11px] text-white/30 mb-1">색상</label>
+            <label className="block text-[11px] text-white/40 mb-1">색상</label>
             <ColorBar
               colors={colorsForRank(curRankIdx)}
               value={curColorIdx}
@@ -153,7 +153,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
             />
           </div>
           <div>
-            <label className="block text-[11px] text-white/30 mb-1">진행률 (%)</label>
+            <label className="block text-[11px] text-white/40 mb-1">진행률 (%)</label>
             <input
               type="number"
               min={0}
@@ -206,7 +206,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
           placeholder="한 판당 얻는 평균 EXP 입력"
           className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base font-bold text-white/90 tabular-nums outline-none focus:border-teal-500/50 placeholder:text-white/20 placeholder:font-normal sm:text-sm sm:py-2.5"
         />
-        <p className="mt-1.5 text-[11px] text-white/25">
+        <p className="mt-1.5 text-[11px] text-white/40">
           입력 시 목표까지 필요한 게임 수를 계산합니다.
         </p>
       </div>
@@ -216,7 +216,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
         <h3 className="text-sm font-medium text-white/50 mb-3">목표 레벨</h3>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="block text-[11px] text-white/30 mb-1">계급</label>
+            <label className="block text-[11px] text-white/40 mb-1">계급</label>
             <select
               value={tgtRankIdx}
               onChange={(e) => {
@@ -231,7 +231,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
             </select>
           </div>
           <div>
-            <label className="block text-[11px] text-white/30 mb-1">색상</label>
+            <label className="block text-[11px] text-white/40 mb-1">색상</label>
             <ColorBar
               colors={colorsForRank(tgtRankIdx)}
               value={tgtColorIdx}
@@ -254,7 +254,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
               <div className="text-xl sm:text-2xl font-bold text-white/90 tabular-nums">
                 {result.totalNeeded.toLocaleString()}
               </div>
-              <div className="text-xs text-white/30">
+              <div className="text-xs text-white/40">
                 ({formatExp(result.totalNeeded)})
               </div>
             </div>
@@ -263,7 +263,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
               <div className="text-xl sm:text-2xl font-bold text-teal-300 tabular-nums">
                 {result.remaining.toLocaleString()}
               </div>
-              <div className="text-xs text-white/30">
+              <div className="text-xs text-white/40">
                 ({formatExp(result.remaining)})
               </div>
             </div>
@@ -276,7 +276,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
                 {result.gamesNeeded.toLocaleString()}
                 <span className="text-sm font-normal text-white/40 ml-1">판</span>
               </div>
-              <div className="text-xs text-white/25 mt-0.5">
+              <div className="text-xs text-white/40 mt-0.5">
                 게임당 {expPerGame.toLocaleString()} EXP 기준
               </div>
             </div>
@@ -284,7 +284,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
 
           {result.totalNeeded > 0 && (
             <div className="mb-5">
-              <div className="flex justify-between text-xs text-white/30 mb-1">
+              <div className="flex justify-between text-xs text-white/40 mb-1">
                 <span>진행률</span>
                 <span>
                   {((1 - result.remaining / result.totalNeeded) * 100).toFixed(1)}%
@@ -309,7 +309,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
               <div className="max-h-[300px] overflow-y-auto rounded-lg border border-white/5">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-white/5 text-xs text-white/30">
+                    <tr className="border-b border-white/5 text-xs text-white/40">
                       <th className="px-3 py-2 text-left">구간</th>
                       <th className="px-3 py-2 text-right">필요 경험치</th>
                     </tr>
@@ -344,7 +344,7 @@ export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
         <div className="max-h-[400px] overflow-y-auto">
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-surface-card">
-              <tr className="border-b border-white/10 text-xs text-white/30">
+              <tr className="border-b border-white/10 text-xs text-white/40">
                 <th className="px-3 py-2 text-left">계급</th>
                 <th className="px-3 py-2 text-right">누적 경험치</th>
                 <th className="px-3 py-2 text-right">구간 경험치</th>

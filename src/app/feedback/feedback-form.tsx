@@ -56,7 +56,7 @@ export function FeedbackForm() {
         <div className="mt-4">
           <button
             onClick={() => setResult(null)}
-            className="text-sm text-white/30 hover:text-white/60 transition-colors"
+            className="text-sm text-white/40 hover:text-white/60 transition-colors"
           >
             다른 건의 작성하기
           </button>
@@ -89,7 +89,7 @@ export function FeedbackForm() {
                 className="sr-only"
               />
               <div className="text-sm font-medium text-white/80">{cat.label}</div>
-              <div className="text-[10px] text-white/30 mt-0.5">{cat.desc}</div>
+              <div className="text-[10px] text-white/40 mt-0.5">{cat.desc}</div>
             </label>
           ))}
         </div>
@@ -98,7 +98,7 @@ export function FeedbackForm() {
       {/* Nickname */}
       <div>
         <label htmlFor="nickname" className="mb-1.5 block text-sm font-medium text-white/50">
-          닉네임 <span className="text-white/20">(선택)</span>
+          닉네임 <span className="text-white/40">(선택)</span>
         </label>
         <input
           id="nickname"
@@ -166,7 +166,7 @@ export function FeedbackForm() {
         {pending ? "전송 중..." : "건의하기"}
       </button>
 
-      <p className="text-[11px] text-white/20 text-center">
+      <p className="text-[11px] text-white/40 text-center">
         건의 내용은 GitHub Issues에 등록됩니다. 개인정보를 포함하지 마세요.
       </p>
     </form>

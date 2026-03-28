@@ -207,7 +207,7 @@ function StoryViewer({
       <div className={`shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-2 ${barClass}`}>
         <div className="min-w-0">
           <h2 className="text-sm font-bold text-white/90 truncate">{story.subject}</h2>
-          <p className="text-[11px] text-white/30">{formatDate(story.openDt)}</p>
+          <p className="text-[11px] text-white/40">{formatDate(story.openDt)}</p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onClose(); }}
@@ -249,7 +249,7 @@ function StoryViewer({
         <div className="py-12 text-center space-y-4" onClick={(e) => e.stopPropagation()}>
           {hasNext ? (
             <>
-              <p className="text-xs text-white/30">다음 이야기</p>
+              <p className="text-xs text-white/40">다음 이야기</p>
               <button
                 onClick={onNext}
                 className="rounded-xl bg-teal-600 px-8 py-3.5 text-sm font-medium text-white hover:bg-teal-500 transition-colors"
@@ -258,7 +258,7 @@ function StoryViewer({
               </button>
             </>
           ) : (
-            <p className="text-sm text-white/30">마지막 화입니다</p>
+            <p className="text-sm text-white/40">마지막 화입니다</p>
           )}
           <div className="flex items-center justify-center gap-3">
             <button
@@ -318,7 +318,7 @@ function StoryViewer({
           >
             ← 이전화
           </button>
-          <span className="text-[10px] text-white/20 tabular-nums">{Math.round(scrollProgress * 100)}%</span>
+          <span className="text-[10px] text-white/40 tabular-nums">{Math.round(scrollProgress * 100)}%</span>
           <button
             onClick={() => { if (hasNext) onNext(); }}
             disabled={!hasNext}
@@ -332,12 +332,16 @@ function StoryViewer({
   );
 }
 
-export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
+export function StoryTimeline({ stories, initialTag }: { stories: StoryItem[]; initialTag?: string }) {
   const [catFilter, setCatFilter] = useState<number | null>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialTag ?? "");
   const [viewingId, setViewingId] = useState<number | null>(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [readIds, setReadIds] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (initialTag !== undefined) setSearch(initialTag);
+  }, [initialTag]);
 
   useEffect(() => {
     db.stories.getAll().then((entries) => setReadIds(new Set(entries.map((e) => e.id))));
@@ -483,7 +487,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
           onChange={(e) => setSearch(e.target.value)}
           className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
-        <span className="text-xs text-white/30">{filtered.length}개</span>
+        <span className="text-xs text-white/40">{filtered.length}개</span>
       </div>
 
       {/* Timeline */}
@@ -536,7 +540,7 @@ export function StoryTimeline({ stories }: { stories: StoryItem[] }) {
                         >
                           {STORY_CATEGORY_LABEL[s.category]}
                         </span>
-                        <span className="text-[11px] text-white/30">
+                        <span className="text-[11px] text-white/40">
                           {formatDate(s.openDt)}
                         </span>
                       </div>

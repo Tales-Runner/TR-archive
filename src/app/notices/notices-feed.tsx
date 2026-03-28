@@ -97,7 +97,7 @@ export function NoticesFeed() {
 
   if (error) {
     return (
-      <div className="text-center py-12 text-white/30 text-sm">
+      <div className="text-center py-12 text-white/40 text-sm">
         공지사항을 불러올 수 없습니다.{" "}
         <a
           href={`${SITE_BASE}/news/notices`}
@@ -137,7 +137,7 @@ export function NoticesFeed() {
           onChange={(e) => setSearch(e.target.value)}
           className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
-        <span className="text-xs text-white/30">{filtered.length}개</span>
+        <span className="text-xs text-white/40">{filtered.length}개</span>
       </div>
 
       {/* List */}
@@ -164,7 +164,7 @@ export function NoticesFeed() {
             <span className="min-w-0 flex-1 text-sm text-white/80 truncate">
               {n.subject}
             </span>
-            <span className="shrink-0 text-xs text-white/25 tabular-nums">
+            <span className="shrink-0 text-xs text-white/40 tabular-nums">
               {formatIsoDate(n.createdAt)}
             </span>
           </a>

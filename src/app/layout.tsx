@@ -113,6 +113,11 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#2dd4bf" />
+        <link
+          rel="stylesheet"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
       </head>
       <body className="min-h-full flex flex-col bg-[#0f0b1a] overflow-x-hidden">
         <ToastProvider>
@@ -143,7 +148,7 @@ export default function RootLayout({
         </main>
         <footer className="border-t border-white/5 bg-[#0f0b1a] py-6">
           <div className="mx-auto max-w-6xl px-4 flex flex-col items-center gap-3">
-            <div className="flex items-center gap-4 text-white/30">
+            <div className="flex items-center gap-4 text-white/40">
               <a href="https://www.youtube.com/@rhaon_tr_official" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition-colors" aria-label="YouTube">
                 <YouTubeIcon className="h-[18px] w-[18px]" />
               </a>
@@ -157,7 +162,7 @@ export default function RootLayout({
                 <WebIcon className="h-4 w-4" />
               </a>
             </div>
-            <p className="text-xs text-white/25">
+            <p className="text-xs text-white/40">
               비공식 아카이브 &middot; 감정 에너지로 빚어낸 기록들 &middot; 엘림스 스마일의 비공식 아카이브
             </p>
           </div>

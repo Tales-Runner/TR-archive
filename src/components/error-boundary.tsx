@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <p className="text-sm text-white/50 mb-1">
             페이지를 불러오는 중 오류가 발생했습니다
           </p>
-          <p className="text-xs text-white/25 mb-4">
+          <p className="text-xs text-white/40 mb-4">
             새로고침하거나 아래 버튼을 눌러주세요
           </p>
           <button

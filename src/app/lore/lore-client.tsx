@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { StoryArc } from "@/data/lore";
 
 function ArcCard({ arc, isOpen, onToggle }: { arc: StoryArc; isOpen: boolean; onToggle: () => void }) {
@@ -18,7 +19,7 @@ function ArcCard({ arc, isOpen, onToggle }: { arc: StoryArc; isOpen: boolean; on
           <h3 className="text-sm font-bold text-white/90 group-hover:text-teal-300 transition-colors">
             {arc.title}
           </h3>
-          <span className="text-[10px] text-white/30">{arc.episodes}화</span>
+          <span className="text-[10px] text-white/40">{arc.episodes}화</span>
           {arc.hasVideo && (
             <span className="rounded-full bg-blue-500/20 px-1.5 py-0.5 text-[10px] text-blue-300">영상</span>
           )}
@@ -38,7 +39,16 @@ function ArcCard({ arc, isOpen, onToggle }: { arc: StoryArc; isOpen: boolean; on
         <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.02] p-4 animate-fade-in">
           <p className="text-sm text-white/70 leading-relaxed mb-4">{arc.summary}</p>
 
-          {/* Elims Commentary */}
+          {arc.storyTags.length > 0 && (
+            <Link
+              href={`/stories?tag=${encodeURIComponent(arc.storyTags[0])}`}
+              className="text-xs text-teal-400 hover:text-teal-300 transition-colors"
+            >
+              관련 스토리 보기 →
+            </Link>
+          )}
+
+          {/* 감초 대사 — 캐릭터 해석 재검토 후 복원 예정
           <div className="border-t border-white/5 pt-3 space-y-2">
             <div className="flex gap-2">
               <span className="shrink-0 text-[10px] font-bold text-teal-400">엘림스</span>
@@ -51,6 +61,7 @@ function ArcCard({ arc, isOpen, onToggle }: { arc: StoryArc; isOpen: boolean; on
               </div>
             )}
           </div>
+          */}
         </div>
       )}
     </div>

@@ -138,7 +138,7 @@ export function MapCatalog({
           onChange={(e) => setSearch(e.target.value)}
           className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50 sm:text-sm sm:py-1.5"
         />
-        <span className="text-xs text-white/30">{filtered.length}개</span>
+        <span className="text-xs text-white/40">{filtered.length}개</span>
       </div>
 
       {/* Detail modal */}
@@ -168,7 +168,7 @@ export function MapCatalog({
                   {typeName(selected.mapTypeCd)}
                 </span>
               )}
-              <span className="text-xs text-white/30">
+              <span className="text-xs text-white/40">
                 {formatDate(selected.openDt)}
               </span>
             </div>
@@ -227,7 +227,7 @@ export function MapCatalog({
                 {selected.hashTagSubject.split(",").map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/30"
+                    className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/40"
                   >
                     {tag.trim()}
                   </span>
@@ -269,7 +269,7 @@ export function MapCatalog({
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-white/30">
+                <p className="text-[11px] text-white/40">
                   {formatDate(m.openDt)}
                 </p>
               </div>

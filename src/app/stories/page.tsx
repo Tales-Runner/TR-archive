@@ -13,7 +13,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function StoriesPage() {
+export default async function StoriesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { tag } = await searchParams;
+  const initialTag = typeof tag === "string" ? tag : undefined;
   const stories = storiesJson as StoryItem[];
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -25,7 +31,7 @@ export default function StoriesPage() {
         elims="여태까지의 이벤트 스토리를 모아 둔 거야. 공식에선 모바일로 보면 깨지던데... 내가 고쳐놨지."
         r="...세로로 스크롤하면 읽을 수 있어요."
       />
-      <StoryTimeline stories={stories} />
+      <StoryTimeline stories={stories} initialTag={initialTag} />
     </div>
   );
 }
