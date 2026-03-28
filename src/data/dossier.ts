@@ -654,9 +654,13 @@ export const DOSSIERS: Dossier[] = [
   },
 ];
 
+const DOSSIER_MAP = new Map<number, Dossier>(
+  DOSSIERS.map((d) => [d.characterId, d]),
+);
+
 /** characterId로 도시에 찾기 */
 export function getDossier(characterId: number): Dossier | undefined {
-  return DOSSIERS.find((d) => d.characterId === characterId);
+  return DOSSIER_MAP.get(characterId);
 }
 
 /** 해당 캐릭터와 관계가 있는 다른 캐릭터 ID 목록 */
