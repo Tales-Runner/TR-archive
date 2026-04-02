@@ -15,33 +15,33 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
-  // Close on route change
-  useEffect(() => {
+  // Close menus on route change — adjust state when prop changes
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setOpenGroup(null);
     setMobileOpen(false);
-  }, [pathname]);
+  }
 
-  // Close on outside click
+  // Close on outside click and Escape key
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenGroup(null);
       }
     }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
-
-  // Close on Escape
-  useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setOpenGroup(null);
         setMobileOpen(false);
       }
     }
+    document.addEventListener("mousedown", onClickOutside);
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKey);
+    };
   }, []);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");

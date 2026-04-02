@@ -174,12 +174,15 @@ export function MapCatalog({
             </div>
 
             {selected.thumbnail && isSafeImageUrl(selected.thumbnail) && (
-              <img
-                src={selected.thumbnail}
-                alt={selected.subject}
-                className="mb-4 w-full rounded-xl"
-                loading="lazy"
-              />
+              <div className="relative mb-4 w-full aspect-video">
+                <Image
+                  src={selected.thumbnail}
+                  alt={selected.subject}
+                  fill
+                  sizes="(max-width: 672px) 100vw, 672px"
+                  className="rounded-xl object-cover"
+                />
+              </div>
             )}
 
             {selected.summary && (

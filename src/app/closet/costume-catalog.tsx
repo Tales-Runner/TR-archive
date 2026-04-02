@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { CostumeItem } from "@/lib/types";
@@ -63,23 +63,21 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
     return list;
   }, [costumes, yearFilter, debouncedSearch, sortBy]);
 
+  const closeModal = useCallback(() => {
+    setSelectedId(null);
+    setActiveVideoId(null);
+    videoRefs.current.clear();
+  }, []);
+
   // Close modal on Escape
   useEffect(() => {
     if (selectedId === null) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setSelectedId(null);
+      if (e.key === "Escape") closeModal();
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [selectedId]);
-
-  // Reset active video when modal closes
-  useEffect(() => {
-    if (selectedId === null) {
-      setActiveVideoId(null);
-      videoRefs.current.clear();
-    }
-  }, [selectedId]);
+  }, [selectedId, closeModal]);
 
   const selected = selectedId !== null ? costumes.find((c) => c.id === selectedId) : null;
 
@@ -142,7 +140,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           role="dialog"
           aria-modal="true"
-          onClick={() => setSelectedId(null)}
+          onClick={closeModal}
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -179,7 +177,7 @@ export function CostumeCatalog({ costumes }: { costumes: CostumeItem[] }) {
                 </button>
               )}
               <button
-                onClick={() => setSelectedId(null)}
+                onClick={closeModal}
                 className="rounded-lg bg-black/50 px-3 py-1 text-sm text-white/40 hover:bg-white/10 hover:text-white/70"
               >
                 닫기

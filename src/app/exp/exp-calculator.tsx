@@ -45,8 +45,6 @@ function ColorBar({ colors, value, onChange }: { colors: typeof RANK_COLORS; val
 }
 
 export function ExpCalculator({ levels }: { levels: LevelEntry[] }) {
-  const maxLv = levels[levels.length - 1].level;
-
   // Current level = rank + color
   const [curRankIdx, setCurRankIdx] = useState(0);
   const [curColorIdx, setCurColorIdx] = useState(0);

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { SEARCH_TYPE_COLORS } from "@/lib/constants";
 import { isSafeImageUrl } from "@/lib/format";
 
@@ -35,10 +36,12 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
       .slice(0, MAX_VISIBLE);
   }, [query, index]);
 
-  // Reset selection when query changes
-  useEffect(() => {
+  // Reset selection when query changes — tracked via previous value in state
+  const [prevQuery, setPrevQuery] = useState(query);
+  if (prevQuery !== query) {
+    setPrevQuery(query);
     setSelectedIndex(-1);
-  }, [query]);
+  }
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -154,7 +157,7 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
                     }`}
                   >
                     {r.img && isSafeImageUrl(r.img) ? (
-                      <img src={r.img} alt="" width={24} height={24} className="rounded-full shrink-0" loading="lazy" />
+                      <Image src={r.img} alt="" width={24} height={24} className="rounded-full shrink-0" />
                     ) : (
                       <div className="w-6 h-6 rounded-full bg-white/5 shrink-0" />
                     )}

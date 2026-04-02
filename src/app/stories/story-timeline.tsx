@@ -119,11 +119,16 @@ function StoryViewer({
     return () => clearTimeout(autoHideTimerRef.current);
   }, []);
 
-  // Reset on episode change
+  // Reset on episode change — adjust state when prop changes
+  const [prevStoryId, setPrevStoryId] = useState(story.id);
+  if (prevStoryId !== story.id) {
+    setPrevStoryId(story.id);
+    setScrollProgress(0);
+  }
+
+  // Restore scroll position and sync read status on episode change
   useEffect(() => {
     markedReadRef.current = !!isRead;
-    setScrollProgress(0);
-    // Restore scroll position
     db.stories.get(story.id).then((entry) => {
       const progress = entry?.scrollProgress;
       if (typeof progress === "number" && progress > 0.05) {
@@ -339,9 +344,12 @@ export function StoryTimeline({ stories, initialTag }: { stories: StoryItem[]; i
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [readIds, setReadIds] = useState<Set<number>>(new Set());
 
-  useEffect(() => {
+  // Sync search with initialTag prop changes
+  const [prevInitialTag, setPrevInitialTag] = useState(initialTag);
+  if (prevInitialTag !== initialTag) {
+    setPrevInitialTag(initialTag);
     if (initialTag !== undefined) setSearch(initialTag);
-  }, [initialTag]);
+  }
 
   useEffect(() => {
     db.stories.getAll().then((entries) => setReadIds(new Set(entries.map((e) => e.id))));
@@ -375,10 +383,14 @@ export function StoryTimeline({ stories, initialTag }: { stories: StoryItem[]; i
     return list;
   }, [stories, catFilter, debouncedSearch]);
 
-  // Reset pagination when filter changes
-  useEffect(() => {
+  // Reset pagination when filter changes — adjust state when deps change
+  const [prevCatFilter, setPrevCatFilter] = useState(catFilter);
+  const [prevSearch, setPrevSearch] = useState(search);
+  if (prevCatFilter !== catFilter || prevSearch !== search) {
+    setPrevCatFilter(catFilter);
+    setPrevSearch(search);
     setVisibleCount(PAGE_SIZE);
-  }, [catFilter, search]);
+  }
 
   const flatVisible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
   const hasMore = visibleCount < filtered.length;
