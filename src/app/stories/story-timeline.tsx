@@ -295,6 +295,7 @@ function StoryViewer({
     setZoomIdx(0);
     setShowDrawer(false);
     setShowSettings(false);
+    markedReadRef.current = !!isRead;
   }
 
   // Restore scroll + toast
@@ -313,7 +314,7 @@ function StoryViewer({
         scrollRef.current?.scrollTo(0, 0);
       }
     });
-  }, [story.id, isRead, showToast]);
+  }, [story.id, showToast]);
 
   // URL sync
   useEffect(() => {
@@ -415,7 +416,7 @@ function StoryViewer({
     <div className="fixed inset-0 z-[70] flex flex-col bg-[#0a0812]">
       {/* Top bar */}
       <div
-        className={`shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-2 ${barClass}`}
+        className={`absolute top-0 left-0 right-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-2 ${barClass}`}
       >
         <div className="min-w-0">
           <h2 className="text-sm font-bold text-white/90 truncate">
@@ -520,7 +521,7 @@ function StoryViewer({
 
       {/* Bottom nav bar */}
       <div
-        className={`shrink-0 border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md ${barClass}`}
+        className={`absolute bottom-0 left-0 right-0 z-10 border-t border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md ${barClass}`}
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -969,7 +970,7 @@ export function StoryTimeline({
             <option value="">시리즈 전체</option>
             {seriesOptions.map((s) => (
               <option key={s.name} value={s.name}>
-                {s.name} ({s.count})
+                {s.name}
               </option>
             ))}
           </select>
