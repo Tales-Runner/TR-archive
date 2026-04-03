@@ -131,7 +131,7 @@ function EpisodeDrawer({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[60]" onClick={onClose}>
+    <div className="fixed inset-0 z-[70]" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 animate-fade-in" />
       <div
         className="absolute bottom-0 left-0 right-0 max-h-[60vh] rounded-t-2xl bg-[#13101f] border-t border-white/10 overflow-hidden animate-slide-up"
@@ -409,7 +409,7 @@ function StoryViewer({
   const barClass = barVisible ? "viewer-bar-visible" : "viewer-bar-hidden";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0812]">
+    <div className="fixed inset-0 z-[70] flex flex-col bg-[#0a0812]">
       {/* Top bar */}
       <div
         className={`shrink-0 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-2 ${barClass}`}
@@ -632,7 +632,7 @@ function StoryViewer({
 
       {/* Viewer toast (positioned at top) */}
       {viewerToast && (
-        <div className="fixed top-14 left-0 right-0 z-[60] flex justify-center pointer-events-none">
+        <div className="fixed top-14 left-0 right-0 z-[70] flex justify-center pointer-events-none">
           <div className="rounded-lg border border-white/10 bg-[#1a1530]/95 backdrop-blur-md px-4 py-2 text-sm text-white/80 shadow-lg animate-fade-in">
             {viewerToast}
           </div>
@@ -653,7 +653,7 @@ function StoryViewer({
       {/* Settings popover */}
       {showSettings && (
         <div
-          className="fixed inset-0 z-[60]"
+          className="fixed inset-0 z-[70]"
           onClick={() => setShowSettings(false)}
         >
           <div
