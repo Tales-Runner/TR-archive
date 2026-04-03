@@ -18,8 +18,11 @@ export default async function StoriesPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { tag } = await searchParams;
+  const { tag, story } = await searchParams;
   const initialTag = typeof tag === "string" ? tag : undefined;
+  const storyParam = typeof story === "string" ? Number(story) : undefined;
+  const initialStoryId =
+    storyParam && !isNaN(storyParam) ? storyParam : undefined;
   const stories = storiesJson as StoryItem[];
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -31,7 +34,11 @@ export default async function StoriesPage({
         elims="여태까지의 이벤트 스토리를 모아 둔 거야. 공식에선 모바일로 보면 깨지던데... 내가 고쳐놨지."
         r="...세로로 스크롤하면 읽을 수 있어요."
       />
-      <StoryTimeline stories={stories} initialTag={initialTag} />
+      <StoryTimeline
+        stories={stories}
+        initialTag={initialTag}
+        initialStoryId={initialStoryId}
+      />
     </div>
   );
 }
