@@ -239,7 +239,17 @@ function StoryViewer({
   const [showDrawer, setShowDrawer] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [zoomIdx, setZoomIdx] = useState(0);
-  const [brightness, setBrightness] = useState(100);
+  const [brightness, setBrightness] = useState(() => {
+    try {
+      const saved =
+        typeof window !== "undefined"
+          ? localStorage.getItem(BRIGHTNESS_KEY)
+          : null;
+      return saved ? Number(saved) : 100;
+    } catch {
+      return 100;
+    }
+  });
   const [viewerToast, setViewerToast] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -254,14 +264,6 @@ function StoryViewer({
     setViewerToast(msg);
     clearTimeout(toastTimerRef.current);
     toastTimerRef.current = setTimeout(() => setViewerToast(null), 2000);
-  }, []);
-
-  // Load brightness
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(BRIGHTNESS_KEY);
-      if (saved) setBrightness(Number(saved));
-    } catch {}
   }, []);
 
   const handleBrightness = useCallback((v: number) => {
@@ -333,8 +335,9 @@ function StoryViewer({
   // Save scroll on unmount
   useEffect(() => {
     const storyId = story.id;
+    const scrollEl = scrollRef.current;
     return () => {
-      const el = scrollRef.current;
+      const el = scrollEl;
       if (!el) return;
       const progress =
         el.scrollTop / Math.max(el.scrollHeight - el.clientHeight, 1);
