@@ -6,10 +6,11 @@
  *   costumes { id, addedAt, memo?, status: "owned"|"wishlist" }
  *   stories  { id, readAt }
  *   maps     { id, clearedAt?, personalBest? }
+ *   profile  { id: "me", nickname, avatarUrl?, characterId? }
  */
 
 const DB_NAME = "elims-archive";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export interface RunnerEntry {
   id: number;
@@ -37,7 +38,16 @@ export interface MapEntry {
   personalBest: string;
 }
 
-type StoreName = "runners" | "costumes" | "stories" | "maps";
+export interface ProfileEntry {
+  id: "me";
+  nickname: string;
+  avatarUrl: string;
+  characterId: number | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+type StoreName = "runners" | "costumes" | "stories" | "maps" | "profile";
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -59,6 +69,9 @@ function open(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("maps")) {
         db.createObjectStore("maps", { keyPath: "id" });
       }
+      if (!db.objectStoreNames.contains("profile")) {
+        db.createObjectStore("profile", { keyPath: "id" });
+      }
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -78,7 +91,7 @@ async function getAll<T>(store: StoreName): Promise<T[]> {
   });
 }
 
-async function get<T>(store: StoreName, id: number): Promise<T | undefined> {
+async function get<T>(store: StoreName, id: number | string): Promise<T | undefined> {
   const db = await open();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, "readonly");
@@ -98,7 +111,19 @@ async function put<T>(store: StoreName, value: T): Promise<void> {
   });
 }
 
-async function remove(store: StoreName, id: number): Promise<void> {
+async function putAll<T>(store: StoreName, values: T[]): Promise<void> {
+  if (values.length === 0) return;
+  const idb = await open();
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(store, "readwrite");
+    const os = tx.objectStore(store);
+    for (const v of values) os.put(v);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function remove(store: StoreName, id: number | string): Promise<void> {
   const db = await open();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, "readwrite");
@@ -135,31 +160,39 @@ export const db = {
     put: (entry: MapEntry) => put("maps", entry),
     remove: (id: number) => remove("maps", id),
   },
+  profile: {
+    get: () => get<ProfileEntry>("profile", "me"),
+    put: (entry: ProfileEntry) => put("profile", entry),
+    remove: () => remove("profile", "me"),
+  },
 
   /** 전체 데이터 JSON export (백업/공유용) */
   async exportAll() {
-    const [runners, costumes, stories, maps] = await Promise.all([
+    const [runners, costumes, stories, maps, profile] = await Promise.all([
       getAll<RunnerEntry>("runners"),
       getAll<CostumeEntry>("costumes"),
       getAll<StoryEntry>("stories"),
       getAll<MapEntry>("maps"),
+      get<ProfileEntry>("profile", "me"),
     ]);
-    return { runners, costumes, stories, maps, exportedAt: Date.now() };
+    return { runners, costumes, stories, maps, profile, exportedAt: Date.now() };
   },
 
-  /** JSON import (복원용) */
+  /** JSON import (복원용) — 스토어별 단일 트랜잭션으로 배치 */
   async importAll(data: {
     runners?: RunnerEntry[];
     costumes?: CostumeEntry[];
     stories?: StoryEntry[];
     maps?: MapEntry[];
+    profile?: ProfileEntry;
   }) {
-    const ops: Promise<void>[] = [];
-    for (const r of data.runners ?? []) ops.push(put("runners", r));
-    for (const c of data.costumes ?? []) ops.push(put("costumes", c));
-    for (const s of data.stories ?? []) ops.push(put("stories", s));
-    for (const m of data.maps ?? []) ops.push(put("maps", m));
-    await Promise.all(ops);
+    await Promise.all([
+      putAll("runners", data.runners ?? []),
+      putAll("costumes", data.costumes ?? []),
+      putAll("stories", data.stories ?? []),
+      putAll("maps", data.maps ?? []),
+      ...(data.profile ? [put("profile", data.profile)] : []),
+    ]);
   },
 };
 

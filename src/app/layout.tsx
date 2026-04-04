@@ -8,6 +8,8 @@ import { MaintenanceBanner } from "./maintenance-banner";
 import { ToastProvider } from "@/components/toast";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { ProfileButton } from "./profile-button";
+import { ProfileProvider } from "@/lib/use-profile";
 import { YouTubeIcon, TwitterIcon, InstagramIcon, WebIcon } from "@/components/icons";
 import charactersJson from "@/data/characters.json";
 import mapsJson from "@/data/maps.json";
@@ -96,6 +98,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/channels", label: "공식 채널" },
       { href: "/notices", label: "공지사항" },
       { href: "/feedback", label: "건의함" },
+      { href: "/my", label: "마이페이지" },
     ],
   },
 ];
@@ -127,6 +130,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#0f0b1a] overflow-x-hidden">
         <ToastProvider>
+        <ProfileProvider>
         <MaintenanceBanner />
         <header className="relative sticky top-0 z-50 border-b border-white/5 bg-[#0f0b1a]/80 backdrop-blur-md">
           <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 sm:gap-6 px-4">
@@ -144,8 +148,9 @@ export default function RootLayout({
               엘림스 스마일의 비공식 아카이브
             </Link>
             <NavMenu groups={NAV_GROUPS} />
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
               <GlobalSearch index={searchIndex} />
+              <ProfileButton />
             </div>
           </div>
         </header>
@@ -174,6 +179,7 @@ export default function RootLayout({
           </div>
         </footer>
         <ScrollToTop />
+        </ProfileProvider>
         </ToastProvider>
       </body>
     </html>
