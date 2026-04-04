@@ -36,6 +36,7 @@ export function ProfileProvider({ children }: { children: React.ReactNode }) {
         nickname: patch.nickname ?? prev?.nickname ?? "",
         avatarUrl: patch.avatarUrl ?? prev?.avatarUrl ?? "",
         characterId: patch.characterId !== undefined ? patch.characterId : (prev?.characterId ?? null),
+        level: patch.level !== undefined ? patch.level : (prev?.level ?? null),
         createdAt: prev?.createdAt ?? now,
         updatedAt: now,
       };

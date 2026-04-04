@@ -43,6 +43,7 @@ export interface ProfileEntry {
   nickname: string;
   avatarUrl: string;
   characterId: number | null;
+  level: number | null;
   createdAt: number;
   updatedAt: number;
 }
