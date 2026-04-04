@@ -9,11 +9,17 @@ import { db } from "@/lib/db";
 import type { RunnerEntry, CostumeEntry, StoryEntry, MapEntry } from "@/lib/db";
 import { useToast } from "@/components/toast";
 import { EmptyState } from "@/components/empty-state";
+import { HeartIcon, XIcon } from "@/components/icons";
 import { formatDate } from "@/lib/format";
 import { getLevelRank } from "@/lib/constants";
 import type { Character, CostumeItem, StoryItem, MapItem } from "@/lib/types";
 
-// ── Avatar Picker ────────────────────────────────────
+function formatTimestamp(ts: number) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// ── Avatar Picker ─────────────────────��──────────────
 
 function AvatarPicker({
   characters,
@@ -50,7 +56,7 @@ function AvatarPicker({
   );
 }
 
-// ── Level Badge ──────────────────────────────────────
+// ── Level Badge ───────���──────────────────────────────
 
 function LevelBadge({ level }: { level: number }) {
   const { rank, color, hex } = getLevelRank(level);
@@ -68,7 +74,7 @@ function LevelBadge({ level }: { level: number }) {
   );
 }
 
-// ── Profile Card ─────────────────────────────────────
+// ── Profile Card ────���────────────────────────────────
 
 function ProfileSection({
   characters,
@@ -96,15 +102,18 @@ function ProfileSection({
       toast("닉네임을 입력해 주세요");
       return;
     }
-    const lvl = level.trim() ? Math.min(126, Math.max(1, parseInt(level))) : null;
+    const parsed = level.trim() ? parseInt(level) : null;
+    const validLevel = parsed !== null && !isNaN(parsed)
+      ? Math.min(126, Math.max(1, parsed))
+      : null;
     await save({
       nickname: nickname.trim(),
       avatarUrl,
       characterId: charId,
-      level: isNaN(lvl as number) ? null : lvl,
+      level: validLevel,
     });
     setEditing(false);
-    toast("프로필이 저장되었습니다");
+    toast("프로필��� 저장되었습니다");
   }
 
   if (!ready) {
@@ -122,6 +131,9 @@ function ProfileSection({
   }
 
   if (editing) {
+    const parsedLevel = parseInt(level);
+    const showPreview = !isNaN(parsedLevel) && parsedLevel >= 1 && parsedLevel <= 126;
+
     return (
       <div className="rounded-2xl border border-white/10 bg-surface-card p-6 animate-fade-in space-y-4">
         <h2 className="text-lg font-bold text-white/90">프로필 수정</h2>
@@ -147,9 +159,9 @@ function ProfileSection({
             placeholder="현재 레벨..."
             className="w-32 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 placeholder:text-white/20 outline-none focus:border-teal-500/50"
           />
-          {level && parseInt(level) >= 1 && parseInt(level) <= 126 && (
+          {showPreview && (
             <div className="mt-1.5">
-              <LevelBadge level={parseInt(level)} />
+              <LevelBadge level={parsedLevel} />
             </div>
           )}
         </div>
@@ -194,9 +206,6 @@ function ProfileSection({
     );
   }
 
-  const createdDate = new Date(profile.createdAt);
-  const dateStr = `${createdDate.getFullYear()}.${String(createdDate.getMonth() + 1).padStart(2, "0")}.${String(createdDate.getDate()).padStart(2, "0")}`;
-
   return (
     <div className="rounded-2xl border border-white/10 bg-surface-card p-6 animate-fade-in">
       <div className="flex items-center gap-4">
@@ -219,7 +228,7 @@ function ProfileSection({
           </h2>
           {profile.level && <LevelBadge level={profile.level} />}
           <p className="text-xs text-white/40 mt-1">
-            {dateStr}부터 기록 중
+            {formatTimestamp(profile.createdAt)}부터 기록 중
           </p>
         </div>
         <button
@@ -233,36 +242,21 @@ function ProfileSection({
   );
 }
 
-// ── Activity Dashboard ───────────────────────────────
+// ── Activity Dashboard ───────────���───────────────────
 
 function ActivityDashboard({
   totalStories,
   totalMaps,
+  storyEntries,
+  mapEntries,
+  favs,
 }: {
   totalStories: number;
   totalMaps: number;
+  storyEntries: StoryEntry[];
+  mapEntries: MapEntry[];
+  favs: ReturnType<typeof useFavorites>;
 }) {
-  const favs = useFavorites();
-  const [storyEntries, setStoryEntries] = useState<StoryEntry[]>([]);
-  const [mapEntries, setMapEntries] = useState<MapEntry[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    Promise.all([db.stories.getAll(), db.maps.getAll()]).then(
-      ([s, m]) => { setStoryEntries(s); setMapEntries(m); setLoaded(true); },
-    );
-  }, []);
-
-  if (!loaded || !favs.ready) {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-white/10 bg-surface-card p-4 h-20 skeleton" />
-        ))}
-      </div>
-    );
-  }
-
   const readStories = storyEntries.filter((s) => s.readAt > 0);
   const clearedMaps = mapEntries.filter((m) => m.clearedAt);
   const ownedCostumes = favs.costumes.filter((c) => c.status === "owned");
@@ -288,6 +282,7 @@ function ActivityDashboard({
     {
       label: "보유 코스튬",
       value: ownedCostumes.length,
+      total: undefined as number | undefined,
       sub: wishlistCostumes.length > 0 ? `위시 ${wishlistCostumes.length}` : undefined,
       color: "text-pink-400",
       bg: "bg-pink-500/10",
@@ -296,6 +291,7 @@ function ActivityDashboard({
     {
       label: "즐겨찾기 런너",
       value: favs.runners.length,
+      total: undefined as number | undefined,
       color: "text-teal-400",
       bg: "bg-teal-500/10",
       href: "/characters",
@@ -313,7 +309,7 @@ function ActivityDashboard({
           <p className="text-[11px] text-white/40 mb-1">{card.label}</p>
           <p className={`text-2xl font-bold ${card.color}`}>
             {card.value}
-            {"total" in card && card.total && (
+            {card.total != null && (
               <span className="text-sm font-normal text-white/20">
                 /{card.total}
               </span>
@@ -328,7 +324,7 @@ function ActivityDashboard({
   );
 }
 
-// ── Favorites Section ────────────────────────────────
+// ── Favorites Section ───────���────────────────────────
 
 type FavTab = "runners" | "costumes" | "stories" | "maps";
 
@@ -337,24 +333,24 @@ function FavoritesSection({
   costumes,
   stories,
   maps,
+  storyEntries,
+  mapEntries,
+  onStoryEntriesChange,
+  onMapEntriesChange,
+  favs,
 }: {
   characters: Character[];
   costumes: CostumeItem[];
   stories: StoryItem[];
   maps: MapItem[];
+  storyEntries: StoryEntry[];
+  mapEntries: MapEntry[];
+  onStoryEntriesChange: (fn: (prev: StoryEntry[]) => StoryEntry[]) => void;
+  onMapEntriesChange: (fn: (prev: MapEntry[]) => MapEntry[]) => void;
+  favs: ReturnType<typeof useFavorites>;
 }) {
-  const favs = useFavorites();
   const [tab, setTab] = useState<FavTab>("runners");
-  const [storyEntries, setStoryEntries] = useState<StoryEntry[]>([]);
-  const [mapEntries, setMapEntries] = useState<MapEntry[]>([]);
-  const [loaded, setLoaded] = useState(false);
   const toast = useToast();
-
-  useEffect(() => {
-    Promise.all([db.stories.getAll(), db.maps.getAll()]).then(
-      ([s, m]) => { setStoryEntries(s); setMapEntries(m); setLoaded(true); },
-    );
-  }, []);
 
   const charMap = useMemo(
     () => new Map(characters.map((c) => [c.id, c])),
@@ -411,28 +407,15 @@ function FavoritesSection({
 
   const removeStory = useCallback(async (id: number) => {
     await db.stories.remove(id);
-    setStoryEntries((prev) => prev.filter((s) => s.id !== id));
-    toast("읽음 기록을 삭제했습니다");
-  }, [toast]);
+    onStoryEntriesChange((prev) => prev.filter((s) => s.id !== id));
+    toast("읽음 기록을 삭제했습���다");
+  }, [toast, onStoryEntriesChange]);
 
   const removeMapRecord = useCallback(async (id: number) => {
     await db.maps.remove(id);
-    setMapEntries((prev) => prev.filter((m) => m.id !== id));
+    onMapEntriesChange((prev) => prev.filter((m) => m.id !== id));
     toast("맵 기록을 삭제했습니다");
-  }, [toast]);
-
-  if (!favs.ready || !loaded) {
-    return (
-      <div className="rounded-2xl border border-white/10 bg-surface-card p-6">
-        <div className="h-5 w-24 skeleton mb-4" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-20 skeleton" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  }, [toast, onMapEntriesChange]);
 
   const tabs: { key: FavTab; label: string; count: number }[] = [
     { key: "runners", label: "런너", count: favRunners.length },
@@ -470,7 +453,6 @@ function FavoritesSection({
             ))}
           </div>
 
-          {/* Runners */}
           {tab === "runners" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 stagger-grid">
               {favRunners.length === 0 ? (
@@ -520,9 +502,7 @@ function FavoritesSection({
                       className="shrink-0 rounded-lg p-1.5 text-white/20 hover:text-pink-400 hover:bg-white/5 transition-colors"
                       title="즐겨찾기 해제"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                      </svg>
+                      <HeartIcon className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))
@@ -530,11 +510,10 @@ function FavoritesSection({
             </div>
           )}
 
-          {/* Costumes */}
           {tab === "costumes" && (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 stagger-grid">
               {favCostumes.length === 0 ? (
-                <EmptyState message="즐겨찾기한 코스튬이 없습니다" />
+                <EmptyState message="즐겨찾기��� 코스튬이 없습니다" />
               ) : (
                 favCostumes.map(({ entry, costume }) => (
                   <div
@@ -557,7 +536,7 @@ function FavoritesSection({
                               : "bg-amber-600/80 text-white"
                           }`}
                         >
-                          {entry.status === "owned" ? "보유" : "위시"}
+                          {entry.status === "owned" ? "��유" : "위시"}
                         </span>
                       </div>
                       <div className="p-2">
@@ -570,13 +549,11 @@ function FavoritesSection({
                       </div>
                     </Link>
                     <button
-                      onClick={() => { favs.toggleCostume(entry.id); toast(`${costume.subject} 즐겨찾기 해제`); }}
+                      onClick={() => { favs.toggleCostume(entry.id); toast(`${costume.subject} ���겨찾기 해제`); }}
                       className="absolute top-1.5 right-1.5 rounded-full bg-black/50 p-1 text-white/30 hover:text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity"
                       title="즐겨찾기 해제"
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                      </svg>
+                      <HeartIcon className="h-3 w-3" />
                     </button>
                   </div>
                 ))
@@ -584,7 +561,6 @@ function FavoritesSection({
             </div>
           )}
 
-          {/* Stories */}
           {tab === "stories" && (
             <div className="space-y-2 stagger-grid">
               {readStories.length === 0 ? (
@@ -616,7 +592,7 @@ function FavoritesSection({
                       </Link>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-[10px] text-white/30">
-                          {new Date(entry.readAt).toLocaleDateString("ko-KR")}에 읽음
+                          {formatTimestamp(entry.readAt)}에 읽음
                         </span>
                         {typeof entry.scrollProgress === "number" && entry.scrollProgress > 0 && (
                           <div className="flex items-center gap-1">
@@ -638,9 +614,7 @@ function FavoritesSection({
                       className="shrink-0 rounded-lg p-1.5 text-white/20 hover:text-red-400 hover:bg-white/5 transition-colors"
                       title="읽음 기록 삭제"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
+                      <XIcon className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))
@@ -648,7 +622,6 @@ function FavoritesSection({
             </div>
           )}
 
-          {/* Maps */}
           {tab === "maps" && (
             <div className="space-y-2 stagger-grid">
               {mapRecords.length === 0 ? (
@@ -690,7 +663,7 @@ function FavoritesSection({
                         </span>
                         {entry.clearedAt && (
                           <span className="text-[10px] text-white/25">
-                            {new Date(entry.clearedAt).toLocaleDateString("ko-KR")}
+                            {formatTimestamp(entry.clearedAt)}
                           </span>
                         )}
                       </div>
@@ -700,9 +673,7 @@ function FavoritesSection({
                       className="shrink-0 rounded-lg p-1.5 text-white/20 hover:text-red-400 hover:bg-white/5 transition-colors"
                       title="기록 삭제"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
+                      <XIcon className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))
@@ -751,7 +722,7 @@ function DataSection() {
     <div className="rounded-2xl border border-white/10 bg-surface-card p-6 animate-fade-in">
       <h2 className="text-lg font-bold text-white/90 mb-1">데이터 관리</h2>
       <p className="text-xs text-white/40 mb-4">
-        프로필과 모든 기록을 JSON으로 백업하거나 복원할 수 있습니다
+        프로필과 모든 기록을 JSON으로 백업하거나 복원할 수 있��니다
       </p>
       <div className="flex gap-2">
         <button
@@ -791,6 +762,42 @@ export function MyPageClient({
   stories: StoryItem[];
   maps: MapItem[];
 }) {
+  const favs = useFavorites();
+  const [storyEntries, setStoryEntries] = useState<StoryEntry[]>([]);
+  const [mapEntries, setMapEntries] = useState<MapEntry[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    Promise.all([db.stories.getAll(), db.maps.getAll()]).then(
+      ([s, m]) => { setStoryEntries(s); setMapEntries(m); setLoaded(true); },
+    );
+  }, []);
+
+  if (!loaded || !favs.ready) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
+        <div>
+          <h1 className="mb-1 text-2xl font-bold text-accent-light">마이페이지</h1>
+          <p className="text-sm text-white/40">내 프로필, 기록, 즐겨찾기를 한곳에서 관리합니다</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-surface-card p-6">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 rounded-full skeleton" />
+            <div className="space-y-2 flex-1">
+              <div className="h-5 w-32 skeleton" />
+              <div className="h-3 w-48 skeleton" />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-white/10 bg-surface-card p-4 h-20 skeleton" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
       <div>
@@ -798,16 +805,27 @@ export function MyPageClient({
           마이페이지
         </h1>
         <p className="text-sm text-white/40">
-          내 프로필, 기록, 즐겨찾기를 한곳에서 관리합니다
+          내 프로필, 기���, 즐겨찾기를 ���곳에서 관리합니다
         </p>
       </div>
       <ProfileSection characters={characters} />
-      <ActivityDashboard totalStories={stories.length} totalMaps={maps.length} />
+      <ActivityDashboard
+        totalStories={stories.length}
+        totalMaps={maps.length}
+        storyEntries={storyEntries}
+        mapEntries={mapEntries}
+        favs={favs}
+      />
       <FavoritesSection
         characters={characters}
         costumes={costumes}
         stories={stories}
         maps={maps}
+        storyEntries={storyEntries}
+        mapEntries={mapEntries}
+        onStoryEntriesChange={setStoryEntries}
+        onMapEntriesChange={setMapEntries}
+        favs={favs}
       />
       <DataSection />
     </div>
