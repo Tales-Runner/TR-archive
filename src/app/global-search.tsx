@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { SEARCH_TYPE_COLORS } from "@/lib/constants";
 import { isSafeImageUrl } from "@/lib/format";
+import { useDocumentKeydown } from "@/lib/use-document-keydown";
 
 export interface SearchEntry {
   type: string;
@@ -43,8 +44,8 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
     setSelectedIndex(-1);
   }
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
+  useDocumentKeydown(
+    useCallback((e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setOpen(true);
@@ -53,10 +54,8 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
         setOpen(false);
         setQuery("");
       }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
+    }, []),
+  );
 
   useEffect(() => {
     if (open) inputRef.current?.focus();

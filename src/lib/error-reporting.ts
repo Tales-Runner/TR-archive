@@ -30,10 +30,9 @@ async function getSentry(): Promise<SentryLike | null> {
   _sentryChecked = true;
   if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return null;
   try {
-    // Dynamic require — only resolves when @sentry/nextjs is installed.
-    // Using a variable prevents TypeScript from resolving the module at compile time.
-    const mod = "@sentry/nextjs";
-    _sentry = await (Function(`return import("${mod}")`)() as Promise<SentryLike>);
+    // String concatenation prevents bundler static analysis for this optional dependency.
+    const mod = "@sentry/" + "nextjs";
+    _sentry = (await import(mod)) as unknown as SentryLike;
     return _sentry;
   } catch {
     // @sentry/nextjs is not installed — fall back silently

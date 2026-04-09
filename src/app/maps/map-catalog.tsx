@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { MapItem, MapType } from "@/lib/types";
 import { formatDate, youtubeId, isSafeImageUrl } from "@/lib/format";
 import { useDebouncedValue } from "@/lib/use-debounce";
+import { useDocumentKeydown } from "@/lib/use-document-keydown";
 import { db, type MapEntry } from "@/lib/db";
 import { EmptyState } from "@/components/empty-state";
 
@@ -74,14 +75,12 @@ export function MapCatalog({
   }, [maps, typeFilter, debouncedSearch, sortBy]);
 
   // Close modal on Escape
-  useEffect(() => {
-    if (selectedId === null) return;
-    function onKey(e: KeyboardEvent) {
+  useDocumentKeydown(
+    useCallback((e: KeyboardEvent) => {
+      if (selectedId === null) return;
       if (e.key === "Escape") setSelectedId(null);
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [selectedId]);
+    }, [selectedId]),
+  );
 
   const selected = selectedId !== null ? maps.find((m) => m.id === selectedId) : null;
 

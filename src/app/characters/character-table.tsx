@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Character, SortKey, SortDir } from "@/lib/types";
 import { CHARACTER_CATEGORY, CHARACTER_CATEGORY_LABEL, STAT_MAX, STAT_TOTAL_MAX } from "@/lib/constants";
 import { useDebouncedValue } from "@/lib/use-debounce";
+import { useDocumentKeydown } from "@/lib/use-document-keydown";
 import { useFavorites } from "@/lib/use-favorites";
 import { useToast } from "@/components/toast";
 import { Tooltip } from "@/components/tooltip";
@@ -390,17 +391,15 @@ export function CharacterTable({
   const favs = useFavorites();
 
   // Close modals on Escape
-  useEffect(() => {
-    if (selectedId === null && !showCompare) return;
-    function onKey(e: KeyboardEvent) {
+  useDocumentKeydown(
+    useCallback((e: KeyboardEvent) => {
+      if (selectedId === null && !showCompare) return;
       if (e.key === "Escape") {
         if (showCompare) setShowCompare(false);
         else setSelectedId(null);
       }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [selectedId, showCompare]);
+    }, [selectedId, showCompare]),
+  );
 
   function toggleCompare(id: number, e: React.MouseEvent) {
     e.stopPropagation();

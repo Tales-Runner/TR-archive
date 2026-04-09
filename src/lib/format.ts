@@ -3,9 +3,9 @@ export function formatDate(dt: string) {
   return `${dt.slice(0, 4)}.${dt.slice(4, 6)}.${dt.slice(6, 8)}`;
 }
 
-/** ISO date string → YYYY.MM.DD */
-export function formatIsoDate(iso: string) {
-  const d = new Date(iso);
+/** ISO date string or Unix timestamp → YYYY.MM.DD */
+export function formatIsoDate(value: string | number) {
+  const d = new Date(value);
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
 }
 
