@@ -35,7 +35,11 @@ export function buildSeriesMap(stories: StoryItem[]): Map<string, SeriesInfo> {
 export function getSeriesOptions(
   seriesMap: Map<string, SeriesInfo>,
 ): { name: string; count: number }[] {
-  return [...seriesMap.values()]
-    .map((s) => ({ name: s.name, count: s.episodes.length }))
-    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  const list = [...seriesMap.values()].map((s) => ({
+    name: s.name,
+    count: s.episodes.length,
+    latestDt: s.episodes[s.episodes.length - 1]?.openDt ?? "",
+  }));
+  list.sort((a, b) => b.latestDt.localeCompare(a.latestDt));
+  return list;
 }

@@ -184,18 +184,27 @@ export function StoryTimeline({
 
   const viewingStory =
     viewingId !== null ? stories.find((s) => s.id === viewingId) : null;
-  const viewingIdx = viewingStory
-    ? viewableList.findIndex((s) => s.id === viewingStory.id)
+
+  // Resolve navigation list: series episodes if multi-episode, else global viewable list
+  const viewingSeriesKey = viewingStory ? getSeriesKey(viewingStory) : "";
+  const viewingSeries = viewingSeriesKey ? seriesMap.get(viewingSeriesKey) : undefined;
+  const navList = viewingSeries && viewingSeries.episodes.length >= 2
+    ? viewingSeries.episodes
+    : viewableList;
+  const navIdx = viewingStory
+    ? navList.findIndex((s) => s.id === viewingStory.id)
     : -1;
+  const hasPrev = navIdx > 0;
+  const hasNext = navIdx >= 0 && navIdx < navList.length - 1;
+  const nextStory = hasNext ? navList[navIdx + 1] : undefined;
 
   const goPrev = useCallback(() => {
-    if (viewingIdx > 0) setViewingId(viewableList[viewingIdx - 1].id);
-  }, [viewingIdx, viewableList]);
+    if (hasPrev) setViewingId(navList[navIdx - 1].id);
+  }, [hasPrev, navList, navIdx]);
 
   const goNext = useCallback(() => {
-    if (viewingIdx < viewableList.length - 1)
-      setViewingId(viewableList[viewingIdx + 1].id);
-  }, [viewingIdx, viewableList]);
+    if (hasNext) setViewingId(navList[navIdx + 1].id);
+  }, [hasNext, navList, navIdx]);
 
   const openViewer = useCallback((id: number) => {
     setViewingId(id);
@@ -227,19 +236,16 @@ export function StoryTimeline({
           onClose={closeViewer}
           onPrev={goPrev}
           onNext={goNext}
-          hasPrev={viewingIdx > 0}
-          hasNext={viewingIdx < viewableList.length - 1}
-          seriesMap={seriesMap}
+          hasPrev={hasPrev}
+          hasNext={hasNext}
+          series={viewingSeries}
+          epIndex={navIdx}
           onJump={(id) => setViewingId(id)}
           isRead={readIds.has(viewingStory.id)}
           onMarkRead={() => {
             if (!readIds.has(viewingStory.id)) toggleRead(viewingStory.id);
           }}
-          nextStoryTitle={
-            viewingIdx < viewableList.length - 1
-              ? viewableList[viewingIdx + 1].subject
-              : undefined
-          }
+          nextStoryTitle={nextStory?.subject}
           readIds={readIds}
         />
       )}

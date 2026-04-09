@@ -8,7 +8,7 @@ import { db } from "@/lib/db";
 import { WebtoonImage } from "./webtoon-image";
 import { EpisodeDrawer } from "./episode-drawer";
 import type { SeriesInfo } from "./story-utils";
-import { BRIGHTNESS_KEY, ZOOM_LEVELS, getSeriesKey } from "./story-utils";
+import { BRIGHTNESS_KEY, ZOOM_LEVELS } from "./story-utils";
 
 export function StoryViewer({
   story,
@@ -17,7 +17,8 @@ export function StoryViewer({
   onNext,
   hasPrev,
   hasNext,
-  seriesMap,
+  series,
+  epIndex,
   onJump,
   isRead,
   onMarkRead,
@@ -30,7 +31,8 @@ export function StoryViewer({
   onNext: () => void;
   hasPrev: boolean;
   hasNext: boolean;
-  seriesMap: Map<string, SeriesInfo>;
+  series?: SeriesInfo;
+  epIndex: number;
   onJump: (id: number) => void;
   isRead?: boolean;
   onMarkRead?: () => void;
@@ -205,12 +207,6 @@ export function StoryViewer({
   const videoUrl = story.images.find((img) => img.movieUrl)?.movieUrl;
   const vid = videoUrl ? youtubeId(videoUrl.trim()) : null;
 
-  const currentKey = getSeriesKey(story);
-  const currentSeries = currentKey ? seriesMap.get(currentKey) : undefined;
-  const epIndex = currentSeries
-    ? currentSeries.episodes.findIndex((e) => e.id === story.id)
-    : -1;
-
   const barClass = barVisible ? "viewer-bar-visible" : "viewer-bar-hidden";
 
   return (
@@ -335,15 +331,15 @@ export function StoryViewer({
         </div>
 
         {/* Series/episode info — tappable row */}
-        {currentSeries && currentSeries.episodes.length >= 2 && (
+        {series && series.episodes.length >= 2 && (
           <button
             onClick={() => setShowDrawer(true)}
             className="w-full flex items-center justify-center gap-2 px-4 py-2 text-xs text-white/50 hover:text-white/70 hover:bg-white/5 transition-colors"
           >
-            <span className="truncate">{currentSeries.name}</span>
+            <span className="truncate">{series.name}</span>
             <span className="text-white/30">·</span>
             <span className="text-teal-400/70 shrink-0">
-              {epIndex + 1}/{currentSeries.episodes.length}화
+              {epIndex + 1}/{series.episodes.length}화
             </span>
             <svg
               className="w-3 h-3 text-white/30 shrink-0"
@@ -445,9 +441,9 @@ export function StoryViewer({
       )}
 
       {/* Episode drawer */}
-      {showDrawer && currentSeries && (
+      {showDrawer && series && (
         <EpisodeDrawer
-          series={currentSeries}
+          series={series}
           currentId={story.id}
           readIds={readIds}
           onSelect={onJump}
