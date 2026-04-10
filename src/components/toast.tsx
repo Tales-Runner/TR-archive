@@ -20,8 +20,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const timers = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
 
   useEffect(() => {
+    const currentTimers = timers.current;
     return () => {
-      for (const t of timers.current) clearTimeout(t);
+      for (const t of currentTimers) clearTimeout(t);
     };
   }, []);
 

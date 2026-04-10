@@ -102,9 +102,14 @@ export function StoryViewer({
     setShowSettings(false);
   }
 
-  // Restore scroll + toast
+  // Track read state — separated from scroll restore so isRead changes
+  // (from our own onMarkRead callback) don't re-trigger the DB fetch + toast.
   useEffect(() => {
     markedReadRef.current = !!isRead;
+  }, [story.id, isRead]);
+
+  // Restore scroll + toast on episode change
+  useEffect(() => {
     db.stories.get(story.id).then((entry) => {
       const progress = entry?.scrollProgress;
       if (typeof progress === "number" && progress > 0.05) {

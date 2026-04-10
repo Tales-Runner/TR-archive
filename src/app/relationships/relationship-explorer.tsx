@@ -179,7 +179,7 @@ export function RelationshipExplorer({
   const selectedDossier = selectedId !== null ? dossierMap.get(selectedId) : undefined;
 
   useEffect(() => {
-    if (selectedChar && cardRef.current) {
+    if (cardRef.current) {
       cardRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   }, [selectedId]);
