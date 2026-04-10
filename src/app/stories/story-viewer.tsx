@@ -100,7 +100,6 @@ export function StoryViewer({
     setZoomIdx(0);
     setShowDrawer(false);
     setShowSettings(false);
-    markedReadRef.current = !!isRead;
   }
 
   // Restore scroll + toast
