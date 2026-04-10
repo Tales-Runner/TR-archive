@@ -91,8 +91,6 @@ const MOTION_KEYS = [
   { key: "stunMotion", label: "스턴", desc: "스턴 지속 시간" },
 ] as const;
 
-type MotionKey = typeof MOTION_KEYS[number]["key"];
-
 /* ── Dashboard ───────────────────────────────────────── */
 
 export function StatsDashboard({ characters, maps, costumes, stories, probability, levels }: Props) {

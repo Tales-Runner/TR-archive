@@ -70,7 +70,10 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
 
   const currentItems = groups[selectedGroup] ?? [];
   const currentItem = currentItems[selectedItemIdx];
-  const transitions = currentItem ? getTransitions(currentItem) : [];
+  const transitions = useMemo(
+    () => (currentItem ? getTransitions(currentItem) : []),
+    [currentItem],
+  );
 
   const targetGrades = useMemo(() => {
     const set = new Set<string>();

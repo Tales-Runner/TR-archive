@@ -42,6 +42,10 @@ export function WebtoonImage({
       }}
     >
       {inView && (
+        // Webtoon 이미지는 가로 고정 세로 가변이고 원본 CDN이 리사이즈를
+        // 지원하지 않음. 프로젝트가 images.unoptimized:true 라 next/image는
+        // 래퍼 역할만 하고 기능상 이득 없음 → 네이티브 <img> 유지.
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
           alt={alt}

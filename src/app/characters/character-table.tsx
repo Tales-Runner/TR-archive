@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { Character, SortKey, SortDir } from "@/lib/types";
 import { CHARACTER_CATEGORY, CHARACTER_CATEGORY_LABEL, STAT_MAX, STAT_TOTAL_MAX } from "@/lib/constants";
 import { useDebouncedValue } from "@/lib/use-debounce";
