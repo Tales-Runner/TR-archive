@@ -74,7 +74,17 @@ function open(): Promise<IDBDatabase> {
         db.createObjectStore("profile", { keyPath: "id" });
       }
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      const db = req.result;
+      // Drop the cached connection if another tab triggers a version
+      // upgrade — the next call to open() will reconnect against the new
+      // schema instead of throwing InvalidStateError on every transaction.
+      db.onversionchange = () => {
+        db.close();
+        dbPromise = null;
+      };
+      resolve(db);
+    };
     req.onerror = () => reject(req.error);
   });
   return dbPromise;
@@ -231,5 +241,10 @@ export async function migrateFromLocalStorage(): Promise<void> {
 
     await Promise.all(ops);
     localStorage.removeItem(LEGACY_KEY);
-  } catch {}
+  } catch (err) {
+    // Migration is best-effort but a silent failure used to leave users
+    // with their localStorage favorites stranded — at least surface the
+    // reason in the dev console so it can be reproduced and fixed.
+    console.warn("[tr-archive] migrateFromLocalStorage failed:", err);
+  }
 }
