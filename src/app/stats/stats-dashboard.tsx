@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import type { Character, MapItem, CostumeItem, StoryItem, ProbabilityData } from "@/lib/types";
+import type { Character, MapItem, CostumeItem, StoryItem, ProbabilityCategoryMeta } from "@/lib/types";
 import { getLevelLabel, getLevelRank, MAP_TYPE_NAMES } from "@/lib/constants";
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
   maps: MapItem[];
   costumes: CostumeItem[];
   stories: StoryItem[];
-  probability: ProbabilityData;
+  probabilityMeta: ProbabilityCategoryMeta[];
   levels: { level: number; exp: number }[];
 }
 
@@ -93,7 +93,7 @@ const MOTION_KEYS = [
 
 /* ── Dashboard ───────────────────────────────────────── */
 
-export function StatsDashboard({ characters, maps, costumes, stories, probability, levels }: Props) {
+export function StatsDashboard({ characters, maps, costumes, stories, probabilityMeta, levels }: Props) {
   const [tab, setTab] = useState<"overview" | "characters" | "content" | "gacha" | "exp">("overview");
 
   const visibleChars = useMemo(() => characters.filter((c) => c.isView), [characters]);
@@ -219,20 +219,10 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
     return { yearCount, totalItems, maxYear };
   }, [costumes]);
 
-  const gachaStats = useMemo(() => {
-    const items = probability.itemList;
-    let lowestProb = 100, lowestName = "", lowestTarget = "";
-    for (const item of items) {
-      for (const t of item.itemList) {
-        if (t.targetNm && t.sourceNm !== "합계" && t.probability > 0 && t.probability < lowestProb) {
-          lowestProb = t.probability;
-          lowestName = item.itemNm;
-          lowestTarget = t.targetNm;
-        }
-      }
-    }
-    return { totalItems: items.length, lowestProb, lowestName, lowestTarget };
-  }, [probability]);
+  const gachaStats = {
+    totalItems: probabilityMeta.reduce((sum, cat) => sum + cat.itemCount, 0),
+    totalCategories: probabilityMeta.length,
+  };
 
   const levelStats = useMemo(() => {
     const maxLv = levels[levels.length - 1];
@@ -312,9 +302,9 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
               detail={`나머지 ${levels[levels.length - 1].level - levelStats.lv50percent}레벨이 또 다른 절반`}
             />
             <Trivia
-              q="가장 뽑기 힘든 등급은?"
-              a={`${gachaStats.lowestProb}%`}
-              detail={`${gachaStats.lowestTarget} — 약 ${Math.round(100 / gachaStats.lowestProb).toLocaleString()}회 시행`}
+              q="확률 데이터 카테고리 수는?"
+              a={`${gachaStats.totalCategories}종`}
+              detail={`총 ${gachaStats.totalItems.toLocaleString()}개 아이템 확률 수록`}
             />
           </div>
 
@@ -545,21 +535,15 @@ export function StatsDashboard({ characters, maps, costumes, stories, probabilit
       {/* ── 변경권 ───────────────────────────────── */}
       {tab === "gacha" && (
         <div className="space-y-6 stagger-grid">
-          <div className="rounded-xl border border-red-500/20 bg-gradient-to-br from-red-950/30 to-transparent p-5 text-center">
-            <div className="text-[10px] font-bold text-red-400/70 uppercase tracking-wider mb-2">최악의 확률</div>
-            <div className="text-4xl font-black text-red-300 tabular-nums mb-1">{gachaStats.lowestProb}%</div>
-            <div className="text-sm text-white/60">{gachaStats.lowestName}</div>
-            <div className="text-xs text-white/40 mt-1">
-              {gachaStats.lowestTarget} — 약 <span className="text-red-300 font-bold">{Math.round(100 / gachaStats.lowestProb).toLocaleString()}번</span> 돌려야 한 번
-            </div>
-          </div>
-
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 to-transparent p-4 text-center">
-              <div className="text-2xl font-black text-amber-300 tabular-nums">{gachaStats.totalItems}</div>
-              <div className="text-xs text-white/40">변경권 종류</div>
+              <div className="text-2xl font-black text-amber-300 tabular-nums">{gachaStats.totalCategories}</div>
+              <div className="text-xs text-white/40">확률 카테고리</div>
             </div>
-            <Trivia q="63.2% 확률에 도달하려면?" a={`${Math.round(100 / gachaStats.lowestProb).toLocaleString()}회`} detail="기대값 = 1/p" />
+            <div className="rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 to-transparent p-4 text-center">
+              <div className="text-2xl font-black text-amber-300 tabular-nums">{gachaStats.totalItems.toLocaleString()}</div>
+              <div className="text-xs text-white/40">아이템 종류</div>
+            </div>
           </div>
 
           <Section title="확률별 기대 시행 횟수" accent="text-amber-400" sub="1번 이상 성공할 확률 63.2%에 도달하는 횟수">

@@ -5,9 +5,9 @@ import charactersJson from "@/data/characters.json";
 import mapsJson from "@/data/maps.json";
 import costumesJson from "@/data/costumes.json";
 import storiesJson from "@/data/stories.json";
-import probabilityJson from "@/data/probability.json";
+import probabilityMeta from "@/data/probability-meta.json";
 import levelsJson from "@/data/levels.json";
-import type { Character, MapItem, CostumeItem, StoryItem, ProbabilityData } from "@/lib/types";
+import type { Character, MapItem, CostumeItem, StoryItem, ProbabilityCategoryMeta } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "통계 - 엘림스 스마일의 비공식 아카이브",
@@ -34,7 +34,7 @@ export default function StatsPage() {
         maps={mapsJson as MapItem[]}
         costumes={costumesJson as CostumeItem[]}
         stories={storiesJson as StoryItem[]}
-        probability={probabilityJson as ProbabilityData}
+        probabilityMeta={probabilityMeta as ProbabilityCategoryMeta[]}
         levels={levelsJson as { level: number; exp: number }[]}
       />
     </div>

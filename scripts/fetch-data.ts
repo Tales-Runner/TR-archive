@@ -1,8 +1,10 @@
-import { writeFileSync } from "fs";
+import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 
 const BASE = "https://tr.rhaon.co.kr/webb";
-const DATA_DIR = join(new URL(".", import.meta.url).pathname, "..", "src", "data");
+const ROOT = join(new URL(".", import.meta.url).pathname, "..");
+const DATA_DIR = join(ROOT, "src", "data");
+const PUBLIC_PROB_DIR = join(ROOT, "public", "data", "probability");
 const DELAY = 500;
 
 function sleep(ms: number) {
@@ -43,6 +45,34 @@ function save(filename: string, data: unknown) {
   const path = join(DATA_DIR, filename);
   writeFileSync(path, JSON.stringify(data, null, 2), "utf-8");
   console.log(`  ✓ saved ${filename}`);
+}
+
+// ── Characters ───────────────────────────────────────
+
+async function fetchCharacters() {
+  console.log("\n🎭 Characters");
+
+  const listResult = await api<{ list: { id: number }[] }>(
+    "/trintro/character/all"
+  );
+  if (!listResult) return;
+
+  const ids = listResult.list.map((c) => c.id);
+  console.log(`  found ${ids.length} characters, fetching details...`);
+
+  const characters: Record<string, unknown>[] = [];
+  for (const id of ids) {
+    await sleep(DELAY);
+    const detail = await api<{ info: Record<string, unknown> }>(
+      `/trintro/character/${id}`
+    );
+    if (detail?.info) {
+      characters.push(detail.info);
+    }
+  }
+
+  console.log(`  fetched ${characters.length} characters with details`);
+  save("characters.json", characters);
 }
 
 // ── Maps ──────────────────────────────────────────────
@@ -349,16 +379,107 @@ async function fetchStories() {
   save("stories.json", stories);
 }
 
+// ── Probability ──────────────────────────────────────
+
+const PROB_CATEGORIES = [
+  { id: "trading-position", path: "/trlibrary/probability/trading/position", name: "변경권" },
+  { id: "trading-level", path: "/trlibrary/probability/trading/level", name: "레벨 트레이딩" },
+  { id: "machine", path: "/trlibrary/probability/machine", name: "캡슐 기계" },
+  { id: "luckybox", path: "/trlibrary/probability/luckybox", name: "럭키 박스" },
+  { id: "fishing", path: "/trlibrary/probability/fishing", name: "낚시" },
+  { id: "cube", path: "/trlibrary/probability/cube", name: "큐브" },
+  { id: "dice", path: "/trlibrary/probability/dice", name: "주사위" },
+  { id: "humong", path: "/trlibrary/probability/humong", name: "휴몽 뽑기판" },
+  { id: "personal", path: "/trlibrary/probability/personal", name: "개인 뽑기판" },
+  { id: "selectshop", path: "/trlibrary/probability/selectshop", name: "셀렉트샵" },
+] as const;
+
+interface RawProbSubItem {
+  sourceNm?: string;
+  targetNm?: string;
+  resultItemNm?: string;
+  probability?: number;
+}
+
+interface RawProbItem {
+  itemNm: string;
+  itemList: RawProbSubItem[];
+}
+
+function normalizeProbItems(items: RawProbItem[]) {
+  return items.map((item) => ({
+    itemNm: item.itemNm,
+    itemList: item.itemList
+      .filter((r) => (r.sourceNm ?? r.resultItemNm ?? "") !== "합계")
+      .map((r) => ({
+        sourceNm: r.sourceNm ?? "",
+        targetNm: r.targetNm ?? r.resultItemNm ?? "",
+        probability: r.probability ?? 0,
+      })),
+  }));
+}
+
+async function fetchProbability() {
+  console.log("\n🎲 Probability");
+
+  const categories: {
+    id: string;
+    name: string;
+    comments: string;
+    itemList: { itemNm: string; itemList: { sourceNm: string; targetNm: string; probability: number }[] }[];
+  }[] = [];
+
+  for (const cat of PROB_CATEGORIES) {
+    await sleep(DELAY);
+    // Endpoints return either { info: { comments, itemList } } or { info: { comments }, itemList: [...] }
+    const raw = await api<Record<string, unknown>>(cat.path);
+    if (!raw) continue;
+
+    const info = raw.info as Record<string, unknown> | undefined;
+    const comments = (info?.comments as string) ?? "";
+    const itemList =
+      (info?.itemList as RawProbItem[]) ?? (raw.itemList as RawProbItem[]) ?? [];
+
+    if (itemList.length === 0) {
+      console.log(`  ⊘ ${cat.name}: empty`);
+      continue;
+    }
+
+    categories.push({
+      id: cat.id,
+      name: cat.name,
+      comments,
+      itemList: normalizeProbItems(itemList),
+    });
+    console.log(`  ✓ ${cat.name}: ${itemList.length} items`);
+  }
+
+  console.log(`  fetched ${categories.length} categories`);
+
+  // Save per-category files to public/ for on-demand loading
+  mkdirSync(PUBLIC_PROB_DIR, { recursive: true });
+  const meta: { id: string; name: string; comments: string; itemCount: number }[] = [];
+  for (const cat of categories) {
+    const path = join(PUBLIC_PROB_DIR, `${cat.id}.json`);
+    writeFileSync(path, JSON.stringify(cat.itemList), "utf-8");
+    console.log(`  ✓ public/data/probability/${cat.id}.json`);
+    meta.push({ id: cat.id, name: cat.name, comments: cat.comments, itemCount: cat.itemList.length });
+  }
+  save("probability-meta.json", meta);
+}
+
 // ── Main ─────────────────────────────────────────────
 
 async function main() {
   console.log("🚀 TR Utils — data fetcher");
   console.log(`   target: ${DATA_DIR}\n`);
 
+  await fetchCharacters();
   await fetchMaps();
   await fetchCostumes();
   await fetchGuides();
   await fetchStories();
+  await fetchProbability();
 
   console.log("\n✅ Done!");
 }
