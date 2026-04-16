@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { ProbabilityData, ProbabilityItem } from "@/lib/types";
+import type { ProbabilityCategoryMeta, ProbabilityItem } from "@/lib/types";
 
 function groupItems(items: ProbabilityItem[]) {
   const groups: Record<string, ProbabilityItem[]> = {};
@@ -59,16 +59,78 @@ function ProbBar({ pct, label }: { pct: number; label: string }) {
   );
 }
 
-export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
-  const groups = useMemo(() => groupItems(data.itemList), [data]);
-  const groupNames = Object.keys(groups);
+function isTrading(catId: string) {
+  return catId.startsWith("trading");
+}
 
-  const [selectedGroup, setSelectedGroup] = useState(groupNames[0]);
+export function ProbabilityCalculator({
+  categories,
+}: {
+  categories: ProbabilityCategoryMeta[];
+}) {
+  const [catIdx, setCatIdx] = useState(0);
+  const [items, setItems] = useState<ProbabilityItem[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const cache = useRef(new Map<string, ProbabilityItem[]>());
+
+  const currentCat = categories[catIdx];
+  const isTradingCat = isTrading(currentCat.id);
+
+  useEffect(() => {
+    const cached = cache.current.get(currentCat.id);
+    if (cached) {
+      setItems(cached);
+      setLoading(false);
+      setError(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(false);
+    fetch(`/data/probability/${currentCat.id}.json`)
+      .then((r) => r.json())
+      .then((data: ProbabilityItem[]) => {
+        if (!cancelled) {
+          cache.current.set(currentCat.id, data);
+          setItems(data);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [currentCat.id]);
+
+  const groups = useMemo(
+    () => (isTradingCat && items ? groupItems(items) : null),
+    [items, isTradingCat],
+  );
+  const groupNames = groups ? Object.keys(groups) : null;
+
+  const [selectedGroup, setSelectedGroup] = useState("");
   const [selectedItemIdx, setSelectedItemIdx] = useState(0);
   const [tries, setTries] = useState(10);
   const [targetGrade, setTargetGrade] = useState<string | null>(null);
 
-  const currentItems = groups[selectedGroup] ?? [];
+  // Reset sub-selectors when items change (adjust state during render)
+  const [prevItems, setPrevItems] = useState(items);
+  if (items && items !== prevItems) {
+    setPrevItems(items);
+    setSelectedGroup(groupNames?.[0] ?? "");
+    setSelectedItemIdx(0);
+    setTargetGrade(null);
+    setTries(10);
+  }
+
+  const currentItems = isTradingCat
+    ? (groups?.[selectedGroup] ?? [])
+    : (items ?? []);
   const currentItem = currentItems[selectedItemIdx];
   const transitions = useMemo(
     () => (currentItem ? getTransitions(currentItem) : []),
@@ -83,8 +145,10 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
     return Array.from(set);
   }, [transitions]);
 
-  const handleItemChange = (idx: number) => {
-    setSelectedItemIdx(idx);
+  const handleCatChange = (idx: number) => {
+    setCatIdx(idx);
+    setSelectedGroup("");
+    setSelectedItemIdx(0);
     setTargetGrade(null);
     setTries(10);
   };
@@ -92,6 +156,12 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
   const handleGroupChange = (g: string) => {
     setSelectedGroup(g);
     setSelectedItemIdx(0);
+    setTargetGrade(null);
+    setTries(10);
+  };
+
+  const handleItemChange = (idx: number) => {
+    setSelectedItemIdx(idx);
     setTargetGrade(null);
     setTries(10);
   };
@@ -109,158 +179,208 @@ export function ProbabilityCalculator({ data }: { data: ProbabilityData }) {
 
   return (
     <div className="space-y-6">
-      {/* Group selector */}
+      {/* Category selector */}
       <div className="flex overflow-x-auto gap-2 pb-1">
-        {groupNames.map((g) => (
+        {categories.map((cat, i) => (
           <button
-            key={g}
-            onClick={() => handleGroupChange(g)}
+            key={cat.id}
+            onClick={() => handleCatChange(i)}
             className={`shrink-0 whitespace-nowrap rounded-lg border px-3 py-2 text-sm transition-colors ${
-              selectedGroup === g
+              catIdx === i
                 ? "border-teal-500 bg-teal-600 text-white"
                 : "border-white/10 bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60"
             }`}
           >
-            {g}
+            {cat.name}
           </button>
         ))}
       </div>
 
-      {/* Item selector */}
-      <div>
-        <label className="mb-1.5 block text-xs font-medium text-white/40">
-          변경권 선택
-        </label>
-        <select
-          value={selectedItemIdx}
-          onChange={(e) => handleItemChange(Number(e.target.value))}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 outline-none focus:border-teal-500/50"
-        >
-          {currentItems.map((item, i) => (
-            <option key={i} value={i}>
-              {item.itemNm}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Probability table */}
-      {currentItem && (
-        <div className="rounded-xl border border-white/10 bg-surface-card overflow-hidden">
-          <p className="text-center text-[10px] text-white/40 py-0.5 sm:hidden">&larr; 좌우로 스크롤 &rarr;</p>
-          <div className="overflow-x-auto">
-          <div className="border-b border-white/10 bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-white/70">
-            {currentItem.itemNm} — 확률표
-          </div>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-left text-xs text-white/40">
-                <th className="px-4 py-2.5">현재 등급</th>
-                <th className="px-4 py-2.5">결과 등급</th>
-                <th className="px-4 py-2.5 text-right">확률</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transitions.map((t, i) => (
-                <tr
-                  key={i}
-                  className={`border-b border-white/5 ${targetGrade === t.targetNm ? "bg-teal-500/10" : ""}`}
-                >
-                  <td className="px-4 py-2.5 text-white/50">{t.sourceNm}</td>
-                  <td className="px-4 py-2.5 font-medium text-white/80">
-                    {t.targetNm}
-                  </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-white/60">
-                    {t.probability.toFixed(4)}%
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
+      {loading && (
+        <div className="py-12 text-center text-sm text-white/30">
+          데이터를 불러오는 중...
         </div>
       )}
 
-      {/* Simulator */}
-      {transitions.length > 0 && (
-        <div className="rounded-xl border border-white/10 bg-surface-card p-5 space-y-5">
-          <h3 className="font-semibold text-white/80">기대값 시뮬레이터</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/40">
-                목표 등급
-              </label>
-              <select
-                value={targetGrade ?? ""}
-                onChange={(e) => setTargetGrade(e.target.value || null)}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 outline-none focus:border-teal-500/50"
-              >
-                <option value="">선택하세요</option>
-                {targetGrades.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
+      {!loading && error && (
+        <div className="py-12 text-center text-sm text-red-400/60">
+          데이터를 불러오지 못했습니다.
+        </div>
+      )}
+
+      {!loading && items && (
+        <>
+          {/* Sub-group selector (trading categories only) */}
+          {groupNames && groupNames.length > 1 && (
+            <div className="flex overflow-x-auto gap-2 pb-1">
+              {groupNames.map((g) => (
+                <button
+                  key={g}
+                  onClick={() => handleGroupChange(g)}
+                  className={`shrink-0 whitespace-nowrap rounded-lg border px-2.5 py-1.5 text-xs transition-colors ${
+                    selectedGroup === g
+                      ? "border-cyan-500/60 bg-cyan-600/30 text-cyan-200"
+                      : "border-white/10 bg-white/5 text-white/30 hover:bg-white/10 hover:text-white/50"
+                  }`}
+                >
+                  {g}
+                </button>
+              ))}
             </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-white/40">
-                시행 횟수
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={1000}
-                value={tries}
-                onChange={(e) =>
-                  setTries(Math.max(1, Math.min(1000, Number(e.target.value))))
-                }
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 outline-none focus:border-teal-500/50"
-              />
-            </div>
+          )}
+
+          {/* Item selector */}
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-white/40">
+              {isTradingCat ? "변경권 선택" : "아이템 선택"}
+            </label>
+            <select
+              value={selectedItemIdx}
+              onChange={(e) => handleItemChange(Number(e.target.value))}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 outline-none focus:border-teal-500/50"
+            >
+              {currentItems.map((item, i) => (
+                <option key={i} value={i}>
+                  {item.itemNm}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {simulationResult && simulationResult.length > 0 && (
-            <div className="space-y-3 pt-2">
-              {simulationResult.map((r, i) => (
-                <div key={i} className="space-y-1.5">
-                  <div className="text-xs text-white/40">
-                    {r.source} → {r.target} (1회: {r.singleProb.toFixed(4)}%)
-                  </div>
-                  <ProbBar
-                    pct={r.cumulative}
-                    label={`${r.cumulative.toFixed(2)}%`}
-                  />
-                  <div className="text-xs text-white/40">
-                    {tries}회 시행 시 1번 이상 나올 확률
-                  </div>
+          {/* Probability table */}
+          {currentItem && (
+            <div className="rounded-xl border border-white/10 bg-surface-card overflow-hidden">
+              <p className="text-center text-[10px] text-white/40 py-0.5 sm:hidden">
+                &larr; 좌우로 스크롤 &rarr;
+              </p>
+              <div className="overflow-x-auto">
+                <div className="border-b border-white/10 bg-white/[0.02] px-4 py-2.5 text-sm font-medium text-white/70">
+                  {currentItem.itemNm} — 확률표
                 </div>
-              ))}
-              <div className="mt-4 pt-4 border-t border-white/10">
-                <h4 className="text-xs font-medium text-white/40 mb-2">
-                  횟수별 누적 확률
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-xs">
-                  {[1, 5, 10, 20, 50].map((n) => {
-                    const r = simulationResult[0];
-                    const cum = calcCumulativeProb(r.singleProb, n);
-                    return (
-                      <div
-                        key={n}
-                        className="rounded-lg bg-white/5 p-2.5 text-center"
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-left text-xs text-white/40">
+                      {isTradingCat && (
+                        <th className="px-4 py-2.5">현재 등급</th>
+                      )}
+                      <th className="px-4 py-2.5">
+                        {isTradingCat ? "결과 등급" : "보상 아이템"}
+                      </th>
+                      <th className="px-4 py-2.5 text-right">확률</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transitions.map((t, i) => (
+                      <tr
+                        key={i}
+                        className={`border-b border-white/5 ${targetGrade === t.targetNm ? "bg-teal-500/10" : ""}`}
                       >
-                        <div className="font-medium text-white/60">{n}회</div>
-                        <div className="tabular-nums text-white/40">
-                          {cum.toFixed(1)}%
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                        {isTradingCat && (
+                          <td className="px-4 py-2.5 text-white/50">
+                            {t.sourceNm}
+                          </td>
+                        )}
+                        <td className="px-4 py-2.5 font-medium text-white/80">
+                          {t.targetNm}
+                        </td>
+                        <td className="px-4 py-2.5 text-right tabular-nums text-white/60">
+                          {t.probability.toFixed(4)}%
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
-        </div>
+
+          {/* Simulator */}
+          {transitions.length > 0 && (
+            <div className="rounded-xl border border-white/10 bg-surface-card p-5 space-y-5">
+              <h3 className="font-semibold text-white/80">기대값 시뮬레이터</h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-white/40">
+                    {isTradingCat ? "목표 등급" : "목표 아이템"}
+                  </label>
+                  <select
+                    value={targetGrade ?? ""}
+                    onChange={(e) => setTargetGrade(e.target.value || null)}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 outline-none focus:border-teal-500/50"
+                  >
+                    <option value="">선택하세요</option>
+                    {targetGrades.map((g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-white/40">
+                    시행 횟수
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={1000}
+                    value={tries}
+                    onChange={(e) =>
+                      setTries(
+                        Math.max(1, Math.min(1000, Number(e.target.value))),
+                      )
+                    }
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/80 outline-none focus:border-teal-500/50"
+                  />
+                </div>
+              </div>
+
+              {simulationResult && simulationResult.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  {simulationResult.map((r, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="text-xs text-white/40">
+                        {r.source ? `${r.source} → ${r.target}` : r.target}{" "}
+                        (1회: {r.singleProb.toFixed(4)}%)
+                      </div>
+                      <ProbBar
+                        pct={r.cumulative}
+                        label={`${r.cumulative.toFixed(2)}%`}
+                      />
+                      <div className="text-xs text-white/40">
+                        {tries}회 시행 시 1번 이상 나올 확률
+                      </div>
+                    </div>
+                  ))}
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <h4 className="text-xs font-medium text-white/40 mb-2">
+                      횟수별 누적 확률
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 text-xs">
+                      {[1, 5, 10, 20, 50].map((n) => {
+                        const r = simulationResult[0];
+                        const cum = calcCumulativeProb(r.singleProb, n);
+                        return (
+                          <div
+                            key={n}
+                            className="rounded-lg bg-white/5 p-2.5 text-center"
+                          >
+                            <div className="font-medium text-white/60">
+                              {n}회
+                            </div>
+                            <div className="tabular-nums text-white/40">
+                              {cum.toFixed(1)}%
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

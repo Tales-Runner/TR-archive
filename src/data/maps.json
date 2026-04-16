@@ -1,5 +1,18 @@
 [
   {
+    "id": 105,
+    "subject": " 센터는 나야 나",
+    "mapTypeCd": 6,
+    "openDt": "20260415",
+    "hashTagSubject": "마춘자, 아케이드, 센터는나야나 ",
+    "thumbnail": "https://trimage.rhaon.co.kr/images/library/map/0QL45yAa3Q2Zn5zH5s5KqP.jpg",
+    "movieUrl": "https://youtu.be/14HMpNZ4X5U",
+    "summary": "춤추는 마춘자와 함께 사진을 찍어요! 누가 가장 멋지게 사진에 찍힐까요?\n빠르게 움직이는 카메라의 앞에 서서 포즈를 취합시다. 하나, 둘, 셋! 찰칵~",
+    "contents": "- 8인 개인전으로 진행되는 아케이드 맵입니다.\n- 입장 시 런너의 캐릭터는 마루/춘배/자브 캐릭터 중 하나로 변경됩니다.\n- 변경된 캐릭터는 춤을 추며, 바닥이 미끄러집니다. 다른 캐릭터와 충돌 시 튕겨져 나갑니다.\n- 촬영 시작 3초 전 카운트다운이 진행되며, 카운트다운이 종료되면 촬영됩니다.\n- 사진에 촬영된 비율 또는 크기에 따른 점수가 부여됩니다.\n- 촬영은 총 9회로 진행되며, 3회 촬영마다 순위를 확인할 수 있습니다.\n- 순위 공개 후 다음 순위 공개까지 상위 1~3위 캐릭터에게는 순위가 표시됩니다.\n- 촬영된 사진은 [테일즈런너] - [스크린샷] 폴더에 자동 저장되며, 새로운 게임을 시작 시 사진은 덮어쓰기 됩니다.\n- 이벤트 채널 / 분노 사용 불가 / 어시스트 사용 가능 / 분노 충돌 OFF / 힘 치이기 OFF / 밟기 OFF / 슈 태그 불가능",
+    "startAt": "2026-04-14T16:00:00",
+    "recommendDataList": []
+  },
+  {
     "id": 104,
     "subject": "마춘자와 함께 춤을!",
     "mapTypeCd": 6,
@@ -156,19 +169,6 @@
     "recommendDataList": []
   },
   {
-    "id": 90,
-    "subject": "웰컴! 애니멀 빌리지",
-    "mapTypeCd": 3,
-    "openDt": "20250723",
-    "hashTagSubject": " 트레이닝, 애니멀 빌리지, 웰컴! 애니멀 빌리지",
-    "thumbnail": "https://trimage.rhaon.co.kr/images/library/map/3cprE4yBw6OoFXvl0eq1qJ.png",
-    "movieUrl": "https://youtu.be/SCWJOoBWs6s",
-    "summary": "웰컴이어유~ 여가 애니멀 빌리지유! \n한 바퀴 돌면서 산책 좀 시켜줘유~",
-    "contents": "- 8인 개인전으로 진행되는 트레이닝 맵으로 가장 먼저 골인한 런너님이 승리하는 맵입니다.\n- 애니멀 빌리지에서 일하고 있는 NPC와 부딪히면 넘어집니다.\n- 토스트 건물을 통해 공중으로도 도약할 수 있으며, 로프와 대시 포탈 구간을 활용해서 주행할 수 있습니다. \n- 노아이템전 / 분노 사용 가능 / 어시스트 사용 가능 / 분노 충돌 off / 힘 치이기 off / 밟기 off / 슈 태그 불가",
-    "startAt": "2025-07-23T00:00:00",
-    "recommendDataList": []
-  },
-  {
     "id": 91,
     "subject": "출발! 배달의 런너",
     "mapTypeCd": 5,
@@ -178,6 +178,19 @@
     "movieUrl": "https://youtu.be/IjQyTBJYbg4",
     "summary": "애니멀 빌리지에는 돼지 전설이 있슈.\n그 돼지 전설을 찾아보러 가볼까유?",
     "contents": "- 8인 개인전으로 진행되는 서바이벌 맵으로 가장 먼저 골인한 런너님이 승리하는 맵입니다.\n- 대시와 아이템 키를 제외한 조작이 불가하고 일정 속도로 자동으로 달리며 전진합니다.\n- 2글자로 구성된 초성이 표시되며, 빨리 정답을 입력한 순서대로 순위가 표시됩니다.\n- 초성 정답 입력은 중복 입력이 불가하며, 제한 시간까지 정답을 입력 못한 런너님은 실패 처리됩니다.\n- 아이템전 / 분노 사용 불가 / 어시스트 사용 가능 / 분노 충돌 off / 힘 치이기 off / 밟기 off / 슈 태그 불가",
+    "startAt": "2025-07-23T00:00:00",
+    "recommendDataList": []
+  },
+  {
+    "id": 90,
+    "subject": "웰컴! 애니멀 빌리지",
+    "mapTypeCd": 3,
+    "openDt": "20250723",
+    "hashTagSubject": " 트레이닝, 애니멀 빌리지, 웰컴! 애니멀 빌리지",
+    "thumbnail": "https://trimage.rhaon.co.kr/images/library/map/3cprE4yBw6OoFXvl0eq1qJ.png",
+    "movieUrl": "https://youtu.be/SCWJOoBWs6s",
+    "summary": "웰컴이어유~ 여가 애니멀 빌리지유! \n한 바퀴 돌면서 산책 좀 시켜줘유~",
+    "contents": "- 8인 개인전으로 진행되는 트레이닝 맵으로 가장 먼저 골인한 런너님이 승리하는 맵입니다.\n- 애니멀 빌리지에서 일하고 있는 NPC와 부딪히면 넘어집니다.\n- 토스트 건물을 통해 공중으로도 도약할 수 있으며, 로프와 대시 포탈 구간을 활용해서 주행할 수 있습니다. \n- 노아이템전 / 분노 사용 가능 / 어시스트 사용 가능 / 분노 충돌 off / 힘 치이기 off / 밟기 off / 슈 태그 불가",
     "startAt": "2025-07-23T00:00:00",
     "recommendDataList": []
   },

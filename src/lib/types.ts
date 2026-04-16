@@ -42,9 +42,11 @@ export interface ProbabilityItem {
   }[];
 }
 
-export interface ProbabilityData {
+export interface ProbabilityCategoryMeta {
+  id: string;
+  name: string;
   comments: string;
-  itemList: ProbabilityItem[];
+  itemCount: number;
 }
 
 export type SortKey =

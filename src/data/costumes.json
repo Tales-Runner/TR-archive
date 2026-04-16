@@ -1,5 +1,44 @@
 [
   {
+    "id": 131,
+    "subject": "April Blossom VOL.2",
+    "thumbnail": "https://trimage.rhaon.co.kr/images/library/runner-closet/library/6aiBHN6gQbMRlXZVlMEqxW.png",
+    "viewOrder": null,
+    "openYearType": null,
+    "openDt": "20260415",
+    "hashTagSubject": "런너즈 트레이닝",
+    "openYear": "2026년",
+    "detail": {
+      "id": null,
+      "subject": "April Blossom VOL.2",
+      "backgroundImageUrl": "https://trimage.rhaon.co.kr/images/library/runner-closet/bg/06vzJLiaSOcl8JUZCPIw6b.png",
+      "titleImageUrl": "https://trimage.rhaon.co.kr/images/library/runner-closet/title/27Xy7saQR2OHk9P6e4dc9a.png",
+      "oldButtonImageUrl": "https://trimage.rhaon.co.kr/images/library/runner-closet/lastCloset/0DZMoAe3nvqajtd8KshmTz.png",
+      "oldBtnPosition": {
+        "btnTop": 596,
+        "btnLeft": 630,
+        "btnWidth": 340,
+        "btnHeight": 64
+      },
+      "itemButtonImageUrl": "https://trimage.rhaon.co.kr/images/library/runner-closet/itemAbility/1qPz0LXo8vo5YEDJFk6HQM.png",
+      "itemButtonLink": "/news/updates/89",
+      "itemList": [
+        {
+          "motionId": 553,
+          "itemId": 462,
+          "id": 131,
+          "itemSubject": "런너즈 트레이닝",
+          "imageUrl": "https://trimage.rhaon.co.kr/images/library/runner-closet/items/image/2dEQBPa7ZIRTLDcEFUS0XK.png",
+          "motionImageUrl": "https://trimage.rhaon.co.kr/images/library/runner-closet/items/motion/3r8lIJJDsR3kSwB6cjhpIp.mp4",
+          "top": 358,
+          "left": 190,
+          "width": 280,
+          "height": 280
+        }
+      ]
+    }
+  },
+  {
     "id": 130,
     "subject": "April Blossom VOL.1",
     "thumbnail": "https://trimage.rhaon.co.kr/images/library/runner-closet/library/3Iwz5gvwdyNye71E6X2taj.png",
