@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import type { ProbabilityCategoryMeta, ProbabilityItem } from "@/lib/types";
 
 function groupItems(items: ProbabilityItem[]) {
@@ -119,9 +119,9 @@ export function ProbabilityCalculator({
   const [targetGrade, setTargetGrade] = useState<string | null>(null);
 
   // Reset sub-selectors when items change (adjust state during render)
-  const prevItemsRef = useRef(items);
-  if (items && items !== prevItemsRef.current) {
-    prevItemsRef.current = items;
+  const [prevItems, setPrevItems] = useState(items);
+  if (items && items !== prevItems) {
+    setPrevItems(items);
     setSelectedGroup(groupNames?.[0] ?? "");
     setSelectedItemIdx(0);
     setTargetGrade(null);
