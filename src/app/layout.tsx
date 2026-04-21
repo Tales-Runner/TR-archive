@@ -11,6 +11,8 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { ProfileButton } from "./profile-button";
 import { ProfileProvider } from "@/lib/use-profile";
 import { YouTubeIcon, TwitterIcon, InstagramIcon, WebIcon } from "@/components/icons";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import charactersJson from "@/data/characters.json";
 import mapsJson from "@/data/maps.json";
 import costumesJson from "@/data/costumes.json";
@@ -182,6 +184,8 @@ export default function RootLayout({
         <ScrollToTop />
         </ProfileProvider>
         </ToastProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
