@@ -1,4 +1,6 @@
 const BASE = "https://tr.rhaon.co.kr/webb";
+const USER_AGENT =
+  "Mozilla/5.0 (compatible; tr-archive/1.0; +https://tr-archive.vercel.app)";
 
 interface Endpoint {
   name: string;
@@ -77,6 +79,30 @@ const ENDPOINTS: Endpoint[] = [
       return null;
     },
   },
+  // Runtime-proxied endpoints — critical to monitor because they power
+  // the live /notices and maintenance banner. Previously missed this class
+  // of breakage when upstream added User-Agent filtering to `/main/*`.
+  {
+    name: "Notices",
+    path: "/main/notices",
+    validate: (r) => {
+      if (!hasListArray(r)) return "missing list array";
+      if (r.list.length === 0) return "list is empty (UA blocked?)";
+      const first = r.list[0] as Record<string, unknown>;
+      if (typeof first.id !== "number") return "missing id";
+      if (typeof first.subject !== "string") return "missing subject";
+      return null;
+    },
+  },
+  {
+    name: "Maintenance",
+    path: "/code/maintenance",
+    validate: (r) => {
+      // Response shape is typically { info: {...} } — just verify object.
+      if (typeof r !== "object" || r === null) return "not an object";
+      return null;
+    },
+  },
 ];
 
 interface CheckResult {
@@ -89,7 +115,10 @@ interface CheckResult {
 async function checkEndpoint(ep: Endpoint): Promise<CheckResult> {
   const url = `${BASE}${ep.path}`;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(15_000),
+      headers: { "User-Agent": USER_AGENT },
+    });
     if (!res.ok) {
       return { name: ep.name, ok: false, error: `HTTP ${res.status} ${res.statusText}`, httpStatus: res.status };
     }

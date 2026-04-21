@@ -7,6 +7,11 @@ const DATA_DIR = join(ROOT, "src", "data");
 const PUBLIC_PROB_DIR = join(ROOT, "public", "data", "probability");
 const DELAY = 500;
 
+// 일부 upstream 엔드포인트가 non-browser UA 를 차단함 (/main/* 계열).
+// /trlibrary/* 는 아직 안 막고 있지만 일관성 + 미래 대응용으로 통일.
+const USER_AGENT =
+  "Mozilla/5.0 (compatible; tr-archive/1.0; +https://tr-archive.vercel.app)";
+
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -21,7 +26,9 @@ async function api<T>(path: string, retries = 2): Promise<T | null> {
       } else {
         console.log(`  GET ${path}`);
       }
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: { "User-Agent": USER_AGENT },
+      });
       if (!res.ok) {
         console.warn(`  ⚠ ${res.status} ${res.statusText}`);
         if (attempt === retries) return null;
