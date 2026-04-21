@@ -44,16 +44,19 @@ export function StoryViewer({
   const [showDrawer, setShowDrawer] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [zoomIdx, setZoomIdx] = useState(0);
+  // Lazy init from localStorage — safe because <StoryViewer> is only ever
+  // mounted from a click handler inside a client component, never during SSR,
+  // so there is no hydration boundary to straddle. Guard with Number.isFinite
+  // to survive a malformed saved value.
   const [brightness, setBrightness] = useState(() => {
     try {
-      const saved =
-        typeof window !== "undefined"
-          ? localStorage.getItem(BRIGHTNESS_KEY)
-          : null;
-      return saved ? Number(saved) : 100;
-    } catch {
-      return 100;
-    }
+      const saved = localStorage.getItem(BRIGHTNESS_KEY);
+      if (saved) {
+        const n = Number(saved);
+        if (Number.isFinite(n)) return n;
+      }
+    } catch {}
+    return 100;
   });
   const [viewerToast, setViewerToast] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
