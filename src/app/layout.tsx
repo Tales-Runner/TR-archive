@@ -40,6 +40,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tr-archive.vercel.app"),
   title: "엘림스 스마일의 비공식 아카이브 - 테일즈런너",
   description:
     "테일즈런너 캐릭터 능력치 비교, 변경권 확률, 맵 도감, 코스튬, 가이드, 스토리 뷰어",
