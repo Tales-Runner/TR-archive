@@ -28,3 +28,14 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          # next build 는 GITHUB_TOKEN 을 실제로 안 쓰지만 (feedback 서버
+          # 액션은 런타임에만 필요), 없으면 console.error 가 찍힘. 더미로 뚫음
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Security audit (high+ production)
+        run: npm audit --audit-level=high --omit=dev
+        continue-on-error: true
