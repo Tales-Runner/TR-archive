@@ -1,6 +1,4 @@
-const BASE = "https://tr.rhaon.co.kr/webb";
-const USER_AGENT =
-  "Mozilla/5.0 (compatible; tr-archive/1.0; +https://tr-archive.vercel.app)";
+import { API_BASE, UPSTREAM_USER_AGENT } from "@/lib/constants";
 
 interface Endpoint {
   name: string;
@@ -79,11 +77,11 @@ const ENDPOINTS: Endpoint[] = [
       return null;
     },
   },
-  // NOTE: /main/notices 와 /code/maintenance 는 upstream cloudflare 가
-  // GitHub Actions 의 IP 대역을 차단하고 있어 여기 포함시키면 매일
-  // 오탐 이슈가 열린다. 이 두 엔드포인트는 Vercel 엣지에서만 정상
-  // 응답하므로, regression 은 배포 후 수동 확인 (e2e/api.spec.ts,
-  // `PLAYWRIGHT_LIVE=1` 모드) 또는 사용자 제보로 잡는다.
+  // /main/notices 와 /code/maintenance 는 의도적으로 제외. GHA runner 에서
+  // 호출하면 502/504 가 빈번해 매일 오탐 이슈가 열림 — upstream 자체의
+  // 간헐 장애인지 GHA IP 대역이 차별 대우되는지는 확정 안 됨. 프로덕션
+  // (icn1 리전) 에서는 대개 정상이므로 이 두 엔드포인트는 e2e/api.spec.ts
+  // 의 PLAYWRIGHT_LIVE 모드 또는 사용자 제보로 탐지.
 ];
 
 interface CheckResult {
@@ -94,11 +92,11 @@ interface CheckResult {
 }
 
 async function checkEndpoint(ep: Endpoint): Promise<CheckResult> {
-  const url = `${BASE}${ep.path}`;
+  const url = `${API_BASE}${ep.path}`;
   try {
     const res = await fetch(url, {
       signal: AbortSignal.timeout(15_000),
-      headers: { "User-Agent": USER_AGENT },
+      headers: { "User-Agent": UPSTREAM_USER_AGENT },
     });
     if (!res.ok) {
       return { name: ep.name, ok: false, error: `HTTP ${res.status} ${res.statusText}`, httpStatus: res.status };

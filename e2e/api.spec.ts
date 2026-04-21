@@ -1,22 +1,16 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Live upstream proxy guards.
+ * Live upstream proxy 검증 — 기본 CI 에서 skip.
  *
- * **CI 에서 건너뜀.** upstream (tr.rhaon.co.kr) 이 GitHub Actions 의
- * IP 대역(/main/* 엔드포인트 한정) 을 cloudflare 레벨에서 차단함 —
- * Mozilla UA 를 보내도 HTML 에러 페이지를 반환. 따라서 CI 의 localhost
- * webserver 가 upstream 을 프록시하는 방식으로는 무조건 실패.
+ * 왜 skip: CI 의 localhost webserver 가 upstream (tr.rhaon.co.kr) 을
+ * 프록시하면 502/504 빈도가 높아 flake. GHA IP 대역 차별인지 upstream
+ * 간헐 장애인지는 확정 안 됐지만, 어느 쪽이든 CI 에서 신뢰하기 어려움.
  *
- * 대안: 배포 직후 수동으로
+ * 배포 직후 수동 검증:
  *   PLAYWRIGHT_LIVE=1 PLAYWRIGHT_BASE_URL=https://tr-archive.vercel.app \
  *     npm run test:e2e -g "live API proxy"
- * 로 프로덕션 함수를 직접 때려 확인. Vercel 엣지는 upstream 차단 대역이
- * 아니므로 UA 만 맞으면 정상 응답.
- *
- * 일상적 regression 탐지는 scripts/api-health.ts 가 /trlibrary/* 를
- * 매일 찍어 커버 (/main/* 는 GHA 에서 차단되므로 health check 에도
- * 넣지 않음).
+ * 프로덕션은 icn1 리전이라 훨씬 안정적.
  */
 test.describe("live API proxy", () => {
   test.skip(

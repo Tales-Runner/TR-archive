@@ -1,11 +1,6 @@
 import { API_BASE, UPSTREAM_USER_AGENT } from "@/lib/constants";
 import { logger } from "@/lib/logger";
 
-// See src/app/api/notices/route.ts 의 preferredRegion 설명.
-// upstream Cloudflare 가 non-KR IP 를 차단하므로 icn1(서울) 에서 실행.
-export const preferredRegion = "icn1";
-export const runtime = "nodejs";
-
 export async function GET() {
   const url = `${API_BASE}/code/maintenance`;
   try {

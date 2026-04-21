@@ -4,14 +4,12 @@ export const SITE_BASE = "https://tr.rhaon.co.kr";
 export const IMAGE_CDN = "https://trimage.rhaon.co.kr";
 
 /**
- * User-Agent to send when proxying the Tales Runner upstream API.
+ * Browser-like UA sent on every upstream request to tr.rhaon.co.kr.
  *
- * tr.rhaon.co.kr 가 2026-04 경부터 `/webb/main/*` 계열 엔드포인트에
- * 브라우저가 아닌 UA 를 차단하기 시작 — Vercel 기본 undici UA 로는
- * resCd=9999 빈 응답. Chrome-like UA 로 요청하면 정상 데이터 반환.
- *
- * `/webb/trlibrary/*` 는 아직 필터 없음. 그래도 일관성 + 미래 대응용
- * 으로 모든 upstream 요청에 동일 UA 를 쓴다.
+ * Defensive: upstream 이 향후 non-browser UA 를 차단하더라도 살아남도록.
+ * 과거 `/webb/main/*` 장애 디버깅 중 UA 필터 가설이 나왔으나 최종 원인은
+ * 업스트림 504 게이트웨이 타임아웃 + 리전 불일치로 판명. UA 자체가
+ * 필수인지는 여전히 미확정 — 그래도 무해하고 로그/오남용 식별에 도움.
  */
 export const UPSTREAM_USER_AGENT =
   "Mozilla/5.0 (compatible; tr-archive/1.0; +https://tr-archive.vercel.app)";
