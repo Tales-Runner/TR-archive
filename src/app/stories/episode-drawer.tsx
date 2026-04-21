@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { formatDate } from "@/lib/format";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import type { SeriesInfo } from "./story-utils";
 
 export function EpisodeDrawer({
@@ -17,7 +18,9 @@ export function EpisodeDrawer({
   onSelect: (id: number) => void;
   onClose: () => void;
 }) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const titleId = `episode-drawer-title-${series.name}`;
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -27,8 +30,25 @@ export function EpisodeDrawer({
     });
   }, []);
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  useFocusTrap(true, rootRef);
+
   return (
-    <div className="fixed inset-0 z-[70]" onClick={onClose}>
+    <div
+      ref={rootRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className="fixed inset-0 z-[70]"
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-black/50 animate-fade-in" />
       <div
         className="absolute bottom-0 left-0 right-0 max-h-[60vh] rounded-t-2xl bg-[#13101f] border-t border-white/10 overflow-hidden animate-slide-up"
@@ -37,13 +57,14 @@ export function EpisodeDrawer({
       >
         <div className="sticky top-0 z-10 bg-[#13101f] px-4 py-3 border-b border-white/5 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-white/80">{series.name}</h3>
+            <h3 id={titleId} className="text-sm font-bold text-white/80">{series.name}</h3>
             <p className="text-xs text-white/40">
               {series.episodes.length}화
             </p>
           </div>
           <button
             onClick={onClose}
+            aria-label="회차 목록 닫기"
             className="rounded-lg bg-white/5 px-3 py-1.5 text-xs text-white/40 hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             닫기

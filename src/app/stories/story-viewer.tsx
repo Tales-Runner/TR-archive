@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import type { StoryItem } from "@/lib/types";
 import { formatDate, youtubeId, isSafeImageUrl } from "@/lib/format";
 import { useDocumentKeydown } from "@/lib/use-document-keydown";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import { db } from "@/lib/db";
 import { WebtoonImage } from "./webtoon-image";
 import { EpisodeDrawer } from "./episode-drawer";
@@ -59,6 +60,8 @@ export function StoryViewer({
     return 100;
   });
   const [viewerToast, setViewerToast] = useState<string | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const autoHideTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -88,6 +91,9 @@ export function StoryViewer({
       document.body.style.overflow = "";
     };
   }, []);
+
+  // Trap Tab focus inside the dialog + restore focus on close.
+  useFocusTrap(true, rootRef, closeBtnRef);
 
   // Auto-hide bars after 3s
   useEffect(() => {
@@ -216,14 +222,22 @@ export function StoryViewer({
 
   const barClass = barVisible ? "viewer-bar-visible" : "viewer-bar-hidden";
 
+  const titleId = `story-viewer-title-${story.id}`;
+
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col bg-[#0a0812]">
+    <div
+      ref={rootRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className="fixed inset-0 z-[70] flex flex-col bg-[#0a0812]"
+    >
       {/* Top bar */}
       <div
         className={`absolute top-0 left-0 right-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-2 ${barClass}`}
       >
         <div className="min-w-0">
-          <h2 className="text-sm font-bold text-white/90 truncate">
+          <h2 id={titleId} className="text-sm font-bold text-white/90 truncate">
             {story.subject}
           </h2>
           <p className="text-[11px] text-white/40">
@@ -231,10 +245,12 @@ export function StoryViewer({
           </p>
         </div>
         <button
+          ref={closeBtnRef}
           onClick={(e) => {
             e.stopPropagation();
             onClose();
           }}
+          aria-label="스토리 뷰어 닫기"
           className="shrink-0 ml-3 rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white/50 hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
           닫기
