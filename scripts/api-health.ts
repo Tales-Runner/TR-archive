@@ -79,30 +79,11 @@ const ENDPOINTS: Endpoint[] = [
       return null;
     },
   },
-  // Runtime-proxied endpoints — critical to monitor because they power
-  // the live /notices and maintenance banner. Previously missed this class
-  // of breakage when upstream added User-Agent filtering to `/main/*`.
-  {
-    name: "Notices",
-    path: "/main/notices",
-    validate: (r) => {
-      if (!hasListArray(r)) return "missing list array";
-      if (r.list.length === 0) return "list is empty (UA blocked?)";
-      const first = r.list[0] as Record<string, unknown>;
-      if (typeof first.id !== "number") return "missing id";
-      if (typeof first.subject !== "string") return "missing subject";
-      return null;
-    },
-  },
-  {
-    name: "Maintenance",
-    path: "/code/maintenance",
-    validate: (r) => {
-      // Response shape is typically { info: {...} } — just verify object.
-      if (typeof r !== "object" || r === null) return "not an object";
-      return null;
-    },
-  },
+  // NOTE: /main/notices 와 /code/maintenance 는 upstream cloudflare 가
+  // GitHub Actions 의 IP 대역을 차단하고 있어 여기 포함시키면 매일
+  // 오탐 이슈가 열린다. 이 두 엔드포인트는 Vercel 엣지에서만 정상
+  // 응답하므로, regression 은 배포 후 수동 확인 (e2e/api.spec.ts,
+  // `PLAYWRIGHT_LIVE=1` 모드) 또는 사용자 제보로 잡는다.
 ];
 
 interface CheckResult {
