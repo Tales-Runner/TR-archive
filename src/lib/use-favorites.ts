@@ -60,12 +60,27 @@ export function useFavorites() {
       const existing = runnerIndex.get(id);
       if (existing) {
         setState((prev) => ({ ...prev, runners: withoutId(prev.runners, id) }));
-        await db.runners.remove(id);
+        try {
+          await db.runners.remove(id);
+        } catch (err) {
+          // IDB write failed — roll back the optimistic removal so the UI
+          // stops lying to the user about their favorites.
+          setState((prev) => ({
+            ...prev,
+            runners: withEntry(prev.runners, existing),
+          }));
+          console.warn("[tr-archive] toggleRunner remove failed:", err);
+        }
         return;
       }
       const next: RunnerEntry = { id, addedAt: Date.now(), memo: "", tags: [] };
       setState((prev) => ({ ...prev, runners: withEntry(prev.runners, next) }));
-      await db.runners.put(next);
+      try {
+        await db.runners.put(next);
+      } catch (err) {
+        setState((prev) => ({ ...prev, runners: withoutId(prev.runners, id) }));
+        console.warn("[tr-archive] toggleRunner put failed:", err);
+      }
     },
     [runnerIndex],
   );
@@ -76,7 +91,16 @@ export function useFavorites() {
       if (!existing) return;
       const merged: RunnerEntry = { ...existing, ...patch };
       setState((prev) => ({ ...prev, runners: withEntry(prev.runners, merged) }));
-      await db.runners.put(merged);
+      try {
+        await db.runners.put(merged);
+      } catch (err) {
+        // Restore the pre-patch entry.
+        setState((prev) => ({
+          ...prev,
+          runners: withEntry(prev.runners, existing),
+        }));
+        console.warn("[tr-archive] updateRunner failed:", err);
+      }
     },
     [runnerIndex],
   );
@@ -95,12 +119,28 @@ export function useFavorites() {
       const existing = costumeIndex.get(id);
       if (existing) {
         setState((prev) => ({ ...prev, costumes: withoutId(prev.costumes, id) }));
-        await db.costumes.remove(id);
+        try {
+          await db.costumes.remove(id);
+        } catch (err) {
+          setState((prev) => ({
+            ...prev,
+            costumes: withEntry(prev.costumes, existing),
+          }));
+          console.warn("[tr-archive] toggleCostume remove failed:", err);
+        }
         return;
       }
       const next: CostumeEntry = { id, addedAt: Date.now(), memo: "", status };
       setState((prev) => ({ ...prev, costumes: withEntry(prev.costumes, next) }));
-      await db.costumes.put(next);
+      try {
+        await db.costumes.put(next);
+      } catch (err) {
+        setState((prev) => ({
+          ...prev,
+          costumes: withoutId(prev.costumes, id),
+        }));
+        console.warn("[tr-archive] toggleCostume put failed:", err);
+      }
     },
     [costumeIndex],
   );
@@ -111,7 +151,15 @@ export function useFavorites() {
       if (!existing) return;
       const merged: CostumeEntry = { ...existing, ...patch };
       setState((prev) => ({ ...prev, costumes: withEntry(prev.costumes, merged) }));
-      await db.costumes.put(merged);
+      try {
+        await db.costumes.put(merged);
+      } catch (err) {
+        setState((prev) => ({
+          ...prev,
+          costumes: withEntry(prev.costumes, existing),
+        }));
+        console.warn("[tr-archive] updateCostume failed:", err);
+      }
     },
     [costumeIndex],
   );

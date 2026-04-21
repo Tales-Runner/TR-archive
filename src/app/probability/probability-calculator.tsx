@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { ProbabilityCategoryMeta, ProbabilityItem } from "@/lib/types";
 
 function groupItems(items: ProbabilityItem[]) {

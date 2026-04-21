@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ErrorBoundary } from "./error-boundary";
 
-function ThrowingComponent(): JSX.Element {
+function ThrowingComponent(): never {
   throw new Error("test error");
 }
 

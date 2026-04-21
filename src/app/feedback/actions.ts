@@ -1,18 +1,36 @@
 "use server";
 
 import { headers } from "next/headers";
-import { CATEGORY_LABEL_MAP } from "./categories";
+import { CATEGORY_LABEL_MAP, FEEDBACK_CATEGORIES } from "./categories";
 
 const GITHUB_REPO = "Tales-Runner/TR-archive";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const ALLOWED_CATEGORIES = new Set<string>(
+  FEEDBACK_CATEGORIES.map((c) => c.value),
+);
 
 /* ── Rate Limiter ─────────────────────────────────────── */
+// In-memory, per-instance. Good enough for a single low-traffic Vercel
+// function; for horizontal scale move to Upstash/Redis. Opportunistically
+// evicts stale IP keys so the Map doesn't grow unbounded on a warm worker.
 const rateLimitMap = new Map<string, number[]>();
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 5;
+const RATE_SWEEP_EVERY = 100;
+let rateCallCount = 0;
+
+function sweepRateLimit(now: number) {
+  for (const [ip, ts] of rateLimitMap) {
+    const live = ts.filter((t) => now - t < RATE_WINDOW_MS);
+    if (live.length === 0) rateLimitMap.delete(ip);
+    else if (live.length !== ts.length) rateLimitMap.set(ip, live);
+  }
+}
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
+  if (++rateCallCount % RATE_SWEEP_EVERY === 0) sweepRateLimit(now);
+
   const timestamps = (rateLimitMap.get(ip) ?? []).filter(
     (t) => now - t < RATE_WINDOW_MS,
   );
@@ -45,6 +63,13 @@ export async function submitFeedback(
   const title = (formData.get("title") as string)?.trim();
   const body = (formData.get("body") as string)?.trim();
   const nickname = (formData.get("nickname") as string)?.trim() || "익명";
+
+  // Whitelist category — otherwise a malicious client could forge arbitrary
+  // GitHub label strings, since `labels: [..., category]` hits the API as-is
+  // (non-existent labels are auto-created, polluting the repo).
+  if (!ALLOWED_CATEGORIES.has(category)) {
+    return { ok: false, message: "잘못된 분류입니다." };
+  }
 
   if (!title || title.length < 2) {
     return { ok: false, message: "제목을 2자 이상 입력해 주세요." };
