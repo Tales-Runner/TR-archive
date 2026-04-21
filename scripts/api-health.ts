@@ -1,4 +1,6 @@
 const BASE = "https://tr.rhaon.co.kr/webb";
+const USER_AGENT =
+  "Mozilla/5.0 (compatible; tr-archive/1.0; +https://tr-archive.vercel.app)";
 
 interface Endpoint {
   name: string;
@@ -77,6 +79,11 @@ const ENDPOINTS: Endpoint[] = [
       return null;
     },
   },
+  // NOTE: /main/notices 와 /code/maintenance 는 upstream cloudflare 가
+  // GitHub Actions 의 IP 대역을 차단하고 있어 여기 포함시키면 매일
+  // 오탐 이슈가 열린다. 이 두 엔드포인트는 Vercel 엣지에서만 정상
+  // 응답하므로, regression 은 배포 후 수동 확인 (e2e/api.spec.ts,
+  // `PLAYWRIGHT_LIVE=1` 모드) 또는 사용자 제보로 잡는다.
 ];
 
 interface CheckResult {
@@ -89,7 +96,10 @@ interface CheckResult {
 async function checkEndpoint(ep: Endpoint): Promise<CheckResult> {
   const url = `${BASE}${ep.path}`;
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(15_000),
+      headers: { "User-Agent": USER_AGENT },
+    });
     if (!res.ok) {
       return { name: ep.name, ok: false, error: `HTTP ${res.status} ${res.statusText}`, httpStatus: res.status };
     }

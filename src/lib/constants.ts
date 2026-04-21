@@ -3,6 +3,19 @@ export const API_BASE = "https://tr.rhaon.co.kr/webb";
 export const SITE_BASE = "https://tr.rhaon.co.kr";
 export const IMAGE_CDN = "https://trimage.rhaon.co.kr";
 
+/**
+ * User-Agent to send when proxying the Tales Runner upstream API.
+ *
+ * tr.rhaon.co.kr 가 2026-04 경부터 `/webb/main/*` 계열 엔드포인트에
+ * 브라우저가 아닌 UA 를 차단하기 시작 — Vercel 기본 undici UA 로는
+ * resCd=9999 빈 응답. Chrome-like UA 로 요청하면 정상 데이터 반환.
+ *
+ * `/webb/trlibrary/*` 는 아직 필터 없음. 그래도 일관성 + 미래 대응용
+ * 으로 모든 upstream 요청에 동일 UA 를 쓴다.
+ */
+export const UPSTREAM_USER_AGENT =
+  "Mozilla/5.0 (compatible; tr-archive/1.0; +https://tr-archive.vercel.app)";
+
 // ── Characters ────────────────────────────────────────
 export const CHARACTER_CATEGORY = { RUNNER: 0, STORY: 1 } as const;
 export const CHARACTER_CATEGORY_LABEL: Record<number, string> = {

@@ -1,4 +1,4 @@
-import { API_BASE } from "@/lib/constants";
+import { API_BASE, UPSTREAM_USER_AGENT } from "@/lib/constants";
 import { logger } from "@/lib/logger";
 
 export async function GET() {
@@ -6,6 +6,7 @@ export async function GET() {
   try {
     const res = await fetch(url, {
       next: { revalidate: 60 },
+      headers: { "User-Agent": UPSTREAM_USER_AGENT },
     });
     const data = await res.json();
     logger.info("Fetched maintenance status", { status: res.status });
