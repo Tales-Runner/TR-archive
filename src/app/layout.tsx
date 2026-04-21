@@ -11,6 +11,9 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { ProfileButton } from "./profile-button";
 import { ProfileProvider } from "@/lib/use-profile";
 import { YouTubeIcon, TwitterIcon, InstagramIcon, WebIcon } from "@/components/icons";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ServiceWorkerRegister } from "@/components/sw-register";
 import charactersJson from "@/data/characters.json";
 import mapsJson from "@/data/maps.json";
 import costumesJson from "@/data/costumes.json";
@@ -40,6 +43,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://tr-archive.vercel.app"),
   title: "엘림스 스마일의 비공식 아카이브 - 테일즈런너",
   description:
     "테일즈런너 캐릭터 능력치 비교, 변경권 확률, 맵 도감, 코스튬, 가이드, 스토리 뷰어",
@@ -181,6 +185,9 @@ export default function RootLayout({
         <ScrollToTop />
         </ProfileProvider>
         </ToastProvider>
+        <Analytics />
+        <SpeedInsights />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

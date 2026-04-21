@@ -4,9 +4,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import type { StoryItem } from "@/lib/types";
 import { formatDate, youtubeId, isSafeImageUrl } from "@/lib/format";
 import { useDocumentKeydown } from "@/lib/use-document-keydown";
-import { db } from "@/lib/db";
+import { useFocusTrap } from "@/lib/use-focus-trap";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useSwipeNav } from "@/lib/use-swipe-nav";
 import { WebtoonImage } from "./webtoon-image";
 import { EpisodeDrawer } from "./episode-drawer";
+import { useScrollRestore } from "./use-scroll-restore";
 import type { SeriesInfo } from "./story-utils";
 import { BRIGHTNESS_KEY, ZOOM_LEVELS } from "./story-utils";
 
@@ -40,7 +43,6 @@ export function StoryViewer({
   readIds: Set<number>;
 }) {
   const [barVisible, setBarVisible] = useState(true);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [showDrawer, setShowDrawer] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [zoomIdx, setZoomIdx] = useState(0);
@@ -59,12 +61,12 @@ export function StoryViewer({
     return 100;
   });
   const [viewerToast, setViewerToast] = useState<string | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const autoHideTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const markedReadRef = useRef(false);
-  const touchRef = useRef({ startX: 0, startY: 0, startTime: 0 });
 
   const zoom = ZOOM_LEVELS[zoomIdx];
 
@@ -81,13 +83,10 @@ export function StoryViewer({
     } catch {}
   }, []);
 
-  // Lock body scroll
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
+  useBodyScrollLock(true);
+
+  // Trap Tab focus inside the dialog + restore focus on close.
+  useFocusTrap(true, rootRef, closeBtnRef);
 
   // Auto-hide bars after 3s
   useEffect(() => {
@@ -99,34 +98,20 @@ export function StoryViewer({
   const [prevStoryId, setPrevStoryId] = useState(story.id);
   if (prevStoryId !== story.id) {
     setPrevStoryId(story.id);
-    setScrollProgress(0);
     setZoomIdx(0);
     setShowDrawer(false);
     setShowSettings(false);
   }
 
-  // Track read state — separated from scroll restore so isRead changes
-  // (from our own onMarkRead callback) don't re-trigger the DB fetch + toast.
-  useEffect(() => {
-    markedReadRef.current = !!isRead;
-  }, [story.id, isRead]);
-
-  // Restore scroll + toast on episode change
-  useEffect(() => {
-    db.stories.get(story.id).then((entry) => {
-      const progress = entry?.scrollProgress;
-      if (typeof progress === "number" && progress > 0.05) {
-        requestAnimationFrame(() => {
-          const el = scrollRef.current;
-          if (el)
-            el.scrollTop = progress * (el.scrollHeight - el.clientHeight);
-        });
-        showToast("이어서 읽는 중");
-      } else {
-        scrollRef.current?.scrollTo(0, 0);
-      }
+  // Scroll restore + read-threshold detection (extracted hook).
+  const { scrollProgress, handleScroll: restoreHandleScroll } =
+    useScrollRestore({
+      storyId: story.id,
+      scrollRef,
+      onMarkRead,
+      onToast: showToast,
+      isRead,
     });
-  }, [story.id, showToast]);
 
   // URL sync
   useEffect(() => {
@@ -143,41 +128,15 @@ export function StoryViewer({
     }, [onClose, onPrev, onNext, hasPrev, hasNext]),
   );
 
-  // Save scroll on unmount
-  useEffect(() => {
-    const storyId = story.id;
-    const scrollEl = scrollRef.current;
-    return () => {
-      const el = scrollEl;
-      if (!el) return;
-      const progress =
-        el.scrollTop / Math.max(el.scrollHeight - el.clientHeight, 1);
-      db.stories.get(storyId).then((existing) => {
-        db.stories.put({
-          id: storyId,
-          readAt: existing?.readAt ?? 0,
-          scrollProgress: progress,
-        });
-      });
-    };
-  }, [story.id]);
-
-  // Scroll handler
+  // Scroll handler — delegates progress + read mark to useScrollRestore,
+  // keeps bar-hide-on-scroll locally since it's coupled to timer state.
   const handleScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const progress =
-      el.scrollTop / Math.max(el.scrollHeight - el.clientHeight, 1);
-    setScrollProgress(Math.min(progress, 1));
+    restoreHandleScroll();
     setBarVisible(false);
     clearTimeout(scrollTimerRef.current);
     clearTimeout(autoHideTimerRef.current);
     scrollTimerRef.current = setTimeout(() => setBarVisible(true), 2000);
-    if (progress >= 0.8 && !markedReadRef.current) {
-      markedReadRef.current = true;
-      onMarkRead?.();
-    }
-  }, [onMarkRead]);
+  }, [restoreHandleScroll]);
 
   const toggleBar = useCallback(() => {
     clearTimeout(scrollTimerRef.current);
@@ -185,30 +144,13 @@ export function StoryViewer({
     setBarVisible((v) => !v);
   }, []);
 
-  // Swipe gesture for prev/next episode
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
-    touchRef.current = {
-      startX: e.touches[0].clientX,
-      startY: e.touches[0].clientY,
-      startTime: Date.now(),
-    };
-  }, []);
-
-  const onTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      const { startX, startY, startTime } = touchRef.current;
-      const endX = e.changedTouches[0].clientX;
-      const endY = e.changedTouches[0].clientY;
-      const dx = endX - startX;
-      const dy = Math.abs(endY - startY);
-      const dt = Date.now() - startTime;
-      if (Math.abs(dx) > 80 && Math.abs(dx) > dy * 2 && dt < 400) {
-        if (dx > 0 && hasPrev) onPrev();
-        else if (dx < 0 && hasNext) onNext();
-      }
-    },
-    [hasPrev, hasNext, onPrev, onNext],
-  );
+  // Swipe gesture for prev/next episode (extracted hook).
+  const { onTouchStart, onTouchEnd } = useSwipeNav({
+    onPrev,
+    onNext,
+    hasPrev,
+    hasNext,
+  });
 
   const hasVideo = story.images.some((img) => img.movieUrl);
   const videoUrl = story.images.find((img) => img.movieUrl)?.movieUrl;
@@ -216,14 +158,22 @@ export function StoryViewer({
 
   const barClass = barVisible ? "viewer-bar-visible" : "viewer-bar-hidden";
 
+  const titleId = `story-viewer-title-${story.id}`;
+
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col bg-[#0a0812]">
+    <div
+      ref={rootRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      className="fixed inset-0 z-[70] flex flex-col bg-[#0a0812]"
+    >
       {/* Top bar */}
       <div
         className={`absolute top-0 left-0 right-0 z-10 flex items-center justify-between border-b border-white/10 bg-[#0f0b1a]/90 backdrop-blur-md px-4 py-2 ${barClass}`}
       >
         <div className="min-w-0">
-          <h2 className="text-sm font-bold text-white/90 truncate">
+          <h2 id={titleId} className="text-sm font-bold text-white/90 truncate">
             {story.subject}
           </h2>
           <p className="text-[11px] text-white/40">
@@ -231,10 +181,12 @@ export function StoryViewer({
           </p>
         </div>
         <button
+          ref={closeBtnRef}
           onClick={(e) => {
             e.stopPropagation();
             onClose();
           }}
+          aria-label="스토리 뷰어 닫기"
           className="shrink-0 ml-3 rounded-lg bg-white/5 px-3 py-1.5 text-sm text-white/50 hover:bg-white/10 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
           닫기
