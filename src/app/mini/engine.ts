@@ -255,20 +255,13 @@ export function step(
   }
 
   // --- coin collection ---
+  // coins 배열은 이미 위 .map(...) 에서 새 인스턴스 — c.collected 갱신은
+  // 새 객체 위에서만 일어나므로 외부 snapshot 에 영향 없음.
   let coinsCollected = s.coinsCollected;
   for (const c of coins) {
     if (c.collected) continue;
     if (
-      rectsOverlap(
-        PLAYER_X,
-        y,
-        PLAYER_W,
-        PLAYER_H,
-        c.x - 2,
-        c.y - 2,
-        5,
-        5,
-      )
+      rectsOverlap(PLAYER_X, y, PLAYER_W, PLAYER_H, c.x - 2, c.y - 2, 5, 5)
     ) {
       c.collected = true;
       coinsCollected += 1;
@@ -319,4 +312,3 @@ export function step(
   };
 }
 
-export const ENGINE_META = { VIEW_W, VIEW_H, GROUND_Y, PLAYER_X, PLAYER_W, PLAYER_H };

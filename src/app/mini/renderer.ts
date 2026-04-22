@@ -149,16 +149,18 @@ function drawPlayer(ctx: CanvasRenderingContext2D, s: GameStateSnapshot) {
   ctx.fillRect(x + PLAYER_W - 5, y + 8 + legOffset, 2, 4 - legOffset);
 }
 
+// [baseX, y, width] 한 번만 정의 — 매 프레임 재할당 방지
+const CLOUDS: ReadonlyArray<readonly [number, number, number]> = [
+  [10, 16, 14],
+  [55, 26, 10],
+  [95, 12, 16],
+  [130, 22, 12],
+];
+
 function drawClouds(ctx: CanvasRenderingContext2D, scroll: number) {
   ctx.fillStyle = LCD_PALETTE.light;
   const ox = Math.floor(scroll * 0.2) % 120;
-  const clouds: [number, number, number][] = [
-    [10, 16, 14],
-    [55, 26, 10],
-    [95, 12, 16],
-    [130, 22, 12],
-  ];
-  for (const [cx, cy, cw] of clouds) {
+  for (const [cx, cy, cw] of CLOUDS) {
     const x = ((cx - ox) % (VIEW_W + 40) + VIEW_W + 40) % (VIEW_W + 40) - 20;
     ctx.fillRect(x, cy, cw, 3);
     ctx.fillRect(x + 2, cy - 1, cw - 4, 1);
@@ -241,6 +243,24 @@ function drawHud(
   }
 }
 
+// (font, text) → 측정된 width. 매 프레임 같은 문자열을 재측정하지 않도록
+// lazy 캐시. 글리프가 작고 종류가 한정돼 있어 무한 성장 위험 없음.
+const textWidthCache = new Map<string, number>();
+function measureCached(
+  ctx: CanvasRenderingContext2D,
+  font: string,
+  text: string,
+): number {
+  const key = `${font}|${text}`;
+  let w = textWidthCache.get(key);
+  if (w === undefined) {
+    ctx.font = font;
+    w = ctx.measureText(text).width;
+    textWidthCache.set(key, w);
+  }
+  return w;
+}
+
 function drawCenterText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -248,10 +268,11 @@ function drawCenterText(
 ) {
   // 한글은 3x5 글리프에 없으므로 네이티브 폰트 fallback — 다만 LCD 룩을
   // 최대한 유지하기 위해 dark color + 작은 사이즈.
+  const font = "bold 7px monospace";
+  const w = measureCached(ctx, font, text);
   ctx.fillStyle = LCD_PALETTE.ink;
-  ctx.font = "bold 7px monospace";
-  const metrics = ctx.measureText(text);
-  ctx.fillText(text, Math.floor((VIEW_W - metrics.width) / 2), y);
+  ctx.font = font;
+  ctx.fillText(text, Math.floor((VIEW_W - w) / 2), y);
 }
 
 function drawOverlay(
@@ -268,11 +289,11 @@ function drawOverlay(
   ctx.fillRect(16, 32, 1, 44);
   ctx.fillRect(VIEW_W - 17, 32, 1, 44);
 
+  const titleFont = "bold 8px monospace";
+  const titleW = measureCached(ctx, titleFont, "GAME OVER");
   ctx.fillStyle = LCD_PALETTE.ink;
-  ctx.font = "bold 8px monospace";
-  const gameOver = "GAME OVER";
-  const m = ctx.measureText(gameOver);
-  ctx.fillText(gameOver, Math.floor((VIEW_W - m.width) / 2), 44);
+  ctx.font = titleFont;
+  ctx.fillText("GAME OVER", Math.floor((VIEW_W - titleW) / 2), 44);
 
   drawPixelText(
     ctx,
@@ -290,8 +311,8 @@ function drawOverlay(
     LCD_PALETTE.dark,
   );
 
-  ctx.font = "6px monospace";
-  const retry = "TAP 로 다시";
-  const m2 = ctx.measureText(retry);
-  ctx.fillText(retry, Math.floor((VIEW_W - m2.width) / 2), 70);
+  const retryFont = "6px monospace";
+  const retryW = measureCached(ctx, retryFont, "TAP 로 다시");
+  ctx.font = retryFont;
+  ctx.fillText("TAP 로 다시", Math.floor((VIEW_W - retryW) / 2), 70);
 }
