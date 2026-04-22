@@ -28,6 +28,7 @@ const ROUTES = [
   "/notices",
   "/feedback",
   "/my",
+  "/mini",
 ];
 
 test.describe("smoke", () => {
