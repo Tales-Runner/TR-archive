@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useDocumentKeydown } from "@/lib/use-document-keydown";
 import {
   initialState,
   step,
@@ -24,14 +25,15 @@ export function MiniGame() {
   const inputRef = useRef({ jumpPressed: false, startPressed: false });
   const [hiScore, setHiScore] = useState(0);
   const hiScoreRef = useRef(0);
-  // 게임 상태는 ref 에서 매 프레임 흐르고, UI 표시용으로 상태 라벨만
+  // 게임 상태는 ref 에서 매 프레임 흐르고, UI 표시용으로 상태만
   // mirror — 전체 snapshot 을 state 로 두면 매 프레임 리렌더 발생.
-  const [stateLabel, setStateLabel] = useState<GameState>("ready");
+  const [gameState, setGameState] = useState<GameState>("ready");
   const [scale, setScale] = useState(4);
+  const scaleRef = useRef(4);
 
-  // --- hi score persistence ---
-  // Render-time hydration — useEffect 안 setState 는 React Compiler lint
-  // 가 금지. one-shot 체크 + window 가드로 SSR 안전 + 한 번만 실행.
+  // localStorage hydration. React Compiler 의 react-hooks/set-state-in-effect
+  // 가 useEffect 직접 setState 를 금지하므로 render-time one-shot 패턴.
+  // SSR 에선 window 가드로 스킵, 클라이언트 첫 렌더 때 한 번만 실행.
   const [hiHydrated, setHiHydrated] = useState(false);
   if (!hiHydrated && typeof window !== "undefined") {
     setHiHydrated(true);
@@ -56,6 +58,7 @@ export function MiniGame() {
       const byH = Math.floor(maxH / VIEW_H);
       const s = Math.max(1, Math.min(byW, byH, 6));
       setScale(s);
+      scaleRef.current = s;
     }
     recompute();
     window.addEventListener("resize", recompute);
@@ -70,16 +73,17 @@ export function MiniGame() {
     inputRef.current.jumpPressed = true;
   }, []);
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
-        e.preventDefault();
-        doJump();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [doJump]);
+  useDocumentKeydown(
+    useCallback(
+      (e: KeyboardEvent) => {
+        if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
+          e.preventDefault();
+          doJump();
+        }
+      },
+      [doJump],
+    ),
+  );
 
   // --- game loop ---
   useEffect(() => {
@@ -111,11 +115,11 @@ export function MiniGame() {
       stateRef.current = next;
       inputRef.current = { jumpPressed: false, startPressed: false };
 
-      render(ctx!, next, scale, hiScoreRef.current);
+      render(ctx!, next, scaleRef.current, hiScoreRef.current);
 
       // 상태 변화가 UI 에 영향 있는 전이만 mirror 갱신 (불필요 리렌더 방지)
       if (next.state !== prev.state) {
-        setStateLabel(next.state);
+        setGameState(next.state);
       }
 
       raf = requestAnimationFrame(loop);
@@ -125,7 +129,7 @@ export function MiniGame() {
       running = false;
       cancelAnimationFrame(raf);
     };
-  }, [scale]);
+  }, []);
 
   // canvas 크기는 실제 픽셀로; 좌표계 스케일은 render 함수가 처리
   const cssWidth = VIEW_W * scale;
@@ -154,7 +158,7 @@ export function MiniGame() {
           / 탭 = 점프
         </span>
         <span className="text-white/40">최고 {hiScore}m</span>
-        <span className="text-white/30">상태: {labelForState(stateLabel)}</span>
+        <span className="text-white/30">상태: {labelForState(gameState)}</span>
       </div>
 
       <p className="max-w-xl text-center text-[11px] leading-relaxed text-white/35">
