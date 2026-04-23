@@ -458,6 +458,15 @@ async function fetchProbability() {
 
   console.log(`  fetched ${categories.length} categories`);
 
+  // Upstream API occasionally returns all-empty itemLists during maintenance
+  // windows. Overwriting the committed data with an empty meta would cause
+  // the downstream validate step to reject the whole run. Bail early and
+  // keep the existing JSON so the site keeps working with slightly stale data.
+  if (categories.length === 0) {
+    console.log("  ⚠ all categories empty — keeping existing probability-meta.json + per-category files");
+    return;
+  }
+
   // Save per-category files to public/ for on-demand loading
   mkdirSync(PUBLIC_PROB_DIR, { recursive: true });
   const meta: { id: string; name: string; comments: string; itemCount: number }[] = [];
