@@ -20,6 +20,7 @@ import mapsJson from "@/data/maps.json";
 import costumesJson from "@/data/costumes.json";
 import guidesJson from "@/data/guides.json";
 import storiesJson from "@/data/stories.json";
+import { trStoryHref } from "@/lib/constants";
 import type { Character, MapItem, CostumeItem, GuideItem, StoryItem } from "@/lib/types";
 import "./globals.css";
 
@@ -30,7 +31,7 @@ const searchIndex: SearchEntry[] = [
   ...(mapsJson as MapItem[]).map((m) => ({ type: "맵", label: m.subject, sub: m.hashTagSubject.split(",")[0]?.trim() ?? "", href: "/maps" })),
   ...(costumesJson as CostumeItem[]).map((c) => ({ type: "코스튬", label: c.subject, sub: c.openYear, href: "/closet" })),
   ...(guidesJson as GuideItem[]).map((g) => ({ type: "가이드", label: g.subject, sub: g.hashTagSubject, href: "/guides" })),
-  ...(storiesJson as StoryItem[]).map((s) => ({ type: "스토리", label: s.subject, sub: s.openYear, href: "/stories" })),
+  ...(storiesJson as StoryItem[]).map((s) => ({ type: "스토리", label: s.subject, sub: s.openYear, href: trStoryHref(`/stories/${s.id}/`) })),
 ];
 
 const geistSans = Geist({
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://tr-archive.vercel.app"),
   title: "엘림스 스마일의 비공식 아카이브 - 테일즈런너",
   description:
-    "테일즈런너 캐릭터 능력치 비교, 변경권 확률, 맵 도감, 코스튬, 가이드, 스토리 뷰어",
+    "테일즈런너 캐릭터 능력치 비교, 변경권 확률, 맵 도감, 코스튬, 가이드, 연대기",
   openGraph: {
     title: "엘림스 스마일의 비공식 아카이브",
     description:
@@ -75,7 +76,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "세계관",
     items: [
-      { href: "/stories", label: "스토리" },
+      { href: "/stories", label: "스토리 안내" },
       { href: "/lore", label: "연대기" },
       { href: "/relationships", label: "인물 소개" },
     ],

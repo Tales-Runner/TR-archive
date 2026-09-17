@@ -6,7 +6,7 @@ import costumesJson from "@/data/costumes.json";
 import storiesJson from "@/data/stories.json";
 import type { MapItem, CostumeItem, StoryItem } from "@/lib/types";
 import { formatDate } from "@/lib/format";
-import { ELIMS_MAIN } from "@/lib/constants";
+import { ELIMS_MAIN, TR_STORY_URL, trStoryHref } from "@/lib/constants";
 
 const recentMaps = (mapsJson as MapItem[]).slice(0, 3);
 const recentCostumes = (costumesJson as CostumeItem[]).slice(0, 3);
@@ -119,16 +119,16 @@ export default function Home() {
 
           {/* Recent Stories */}
           <div>
-            <Link href="/stories" className="text-sm font-medium text-teal-400 hover:text-teal-300 mb-2 block">스토리 →</Link>
+            <Link href="/stories" className="text-sm font-medium text-teal-400 hover:text-teal-300 mb-2 block">스토리 안내 →</Link>
             <div className="space-y-2">
               {recentStories.map((s) => (
-                <Link key={s.id} href="/stories" className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors">
+                <a key={s.id} href={trStoryHref(`/stories/${s.id}/`)} className="flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2 hover:bg-white/[0.05] transition-colors">
                   <Image src={s.thumbnail} alt="" width={48} height={32} className="w-12 h-8 rounded object-cover shrink-0" />
                   <div className="min-w-0">
                     <div className="text-sm text-white/80 truncate">{s.subject}</div>
                     <div className="text-[10px] text-white/40">{formatDate(s.openDt)}</div>
                   </div>
-                </Link>
+                </a>
               ))}
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function Home() {
           <span className="text-white/20">|</span>
           <Link href="/closet" className="hover:text-teal-300 transition-colors">코스튬 전체 보기</Link>
           <span className="text-white/20">|</span>
-          <Link href="/stories" className="hover:text-teal-300 transition-colors">스토리 전체 보기</Link>
+          <a href={TR_STORY_URL} className="hover:text-teal-300 transition-colors">스토리 전체 보기</a>
         </div>
       </div>
     </div>

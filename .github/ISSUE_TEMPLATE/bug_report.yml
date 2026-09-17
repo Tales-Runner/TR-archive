@@ -14,8 +14,7 @@ body:
         - 맵 도감
         - 코스튬
         - 가이드
-        - 스토리 (목록)
-        - 스토리 (웹툰 뷰어)
+        - 스토리 안내
         - 공지사항
         - 검색
         - 기타
@@ -26,7 +25,7 @@ body:
     attributes:
       label: 어떤 문제인가요?
       description: 어떤 상황에서 뭐가 잘못되었는지 알려주세요.
-      placeholder: "예: 스토리 뷰어에서 다음화 버튼을 눌렀는데 같은 화가 다시 나와요."
+      placeholder: "예: 검색 결과를 눌렀는데 잘못된 페이지로 이동해요."
     validations:
       required: true
   - type: textarea
