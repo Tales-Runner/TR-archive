@@ -16,10 +16,8 @@ test.describe("도트 러너", () => {
     const canvas = page.getByLabel("테일즈런너 미니게임 캔버스");
     await expect(canvas).toBeVisible();
 
-    // 몇 프레임 기다려 배경 / 구름이 그려지게 함
-    await page.waitForTimeout(200);
-
-    const isBlank = await canvas.evaluate((el: HTMLCanvasElement) => {
+    // 실제 첫 프레임을 기다린다. 고정 지연은 느린 초기 렌더에서 실패한다.
+    await expect.poll(() => canvas.evaluate((el: HTMLCanvasElement) => {
       const ctx = el.getContext("2d");
       if (!ctx) return true;
       const { data } = ctx.getImageData(0, 0, el.width, el.height);
@@ -33,8 +31,7 @@ test.describe("도트 러너", () => {
         }
       }
       return true;
-    });
-    expect(isBlank, "canvas should not be uniformly blank").toBe(false);
+    }), { message: "canvas should not be uniformly blank" }).toBe(false);
   });
 
   test("SPACE 키 누르면 ready → running 상태 전이", async ({ page }) => {

@@ -7,7 +7,7 @@ const BASE = "https://tr-archive.vercel.app";
 // dynamic routes — so the sitemap stays flat.
 const ROUTES: { path: string; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]; priority: number }[] = [
   { path: "/", changeFrequency: "daily", priority: 1.0 },
-  { path: "/stories", changeFrequency: "monthly", priority: 0.4 },
+  { path: "/stories", changeFrequency: "weekly", priority: 0.9 },
   { path: "/characters", changeFrequency: "weekly", priority: 0.9 },
   { path: "/maps", changeFrequency: "weekly", priority: 0.9 },
   { path: "/closet", changeFrequency: "weekly", priority: 0.8 },
