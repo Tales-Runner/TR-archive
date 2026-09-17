@@ -13,7 +13,7 @@
  * Bump CACHE_VERSION to invalidate old caches after breaking changes.
  */
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const STATIC_CACHE = `tr-archive-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `tr-archive-runtime-${CACHE_VERSION}`;
 const IMAGE_CACHE = `tr-archive-images-${CACHE_VERSION}`;
@@ -33,7 +33,7 @@ self.addEventListener("activate", (event) => {
       const keys = await caches.keys();
       await Promise.all(
         keys
-          .filter((k) => !k.endsWith(CACHE_VERSION))
+          .filter((k) => k.startsWith("tr-archive-") && ![STATIC_CACHE, RUNTIME_CACHE, IMAGE_CACHE].includes(k))
           .map((k) => caches.delete(k)),
       );
       await self.clients.claim();
@@ -88,8 +88,14 @@ async function networkFirst(request, cacheName) {
   } catch {
     const hit = await cache.match(request);
     if (hit) return hit;
-    const fallback = await cache.match(OFFLINE_URL);
-    return fallback ?? Response.error();
+    // Only a document navigation may receive an HTML fallback. JSON/RSC
+    // requests must fail instead of trying to parse the home page as data.
+    if (request.mode === "navigate") {
+      const staticCache = await caches.open(STATIC_CACHE);
+      const fallback = await staticCache.match(OFFLINE_URL);
+      if (fallback) return fallback;
+    }
+    return Response.error();
   }
 }
 

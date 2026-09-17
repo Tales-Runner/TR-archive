@@ -64,7 +64,8 @@ export function ProfileSection({
 }: {
   characters: Character[];
 }) {
-  const { profile, ready, save } = useProfile();
+  const { profile, ready, loadError, save } = useProfile();
+  const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [nickname, setNickname] = useState("");
   const [charId, setCharId] = useState<number | null>(null);
@@ -81,6 +82,7 @@ export function ProfileSection({
   }
 
   async function handleSave() {
+    if (saving) return;
     if (!nickname.trim()) {
       toast("닉네임을 입력해 주세요");
       return;
@@ -89,14 +91,21 @@ export function ProfileSection({
     const validLevel = parsed !== null && !isNaN(parsed)
       ? Math.min(126, Math.max(1, parsed))
       : null;
-    await save({
-      nickname: nickname.trim(),
-      avatarUrl,
-      characterId: charId,
-      level: validLevel,
-    });
-    setEditing(false);
-    toast("프로필을 저장되었습니다");
+    setSaving(true);
+    try {
+      await save({
+        nickname: nickname.trim(),
+        avatarUrl,
+        characterId: charId,
+        level: validLevel,
+      });
+      setEditing(false);
+      toast("프로필이 저장되었습니다");
+    } catch {
+      toast("프로필을 저장하지 못했습니다. 다시 시도해 주세요.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (!ready) {
@@ -111,6 +120,10 @@ export function ProfileSection({
         </div>
       </div>
     );
+  }
+
+  if (loadError) {
+    return <p role="alert" className="p-6 text-sm text-white/60">프로필을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.</p>;
   }
 
   if (editing) {
@@ -159,12 +172,14 @@ export function ProfileSection({
         <div className="flex gap-2">
           <button
             onClick={handleSave}
+            disabled={saving}
             className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500 transition-colors"
           >
-            저장
+            {saving ? "저장 중…" : "저장"}
           </button>
           <button
             onClick={() => setEditing(false)}
+            disabled={saving}
             className="rounded-lg bg-white/5 px-4 py-2 text-sm text-white/40 hover:bg-white/10 transition-colors"
           >
             취소
