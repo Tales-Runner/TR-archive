@@ -1,8 +1,11 @@
 name: API health check
 
 on:
-  schedule:
-    - cron: '0 15 * * *'
+  # TODO(2026-05-21): cron paused — upstream API check failing consistently.
+  # Re-enable after diagnosing root cause (changed endpoint or rate limit).
+  # Original cadence: '0 15 * * *' (daily 15:00 UTC)
+  # schedule:
+  #   - cron: '0 15 * * *'
   workflow_dispatch:
 
 jobs:
