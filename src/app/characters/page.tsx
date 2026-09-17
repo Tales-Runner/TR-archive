@@ -22,8 +22,7 @@ export default function CharactersPage() {
         35명의 런너 스탯과 모션 시간을 한눈에.
       </p>
       <ScholarComment
-        elims="런너들 능력치를 다 까발려 놓는 게 좀 그렇냐고? 크크, 프라이버시 같은 건 아티팩터한테 없어."
-        r="...엘림스. 이건 공개 데이터입니다."
+        elims="누가 더 나은지 궁금한가? 나란히 놓고 봐. 차이라는 건 비교할수록 선명해지지."
       />
       <CharacterTable characters={characters} />
     </div>

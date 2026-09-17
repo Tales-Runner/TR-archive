@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "엘림스 스마일의 비공식 아카이브",
     description:
-      "내가 정리해 둔 비공식 아카이브다. 공식엔 없는 것들도 있지.",
+      "런너들의 능력부터 이 세계의 이야기까지. 꽤 쓸 만한 것들을 모아 뒀지.",
     siteName: "엘림스 스마일의 비공식 아카이브",
     type: "website",
     images: [
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "엘림스 스마일의 비공식 아카이브",
     description:
-      "내가 정리해 둔 비공식 아카이브다. 공식엔 없는 것들도 있지.",
+      "런너들의 능력부터 이 세계의 이야기까지. 꽤 쓸 만한 것들을 모아 뒀지.",
   },
 };
 

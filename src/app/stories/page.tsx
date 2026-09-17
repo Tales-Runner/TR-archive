@@ -31,7 +31,7 @@ export default async function StoriesPage({
         동화나라에 남겨진 이야기들. 감정 에너지가 가장 많이 깃든 기록이지.
       </p>
       <ScholarComment
-        elims="여태까지의 이벤트 스토리를 모아 둔 거야. 공식에선 모바일로 보면 깨지던데... 내가 고쳐놨지."
+        elims="이 세계에 무슨 일이 있었는지 궁금한가? 어디, 직접 읽어 봐. 제법 흥미로운 이야기도 있을 테니."
         r="...세로로 스크롤하면 읽을 수 있어요."
       />
       <StoryTimeline

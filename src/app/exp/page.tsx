@@ -23,7 +23,7 @@ export default function ExpPage() {
         현재 레벨에서 목표 레벨까지 필요한 경험치를 계산합니다.
       </p>
       <ScholarComment
-        elims="크큭. 레벨업에 얼마나 걸리는지 알고 싶다고? 현실을 직시하는 건 좋은 습관이지."
+        elims="목표는 정했나? 그럼 얼마나 남았는지부터 계산해 봐. 막연히 기다린다고 가까워지진 않으니까."
         r="...숫자를 입력하면 계산됩니다."
       />
       <ExpCalculator levels={levels} />

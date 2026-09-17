@@ -22,7 +22,7 @@ export default function GuidesPage() {
         동화나라를 달리기 위해 알아야 할 것들.
       </p>
       <ScholarComment
-        elims="가이드? 이런 건 직접 뛰어보면서 배우는 게 낫지. ...근데 뭐, R이 정리해 달라길래."
+        elims="모르는 게 있나? 그럴 줄 알고 모아 뒀지. 자, 어디부터 막혔는지 찾아보라고."
         r="궁금한 게 많아서요. ...정리하면서 저도 배웠습니다."
       />
       <GuideBrowser guides={guides} />
