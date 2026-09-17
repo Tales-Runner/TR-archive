@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { TYPEWRITER_SPEED_MS } from "@/lib/constants";
 
@@ -26,6 +26,7 @@ export function VNScene({ choices }: { choices: Choice[] }) {
   const [dialogIdx, setDialogIdx] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
+  const typingTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const currentText = dialogues[dialogIdx];
   const isLastDialog = dialogIdx === dialogues.length - 1;
@@ -54,11 +55,19 @@ export function VNScene({ choices }: { choices: Choice[] }) {
         setIsTyping(false);
       }
     }, TYPEWRITER_SPEED_MS);
-    return () => clearInterval(timer);
+    typingTimer.current = timer;
+    return () => {
+      clearInterval(timer);
+      typingTimer.current = null;
+    };
   }, [dialogIdx, currentText]);
 
   function handleClick() {
     if (isTyping) {
+      if (typingTimer.current !== null) {
+        clearInterval(typingTimer.current);
+        typingTimer.current = null;
+      }
       setDisplayedText(currentText);
       setIsTyping(false);
       return;
@@ -70,27 +79,29 @@ export function VNScene({ choices }: { choices: Choice[] }) {
 
   return (
     <div className="relative z-20 w-full max-w-3xl px-4 pb-6">
-      <div
+      <button
+        type="button"
         onClick={handleClick}
-        className="relative cursor-pointer rounded-t-2xl border border-white/10 bg-black/70 backdrop-blur-md px-6 pt-4 pb-5 select-none"
+        aria-label={`${currentText} ${isTyping ? "대사 전체 보기" : showChoices ? "엘림스의 대사" : "다음 대사"}`}
+        className="relative block w-full cursor-pointer rounded-t-2xl border border-white/10 bg-black/70 backdrop-blur-md px-6 pt-4 pb-5 text-left select-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-400"
       >
-        <div className="absolute -top-4 left-5 rounded-lg bg-teal-600 px-4 py-1 text-sm font-bold text-white shadow-lg">
+        <span className="absolute -top-4 left-5 rounded-lg bg-teal-600 px-4 py-1 text-sm font-bold text-white shadow-lg">
           엘림스 스마일
-        </div>
+        </span>
 
-        <p className="mt-2 min-h-[3.5rem] text-[15px] leading-relaxed text-white/90 font-[var(--font-sans)]">
+        <span className="mt-2 block min-h-[3.5rem] text-[15px] leading-relaxed text-white/90 font-[var(--font-sans)]">
           {displayedText}
           {isTyping && (
             <span className="ml-0.5 inline-block w-[2px] h-[1em] bg-white/70 animate-pulse align-middle" />
           )}
-        </p>
+        </span>
 
         {!isTyping && !showChoices && (
-          <div className="absolute bottom-2 right-4 text-xs text-white/40 animate-pulse">
+          <span aria-hidden="true" className="absolute bottom-2 right-4 text-xs text-white/40 animate-pulse">
             ▼
-          </div>
+          </span>
         )}
-      </div>
+      </button>
 
       {showChoices && (
         <div className={`mt-3 grid gap-2 ${choices.length > 4 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
