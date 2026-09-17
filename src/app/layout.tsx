@@ -95,6 +95,11 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/probability", label: "변경권 확률" },
       { href: "/exp", label: "경험치 계산기" },
       { href: "/stats", label: "통계" },
+    ],
+  },
+  {
+    label: "실험실",
+    items: [
       { href: "/mini", label: "도트 러너" },
     ],
   },
