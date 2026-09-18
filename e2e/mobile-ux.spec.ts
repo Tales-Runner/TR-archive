@@ -3,6 +3,14 @@ import { test, expect } from "@playwright/test";
 test.describe("mobile archive", () => {
   test.use({ viewport: { width: 375, height: 812 } });
 
+  test("모바일 헤더가 엘림스 스마일의 아카이브로 표시됨", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("link", { name: "엘림스 스마일의 아카이브 홈", exact: true }).locator("span:visible")).toHaveText(
+      "엘림스 스마일의 아카이브",
+    );
+    await expect(page.getByText("엘림스의 아카이브", { exact: true })).toHaveCount(0);
+  });
+
   test("검색창이 화면 전체를 덮고 닫으면 스크롤과 포커스를 복원함", async ({ page }) => {
     await page.goto("/");
     const trigger = page.getByRole("button", { name: "검색", exact: true });

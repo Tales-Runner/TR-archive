@@ -162,7 +162,7 @@ export default async function RootLayout({
                 height={28}
                 className="rounded-full ring-1 ring-teal-500/30"
               />
-              <span className="truncate sm:hidden">엘림스의 아카이브</span>
+              <span className="truncate sm:hidden">엘림스 스마일의 아카이브</span>
               <span className="hidden whitespace-nowrap sm:inline">엘림스 스마일의 아카이브</span>
             </Link>
             <NavMenu groups={NAV_GROUPS} />
