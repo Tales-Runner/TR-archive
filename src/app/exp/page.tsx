@@ -4,10 +4,10 @@ import { ScholarComment } from "../scholar-comment";
 import levelsJson from "@/data/levels.json";
 
 export const metadata: Metadata = {
-  title: "경험치 계산기 - 엘림스 스마일의 비공식 아카이브",
+  title: "경험치 계산기 - 엘림스 스마일의 아카이브",
   description: "테일즈런너 레벨업 필요 경험치 계산",
   openGraph: {
-    title: "경험치 계산기 - 엘림스 스마일의 비공식 아카이브",
+    title: "경험치 계산기 - 엘림스 스마일의 아카이브",
     description: "테일즈런너 레벨업 필요 경험치 계산",
   },
 };

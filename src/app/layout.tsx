@@ -27,10 +27,10 @@ import "./globals.css";
 const searchIndex: SearchEntry[] = [
   ...(charactersJson as Character[])
     .filter((c) => c.isView)
-    .map((c) => ({ type: "런너", label: c.characterNm, sub: c.catchPhrase, href: "/characters", img: c.circularImageUrl })),
-  ...(mapsJson as MapItem[]).map((m) => ({ type: "맵", label: m.subject, sub: m.hashTagSubject.split(",")[0]?.trim() ?? "", href: "/maps" })),
-  ...(costumesJson as CostumeItem[]).map((c) => ({ type: "코스튬", label: c.subject, sub: c.openYear, href: "/closet" })),
-  ...(guidesJson as GuideItem[]).map((g) => ({ type: "가이드", label: g.subject, sub: g.hashTagSubject, href: "/guides" })),
+    .map((c) => ({ type: "런너", label: c.characterNm, sub: c.catchPhrase, href: `/characters?id=${c.id}`, img: c.circularImageUrl })),
+  ...(mapsJson as MapItem[]).map((m) => ({ type: "맵", label: m.subject, sub: m.hashTagSubject.split(",")[0]?.trim() ?? "", href: `/maps?id=${m.id}` })),
+  ...(costumesJson as CostumeItem[]).map((c) => ({ type: "코스튬", label: c.subject, sub: c.openYear, href: `/closet?id=${c.id}` })),
+  ...(guidesJson as GuideItem[]).map((g) => ({ type: "가이드", label: g.subject, sub: g.hashTagSubject, href: `/guides?id=${g.id}` })),
   ...(storiesJson as StoryItem[]).map((s) => ({ type: "스토리", label: s.subject, sub: s.openYear, href: trStoryHref(`/stories/${s.id}/`) })),
 ];
 
@@ -46,14 +46,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://tr-archive.vercel.app"),
-  title: "엘림스 스마일의 비공식 아카이브 - 테일즈런너",
+  title: "엘림스 스마일의 아카이브 - 테일즈런너",
   description:
     "테일즈런너 캐릭터 능력치 비교, 변경권 확률, 맵 도감, 코스튬, 가이드, 연대기",
   openGraph: {
-    title: "엘림스 스마일의 비공식 아카이브",
+    title: "엘림스 스마일의 아카이브",
     description:
       "런너들의 능력부터 이 세계의 이야기까지. 꽤 쓸 만한 것들을 모아 뒀지.",
-    siteName: "엘림스 스마일의 비공식 아카이브",
+    siteName: "엘림스 스마일의 아카이브",
     type: "website",
     images: [
       {
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "엘림스 스마일의 비공식 아카이브",
+    title: "엘림스 스마일의 아카이브",
     description:
       "런너들의 능력부터 이 세계의 이야기까지. 꽤 쓸 만한 것들을 모아 뒀지.",
   },
@@ -148,11 +148,12 @@ export default async function RootLayout({
         <ToastProvider>
         <ProfileProvider>
         <MaintenanceBanner />
-        <header className="relative sticky top-0 z-50 border-b border-white/5 bg-[#0f0b1a]/80 backdrop-blur-md">
-          <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 sm:gap-6 px-4">
+        <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0f0b1a]/80 backdrop-blur-md">
+          <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 xl:gap-4 px-3 sm:px-4">
             <Link
               href="/"
-              className="flex items-center gap-2 text-lg font-bold text-teal-300 tracking-tight"
+              className="flex min-w-0 items-center gap-2 text-sm sm:text-base font-bold text-teal-300 tracking-tight"
+              aria-label="엘림스 스마일의 아카이브 홈"
             >
               <Image
                 src="https://trimage.rhaon.co.kr/images/trintro/character/circularImageUrl/6awBZmzKmUkV8JVC43yMRH.png"
@@ -161,10 +162,11 @@ export default async function RootLayout({
                 height={28}
                 className="rounded-full ring-1 ring-teal-500/30"
               />
-              엘림스 스마일의 비공식 아카이브
+              <span className="truncate sm:hidden">엘림스의 아카이브</span>
+              <span className="hidden whitespace-nowrap sm:inline">엘림스 스마일의 아카이브</span>
             </Link>
             <NavMenu groups={NAV_GROUPS} />
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-1">
               <GlobalSearch index={searchIndex} />
               <ProfileButton />
             </div>
@@ -190,7 +192,7 @@ export default async function RootLayout({
               </a>
             </div>
             <p className="text-xs text-white/40">
-              비공식 아카이브 &middot; 감정 에너지로 빚어낸 기록들 &middot; 엘림스 스마일의 비공식 아카이브
+              엘림스 스마일의 아카이브 &middot; 테일즈런너 팬 사이트
             </p>
           </div>
         </footer>

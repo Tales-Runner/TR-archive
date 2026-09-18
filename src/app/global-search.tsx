@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
+import { useFocusTrap } from "@/lib/use-focus-trap";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { SEARCH_TYPE_COLORS } from "@/lib/constants";
@@ -24,6 +27,9 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, dialogRef, inputRef);
+  useBodyScrollLock(open);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
@@ -48,7 +54,7 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
     useCallback((e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setOpen(true);
+        if (!document.querySelector('[role="dialog"]')) setOpen(true);
       }
       if (e.key === "Escape") {
         setOpen(false);
@@ -57,9 +63,6 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
     }, []),
   );
 
-  useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
 
   function go(href: string) {
     setOpen(false);
@@ -79,12 +82,12 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
       listRef.current?.children[next]?.scrollIntoView({ block: "nearest" });
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      const next = Math.max(selectedIndex - 1, 0);
+      const next = results.length ? Math.max(selectedIndex - 1, 0) : -1;
       setSelectedIndex(next);
       listRef.current?.children[next]?.scrollIntoView({ block: "nearest" });
-    } else if (e.key === "Enter" && selectedIndex >= 0 && results[selectedIndex]) {
+    } else if (e.key === "Enter" && !e.nativeEvent.isComposing && results.length > 0) {
       e.preventDefault();
-      go(results[selectedIndex].href);
+      go(results[Math.max(selectedIndex, 0)].href);
     }
   }
 
@@ -109,17 +112,18 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
         </svg>
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
-          className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-[60] flex items-start justify-center pt-[8dvh] sm:pt-[15dvh] bg-black/60 backdrop-blur-sm px-4"
           onClick={() => { setOpen(false); setQuery(""); }}
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label="검색"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-2xl border border-white/10 bg-[#13101f] shadow-2xl overflow-hidden animate-scale-in"
+            className="flex max-h-[80dvh] w-full max-w-lg flex-col rounded-2xl border border-white/10 bg-[#13101f] shadow-2xl overflow-hidden animate-scale-in"
           >
             <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white/40 shrink-0">
@@ -133,20 +137,26 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="캐릭터, 맵, 코스튬, 가이드, 스토리 검색..."
-                className="flex-1 bg-transparent text-base text-white/90 placeholder:text-white/40 outline-none"
+                className="min-w-0 flex-1 bg-transparent text-base text-white/90 placeholder:text-white/40 outline-none"
+                role="combobox"
+                aria-label="아카이브 검색"
+                aria-expanded={results.length > 0}
+                aria-controls="archive-search-results"
                 aria-autocomplete="list"
                 aria-activedescendant={selectedIndex >= 0 ? `search-result-${selectedIndex}` : undefined}
               />
-              <kbd
+              <button
+                type="button"
+                aria-label="검색 닫기"
                 onClick={() => { setOpen(false); setQuery(""); }}
                 className="cursor-pointer rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/40 hover:text-white/50"
               >
-                ESC
-              </kbd>
+                닫기
+              </button>
             </div>
 
             {results.length > 0 && (
-              <div ref={listRef} className="max-h-[50vh] overflow-y-auto py-2" role="listbox">
+              <div id="archive-search-results" ref={listRef} className="min-h-0 overflow-y-auto overscroll-contain py-2" role="listbox" aria-label="검색 결과">
                 {results.map((r, i) => (
                   <button
                     id={`search-result-${i}`}
@@ -190,7 +200,8 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

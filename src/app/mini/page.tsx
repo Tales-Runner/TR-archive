@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MiniGame } from "./mini-game";
 
 export const metadata: Metadata = {
-  title: "도트 러너 — 엘림스 스마일의 비공식 아카이브",
+  title: "도트 러너 — 엘림스 스마일의 아카이브",
   description:
     "테일즈런너가 원래 모바일 횡스크롤로 기획됐던 시절에 경의를 표하는 팬제작 LCD 미니게임",
 };

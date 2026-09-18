@@ -3,10 +3,10 @@ import { ChannelsHub } from "./channels-hub";
 import { ScholarComment } from "../scholar-comment";
 
 export const metadata: Metadata = {
-  title: "공식 채널 - 엘림스 스마일의 비공식 아카이브",
+  title: "공식 채널 - 엘림스 스마일의 아카이브",
   description: "테일즈런너 공식 YouTube 채널 및 소셜 미디어 계정 모음",
   openGraph: {
-    title: "공식 채널 - 엘림스 스마일의 비공식 아카이브",
+    title: "공식 채널 - 엘림스 스마일의 아카이브",
     description: "테일즈런너 공식 YouTube 채널 및 소셜 미디어 계정 모음",
   },
 };

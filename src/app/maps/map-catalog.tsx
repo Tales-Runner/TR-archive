@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useFocusTrap } from "@/lib/use-focus-trap";
+import { useDetailRoute } from "@/lib/use-detail-route";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { MapItem, MapType } from "@/lib/types";
@@ -28,7 +31,7 @@ export function MapCatalog({
   const [sortBy, setSortBy] = useState<"date" | "name">(() =>
     searchParams.get("sort") === "name" ? "name" : "date",
   );
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useDetailRoute();
   const [mapRecords, setMapRecords] = useState<Map<number, MapEntry>>(new Map());
 
   useEffect(() => {
@@ -44,12 +47,13 @@ export function MapCatalog({
   const debouncedSearch = useDebouncedValue(search, 200);
 
   useEffect(() => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(window.location.search);
+    for (const key of ["q", "sort", "type", "year"]) params.delete(key);
     if (typeFilter !== null) params.set("type", String(typeFilter));
     if (debouncedSearch.trim()) params.set("q", debouncedSearch.trim());
     if (sortBy !== "date") params.set("sort", sortBy);
     const qs = params.toString();
-    const target = qs ? `?${qs}` : window.location.pathname;
+    const target = window.location.pathname + (qs ? `?${qs}` : "");
     if (target !== window.location.pathname + window.location.search) {
       router.replace(target, { scroll: false });
     }
@@ -79,10 +83,13 @@ export function MapCatalog({
     useCallback((e: KeyboardEvent) => {
       if (selectedId === null) return;
       if (e.key === "Escape") setSelectedId(null);
-    }, [selectedId]),
+    }, [selectedId, setSelectedId]),
   );
 
   const selected = selectedId !== null ? maps.find((m) => m.id === selectedId) : null;
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useBodyScrollLock(!!selected);
+  useFocusTrap(!!selected, dialogRef);
 
   const typeName = (code: number | null) =>
     types.find((t) => t.codeId === code)?.codeName ?? "";
@@ -91,7 +98,7 @@ export function MapCatalog({
     <>
       {/* Filters */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex overflow-x-auto rounded-lg border border-white/10 text-sm">
+        <div className="flex max-w-full overflow-x-auto rounded-lg border border-white/10 text-sm">
           <button
             onClick={() => setTypeFilter(null)}
             className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${
@@ -144,6 +151,8 @@ export function MapCatalog({
       {selected && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          ref={dialogRef}
+          aria-label={selected.subject}
           role="dialog"
           aria-modal="true"
           onClick={() => setSelectedId(null)}

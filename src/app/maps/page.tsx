@@ -7,10 +7,10 @@ import mapTypesJson from "@/data/map-types.json";
 import type { MapItem, MapType } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "맵 백과 - 엘림스 스마일의 비공식 아카이브",
+  title: "맵 백과 - 엘림스 스마일의 아카이브",
   description: "테일즈런너 전체 맵 목록 및 상세 정보",
   openGraph: {
-    title: "맵 백과 - 엘림스 스마일의 비공식 아카이브",
+    title: "맵 백과 - 엘림스 스마일의 아카이브",
     description: "테일즈런너 전체 맵 목록 및 상세 정보",
   },
 };

@@ -5,7 +5,7 @@ import charactersJson from "@/data/characters.json";
 import type { Character } from "@/lib/types";
 
 export const metadata = {
-  title: "인물 소개 — 엘림스 스마일의 비공식 아카이브",
+  title: "인물 소개 — 엘림스 스마일의 아카이브",
   description: "테일즈런너 캐릭터 소개. 공식 프로필 기반 인물 정보와 스토리 등장 정보.",
 };
 

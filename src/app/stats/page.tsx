@@ -10,10 +10,10 @@ import levelsJson from "@/data/levels.json";
 import type { Character, MapItem, CostumeItem, StoryItem, ProbabilityCategoryMeta } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "통계 - 엘림스 스마일의 비공식 아카이브",
+  title: "통계 - 엘림스 스마일의 아카이브",
   description: "테일즈런너 데이터 통계 및 분석",
   openGraph: {
-    title: "통계 - 엘림스 스마일의 비공식 아카이브",
+    title: "통계 - 엘림스 스마일의 아카이브",
     description: "테일즈런너 데이터 통계 및 분석",
   },
 };

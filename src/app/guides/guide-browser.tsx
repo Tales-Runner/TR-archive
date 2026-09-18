@@ -1,17 +1,28 @@
 "use client";
 
+import { useDetailRoute } from "@/lib/use-detail-route";
 import { useState, useMemo } from "react";
-import DOMPurify from "dompurify";
+import dynamic from "next/dynamic";
 import type { GuideItem } from "@/lib/types";
 import { GUIDE_CATEGORY_NAMES as CATEGORY_NAMES } from "@/lib/constants";
 import { useDebouncedValue } from "@/lib/use-debounce";
 import { EmptyState } from "@/components/empty-state";
 
+const GuideContent = dynamic(() => import("./guide-content"), {
+  ssr: false,
+  loading: () => <p role="status" className="p-5 text-sm text-white/50">가이드를 불러오는 중…</p>,
+});
+
 export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
   const [catFilter, setCatFilter] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useDetailRoute();
   const [activePart, setActivePart] = useState(0);
+  const [previousId, setPreviousId] = useState(selectedId);
+  if (previousId !== selectedId) {
+    setPreviousId(selectedId);
+    setActivePart(0);
+  }
 
   const categories = useMemo(() => {
     const cats = [...new Set(guides.map((g) => g.category))];
@@ -41,6 +52,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
   function openGuide(id: number) {
     setSelectedId(id);
     setActivePart(0);
+    window.scrollTo({ top: 0 });
   }
 
   if (selected) {
@@ -94,14 +106,9 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
           )}
 
           {/* Content */}
-          {selected.partList[activePart] && (() => {
-            try {
-              const html = DOMPurify.sanitize(selected.partList[activePart].contents ?? "");
-              return <div className="guide-content p-3 sm:p-5" dangerouslySetInnerHTML={{ __html: html }} />;
-            } catch {
-              return <div className="p-5 text-sm text-white/40">콘텐츠를 표시할 수 없습니다</div>;
-            }
-          })()}
+          {selected.partList[activePart] && (
+            <GuideContent html={selected.partList[activePart].contents ?? ""} />
+          )}
         </div>
       </div>
     );
@@ -111,7 +118,7 @@ export function GuideBrowser({ guides }: { guides: GuideItem[] }) {
     <>
       {/* Filters */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="flex overflow-x-auto rounded-lg border border-white/10 text-sm">
+        <div className="flex max-w-full overflow-x-auto rounded-lg border border-white/10 text-sm">
           <button
             onClick={() => setCatFilter(null)}
             className={`shrink-0 whitespace-nowrap px-3 py-1.5 transition-colors ${

@@ -3,7 +3,7 @@ import { LoreTimeline } from "./lore-client";
 import { CharacterComment } from "../scholar-comment";
 
 export const metadata = {
-  title: "세계관 연대기 — 엘림스 스마일의 비공식 아카이브",
+  title: "세계관 연대기 — 엘림스 스마일의 아카이브",
   description: "테일즈런너 공식 스토리 타임라인. 2009년부터 현재까지의 스토리 아크를 시간순으로 정리.",
 };
 

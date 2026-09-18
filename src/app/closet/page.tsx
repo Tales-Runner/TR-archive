@@ -6,10 +6,10 @@ import costumesJson from "@/data/costumes.json";
 import type { CostumeItem } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "코스튬 - 엘림스 스마일의 비공식 아카이브",
+  title: "코스튬 - 엘림스 스마일의 아카이브",
   description: "테일즈런너 코스튬 세트 갤러리",
   openGraph: {
-    title: "코스튬 - 엘림스 스마일의 비공식 아카이브",
+    title: "코스튬 - 엘림스 스마일의 아카이브",
     description: "테일즈런너 코스튬 세트 갤러리",
   },
 };

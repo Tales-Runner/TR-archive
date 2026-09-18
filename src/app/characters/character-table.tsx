@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useFocusTrap } from "@/lib/use-focus-trap";
+import { useDetailRoute } from "@/lib/use-detail-route";
+import { useState, useMemo, useCallback, useRef } from "react";
 import type { Character, SortKey, SortDir } from "@/lib/types";
 import { CHARACTER_CATEGORY, CHARACTER_CATEGORY_LABEL, STAT_MAX, STAT_TOTAL_MAX } from "@/lib/constants";
 import { useDebouncedValue } from "@/lib/use-debounce";
@@ -91,11 +94,16 @@ function CharacterModal({
   onMemoChange: (m: string) => void;
   onTagsChange: (t: string[]) => void;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useBodyScrollLock();
+  useFocusTrap(true, dialogRef);
   const [tagInput, setTagInput] = useState("");
   const total = c.maximumSpeed + c.acceleration + c.control + c.power;
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      ref={dialogRef}
+      aria-label="런너 상세·비교"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -261,6 +269,9 @@ function CompareModal({
   chars: Character[];
   onClose: () => void;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useBodyScrollLock();
+  useFocusTrap(true, dialogRef);
   const stats = [
     { label: "속도", key: "maximumSpeed" as const },
     { label: "가속", key: "acceleration" as const },
@@ -271,6 +282,8 @@ function CompareModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      ref={dialogRef}
+      aria-label="런너 상세·비교"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
@@ -384,7 +397,7 @@ export function CharacterTable({
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [catFilter, setCatFilter] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useDetailRoute();
   const [compareIds, setCompareIds] = useState<number[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const toast = useToast();
@@ -398,7 +411,7 @@ export function CharacterTable({
         if (showCompare) setShowCompare(false);
         else setSelectedId(null);
       }
-    }, [selectedId, showCompare]),
+    }, [selectedId, showCompare, setSelectedId]),
   );
 
   function toggleCompare(id: number, e: React.MouseEvent) {

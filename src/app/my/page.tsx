@@ -6,10 +6,10 @@ import mapsJson from "@/data/maps.json";
 import type { Character, CostumeItem, MapItem } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "마이페이지 - 엘림스 스마일의 비공식 아카이브",
+  title: "마이페이지 - 엘림스 스마일의 아카이브",
   description: "내 프로필과 즐겨찾기를 관리합니다",
   openGraph: {
-    title: "마이페이지 - 엘림스 스마일의 비공식 아카이브",
+    title: "마이페이지 - 엘림스 스마일의 아카이브",
     description: "내 프로필과 즐겨찾기를 관리합니다",
   },
 };

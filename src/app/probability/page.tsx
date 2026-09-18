@@ -5,10 +5,10 @@ import probabilityMeta from "@/data/probability-meta.json";
 import type { ProbabilityCategoryMeta } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "확률 정보 - 엘림스 스마일의 비공식 아카이브",
+  title: "확률 정보 - 엘림스 스마일의 아카이브",
   description: "테일즈런너 아이템 확률 조회 및 기대값 시뮬레이션",
   openGraph: {
-    title: "확률 정보 - 엘림스 스마일의 비공식 아카이브",
+    title: "확률 정보 - 엘림스 스마일의 아카이브",
     description: "테일즈런너 아이템 확률 조회 및 기대값 시뮬레이션",
   },
 };

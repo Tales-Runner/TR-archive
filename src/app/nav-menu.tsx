@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useBodyScrollLock } from "@/lib/use-body-scroll-lock";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,6 +16,17 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  useBodyScrollLock(mobileOpen);
+  useFocusTrap(mobileOpen, menuRef);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1280px)");
+    const closeMobileOnDesktop = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+    desktop.addEventListener("change", closeMobileOnDesktop);
+    return () => desktop.removeEventListener("change", closeMobileOnDesktop);
+  }, []);
 
   // Close menus on route change — adjust state when prop changes
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -28,9 +41,11 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
     function onClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpenGroup(null);
+        setMobileOpen(false);
       }
     }
     function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") setMobileOpen(false);
       if (e.key === "Escape") {
         setOpenGroup(null);
         setMobileOpen(false);
@@ -47,15 +62,16 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <>
+    <div ref={menuRef} className="contents">
       {/* Desktop */}
-      <nav ref={menuRef} className="hidden md:flex gap-1 items-center">
+      <nav className="hidden xl:flex gap-1 items-center">
         {groups.map((group) => (
           <div key={group.label} className="relative">
             <button
               onClick={() =>
                 setOpenGroup(openGroup === group.label ? null : group.label)
               }
+              aria-expanded={openGroup === group.label}
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 openGroup === group.label || group.items.some((i) => isActive(i.href))
                   ? "bg-white/10 text-white/80"
@@ -73,6 +89,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => { setOpenGroup(null); setMobileOpen(false); }}
                     className={`block px-4 py-2 text-sm transition-colors ${
                       isActive(item.href)
                         ? "text-teal-300 bg-white/5"
@@ -91,7 +108,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="md:hidden rounded-md p-2.5 text-white/50 hover:bg-white/5 hover:text-white/80"
+        className="xl:hidden rounded-md p-2.5 text-white/50 hover:bg-white/5 hover:text-white/80"
         aria-label="메뉴"
         aria-expanded={mobileOpen}
       >
@@ -113,7 +130,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="absolute top-full left-0 right-0 z-40 md:hidden border-b border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md max-h-[70vh] overflow-y-auto animate-slide-down">
+        <div className="absolute top-full left-0 right-0 z-40 xl:hidden border-b border-white/10 bg-[#0f0b1a]/95 backdrop-blur-md max-h-[70vh] overflow-y-auto animate-slide-down">
           {groups.map((group) => (
             <div key={group.label} className="px-4 py-2">
               <div className="text-[10px] uppercase tracking-wider text-white/40 mb-1">
@@ -123,6 +140,7 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={() => { setOpenGroup(null); setMobileOpen(false); }}
                   className={`block rounded-md px-3 py-3 text-sm ${
                     isActive(item.href)
                       ? "text-teal-300 bg-white/5"
@@ -147,6 +165,6 @@ export function NavMenu({ groups }: { groups: NavGroup[] }) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

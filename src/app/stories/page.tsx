@@ -7,10 +7,10 @@ import { formatDate } from "@/lib/format";
 import type { StoryItem } from "@/lib/types";
 
 export const metadata: Metadata = {
-  title: "스토리 안내 - 엘림스 스마일의 비공식 아카이브",
+  title: "스토리 안내 - 엘림스 스마일의 아카이브",
   description: "테일즈런너 스토리 감상은 TR Story에서 제공합니다",
   openGraph: {
-    title: "스토리 안내 - 엘림스 스마일의 비공식 아카이브",
+    title: "스토리 안내 - 엘림스 스마일의 아카이브",
     description: "테일즈런너 스토리 감상은 TR Story에서 제공합니다",
   },
 };
