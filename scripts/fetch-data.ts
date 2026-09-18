@@ -11,7 +11,7 @@ function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function api<T>(path: string, retries = 2): Promise<T | null> {
+async function api<T>(path: string, retries = 2): Promise<T> {
   const url = `${API_BASE}${path}`;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -26,21 +26,20 @@ async function api<T>(path: string, retries = 2): Promise<T | null> {
       });
       if (!res.ok) {
         console.warn(`  ⚠ ${res.status} ${res.statusText}`);
-        if (attempt === retries) return null;
-        continue;
+        throw new Error(`HTTP ${res.status} fetching ${path}`);
       }
       const json = await res.json();
       if (json.resCd !== "0000") {
         console.warn(`  ⚠ API error: ${json.resCd} ${json.rspMsg}`);
-        return null;
+        throw new Error(`API ${json.resCd} fetching ${path}`);
       }
       return json.result as T;
     } catch (err) {
       console.warn(`  ⚠ fetch error: ${err}`);
-      if (attempt === retries) return null;
+      if (attempt === retries) throw err;
     }
   }
-  return null;
+  throw new Error(`Failed to fetch ${path}`);
 }
 
 function save(filename: string, data: unknown) {

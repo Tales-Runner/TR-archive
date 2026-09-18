@@ -19,7 +19,7 @@ export default function ChannelsPage() {
         테일즈런너 공식 채널 및 소셜 미디어 계정을 모아둔 허브.
       </p>
       <ScholarComment
-        elims="공식 채널을 모아뒀다. 업데이트 영상 끝에는 쿠폰이 숨어있으니 놓치지 마라."
+        elims="새 소식이 궁금한가? 찾아갈 곳은 모아 뒀어. 흥미로운 걸 발견하면 내게도 알려 주고."
       />
       <ChannelsHub />
     </div>

@@ -2,6 +2,12 @@
 export const API_BASE = "https://tr.rhaon.co.kr/webb";
 export const SITE_BASE = "https://tr.rhaon.co.kr";
 export const IMAGE_CDN = "https://trimage.rhaon.co.kr";
+export const TR_STORY_URL = "https://tales-runner.github.io/TR-STORY";
+
+export function trStoryHref(path = ""): string {
+  if (!path) return TR_STORY_URL;
+  return `${TR_STORY_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 /**
  * Browser-like UA sent on every upstream request to tr.rhaon.co.kr.

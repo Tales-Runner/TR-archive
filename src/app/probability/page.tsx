@@ -22,8 +22,7 @@ export default function ProbabilityPage() {
         운명을 시험해 보기 전에, 확률부터 확인하는 게 현명하지.
       </p>
       <ScholarComment
-        elims="크큭. 이건 조수가 만든 거라 정확하지 않을 수도 있다고. 결과가 이상하면 나한테 따지지 말고."
-        r="...공식 확률 데이터 그대로예요. 엘림스가 왜 그렇게 말하는 건지는 잘 모르겠어요."
+        elims="운을 시험해 보겠다고? 좋아. 그래도 확률쯤은 보고 덤벼야지. 기대와 확률은 다른 법이니까."
       />
       <ProbabilityCalculator categories={categories} />
     </div>

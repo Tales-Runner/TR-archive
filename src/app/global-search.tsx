@@ -64,6 +64,10 @@ export function GlobalSearch({ index }: { index: SearchEntry[] }) {
   function go(href: string) {
     setOpen(false);
     setQuery("");
+    if (/^https?:\/\//.test(href)) {
+      window.location.assign(href);
+      return;
+    }
     router.push(href);
   }
 

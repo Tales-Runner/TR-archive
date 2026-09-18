@@ -5,33 +5,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { useFavorites } from "@/lib/use-favorites";
 import { db } from "@/lib/db";
-import type { RunnerEntry, CostumeEntry, StoryEntry, MapEntry } from "@/lib/db";
+import type { RunnerEntry, CostumeEntry, MapEntry } from "@/lib/db";
 import { useToast } from "@/components/toast";
 import { EmptyState } from "@/components/empty-state";
 import { HeartIcon, XIcon } from "@/components/icons";
 import { formatDate, formatIsoDate } from "@/lib/format";
-import type { Character, CostumeItem, StoryItem, MapItem } from "@/lib/types";
+import type { Character, CostumeItem, MapItem } from "@/lib/types";
 
-type FavTab = "runners" | "costumes" | "stories" | "maps";
+type FavTab = "runners" | "costumes" | "maps";
 
 export function FavoritesSection({
   characters,
   costumes,
-  stories,
   maps,
-  storyEntries,
   mapEntries,
-  onStoryEntriesChange,
   onMapEntriesChange,
   favs,
 }: {
   characters: Character[];
   costumes: CostumeItem[];
-  stories: StoryItem[];
   maps: MapItem[];
-  storyEntries: StoryEntry[];
   mapEntries: MapEntry[];
-  onStoryEntriesChange: (fn: (prev: StoryEntry[]) => StoryEntry[]) => void;
   onMapEntriesChange: (fn: (prev: MapEntry[]) => MapEntry[]) => void;
   favs: ReturnType<typeof useFavorites>;
 }) {
@@ -45,10 +39,6 @@ export function FavoritesSection({
   const costumeMap = useMemo(
     () => new Map(costumes.map((c) => [c.id, c])),
     [costumes],
-  );
-  const storyMap = useMemo(
-    () => new Map(stories.map((s) => [s.id, s])),
-    [stories],
   );
   const mapMap = useMemo(
     () => new Map(maps.map((m) => [m.id, m])),
@@ -71,16 +61,6 @@ export function FavoritesSection({
     [favs.costumes, costumeMap],
   );
 
-  const readStories = useMemo(
-    () =>
-      storyEntries
-        .filter((s) => s.readAt > 0)
-        .sort((a, b) => b.readAt - a.readAt)
-        .map((entry) => ({ entry, story: storyMap.get(entry.id) }))
-        .filter((x): x is { entry: StoryEntry; story: StoryItem } => !!x.story),
-    [storyEntries, storyMap],
-  );
-
   const mapRecords = useMemo(
     () =>
       mapEntries
@@ -91,12 +71,6 @@ export function FavoritesSection({
     [mapEntries, mapMap],
   );
 
-  const removeStory = useCallback(async (id: number) => {
-    await db.stories.remove(id);
-    onStoryEntriesChange((prev) => prev.filter((s) => s.id !== id));
-    toast("읽음 기록을 삭제했습니다");
-  }, [toast, onStoryEntriesChange]);
-
   const removeMapRecord = useCallback(async (id: number) => {
     await db.maps.remove(id);
     onMapEntriesChange((prev) => prev.filter((m) => m.id !== id));
@@ -106,7 +80,6 @@ export function FavoritesSection({
   const tabs: { key: FavTab; label: string; count: number }[] = [
     { key: "runners", label: "런너", count: favRunners.length },
     { key: "costumes", label: "코스튬", count: favCostumes.length },
-    { key: "stories", label: "스토리", count: readStories.length },
     { key: "maps", label: "맵 기록", count: mapRecords.length },
   ];
 
@@ -240,67 +213,6 @@ export function FavoritesSection({
                       title="즐겨찾기 해제"
                     >
                       <HeartIcon className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {tab === "stories" && (
-            <div className="space-y-2 stagger-grid">
-              {readStories.length === 0 ? (
-                <EmptyState message="아직 읽은 스토리가 없습니다" />
-              ) : (
-                readStories.map(({ entry, story }) => (
-                  <div
-                    key={entry.id}
-                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3"
-                  >
-                    <Link
-                      href={`/stories?story=${story.id}`}
-                      className="shrink-0 relative w-12 h-12 rounded-lg overflow-hidden bg-white/5"
-                    >
-                      <Image
-                        src={story.thumbnail}
-                        alt={story.subject}
-                        fill
-                        sizes="48px"
-                        className="object-cover"
-                      />
-                    </Link>
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        href={`/stories?story=${story.id}`}
-                        className="text-sm font-medium text-white/80 truncate block hover:text-white/90"
-                      >
-                        {story.subject}
-                      </Link>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-white/30">
-                          {formatIsoDate(entry.readAt)}에 읽음
-                        </span>
-                        {typeof entry.scrollProgress === "number" && entry.scrollProgress > 0 && (
-                          <div className="flex items-center gap-1">
-                            <div className="h-1 w-12 rounded-full bg-white/10 overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-blue-500/60"
-                                style={{ width: `${Math.round(entry.scrollProgress * 100)}%` }}
-                              />
-                            </div>
-                            <span className="text-[9px] text-white/25">
-                              {Math.round(entry.scrollProgress * 100)}%
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => removeStory(entry.id)}
-                      className="shrink-0 rounded-lg p-1.5 text-white/20 hover:text-red-400 hover:bg-white/5 transition-colors"
-                      title="읽음 기록 삭제"
-                    >
-                      <XIcon className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 ))

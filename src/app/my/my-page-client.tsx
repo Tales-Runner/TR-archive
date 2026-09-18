@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useFavorites } from "@/lib/use-favorites";
 import { db } from "@/lib/db";
-import type { StoryEntry, MapEntry } from "@/lib/db";
-import type { Character, CostumeItem, StoryItem, MapItem } from "@/lib/types";
+import type { MapEntry } from "@/lib/db";
+import type { Character, CostumeItem, MapItem } from "@/lib/types";
 import { ProfileSection } from "./profile-section";
 import { ActivityDashboard } from "./activity-dashboard";
 import { FavoritesSection } from "./favorites-section";
@@ -13,23 +13,21 @@ import { DataSection } from "./data-section";
 export function MyPageClient({
   characters,
   costumes,
-  stories,
   maps,
 }: {
   characters: Character[];
   costumes: CostumeItem[];
-  stories: StoryItem[];
   maps: MapItem[];
 }) {
   const favs = useFavorites();
-  const [storyEntries, setStoryEntries] = useState<StoryEntry[]>([]);
   const [mapEntries, setMapEntries] = useState<MapEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    Promise.all([db.stories.getAll(), db.maps.getAll()]).then(
-      ([s, m]) => { setStoryEntries(s); setMapEntries(m); setLoaded(true); },
-    );
+    db.maps.getAll().then((m) => {
+      setMapEntries(m);
+      setLoaded(true);
+    });
   }, []);
 
   if (!loaded || !favs.ready) {
@@ -69,20 +67,15 @@ export function MyPageClient({
       </div>
       <ProfileSection characters={characters} />
       <ActivityDashboard
-        totalStories={stories.length}
         totalMaps={maps.length}
-        storyEntries={storyEntries}
         mapEntries={mapEntries}
         favs={favs}
       />
       <FavoritesSection
         characters={characters}
         costumes={costumes}
-        stories={stories}
         maps={maps}
-        storyEntries={storyEntries}
         mapEntries={mapEntries}
-        onStoryEntriesChange={setStoryEntries}
         onMapEntriesChange={setMapEntries}
         favs={favs}
       />

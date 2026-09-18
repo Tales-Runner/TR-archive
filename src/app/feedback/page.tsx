@@ -19,7 +19,7 @@ export default function FeedbackPage() {
         버그 제보, 기능 건의, 데이터 오류 신고 — 뭐든 괜찮아.
       </p>
       <ScholarComment
-        elims="할 말이 있으면 여기에 적어. 내가 다 확인하니까."
+        elims="호오, 할 말이 있나? 어디, 적어 봐. 불편한 게 있다면 구체적으로 말해 주는 편이 좋겠군."
       />
       <FeedbackForm />
     </div>

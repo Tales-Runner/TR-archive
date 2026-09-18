@@ -1,23 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import type { StoryEntry, MapEntry } from "@/lib/db";
+import type { MapEntry } from "@/lib/db";
 import type { useFavorites } from "@/lib/use-favorites";
 
 export function ActivityDashboard({
-  totalStories,
   totalMaps,
-  storyEntries,
   mapEntries,
   favs,
 }: {
-  totalStories: number;
   totalMaps: number;
-  storyEntries: StoryEntry[];
   mapEntries: MapEntry[];
   favs: ReturnType<typeof useFavorites>;
 }) {
-  const readStories = storyEntries.filter((s) => s.readAt > 0);
   const clearedMaps = mapEntries.filter((m) => m.clearedAt);
   const ownedCostumes = favs.costumes.filter((c) => c.status === "owned");
   const wishlistCostumes = favs.costumes.filter((c) => c.status === "wishlist");
@@ -33,14 +28,6 @@ export function ActivityDashboard({
   }
 
   const cards: DashCard[] = [
-    {
-      label: "읽은 스토리",
-      value: readStories.length,
-      total: totalStories,
-      color: "text-blue-400",
-      bg: "bg-blue-500/10",
-      href: "/stories",
-    },
     {
       label: "기록한 맵",
       value: clearedMaps.length,
@@ -67,7 +54,7 @@ export function ActivityDashboard({
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 stagger-grid">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 stagger-grid">
       {cards.map((card) => (
         <Link
           key={card.label}

@@ -23,7 +23,7 @@ export default function ClosetPage() {
         런너들의 옷장. 세트를 눌러 아이템을 살펴보자.
       </p>
       <ScholarComment
-        elims="옷 구경하러 왔어? 흥, 난 이런 거에 관심 없지만 정리는 해뒀지."
+        elims="호오, 이번엔 옷인가? 어디, 골라 봐. 네 안목이 어느 정도인지 궁금하군."
       />
       <Suspense fallback={
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

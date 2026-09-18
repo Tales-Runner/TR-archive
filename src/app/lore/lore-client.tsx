@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { StoryArc } from "@/data/lore";
+import { TR_STORY_URL } from "@/lib/constants";
 
 function ArcCard({ arc, isOpen, onToggle }: { arc: StoryArc; isOpen: boolean; onToggle: () => void }) {
   return (
@@ -40,12 +40,14 @@ function ArcCard({ arc, isOpen, onToggle }: { arc: StoryArc; isOpen: boolean; on
           <p className="text-sm text-white/70 leading-relaxed mb-4">{arc.summary}</p>
 
           {arc.storyTags.length > 0 && (
-            <Link
-              href={`/stories?tag=${encodeURIComponent(arc.storyTags[0])}`}
+            <a
+              href={`${TR_STORY_URL}/?q=${encodeURIComponent(arc.storyTags[0])}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-xs text-teal-400 hover:text-teal-300 transition-colors"
             >
               관련 스토리 보기 →
-            </Link>
+            </a>
           )}
 
           {/* 감초 대사 — 캐릭터 해석 재검토 후 복원 예정
