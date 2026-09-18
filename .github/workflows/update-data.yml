@@ -1,51 +1,65 @@
-name: Update game data
+name: Collect and validate game data
 
 on:
   schedule:
     - cron: '0 9 * * *'
   workflow_dispatch:
 
+# Collection cannot publish, modify main, or bypass its required review.
+permissions:
+  contents: read
+
+concurrency:
+  group: game-data-candidate
+  cancel-in-progress: false
+
 jobs:
-  update:
+  collect:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Collect a complete candidate
+        run: npm run data:collect -- .cache/data-candidate
+      - uses: actions/upload-artifact@v7
+        with:
+          name: collected-game-data
+          path: .cache/data-candidate/
+          if-no-files-found: error
+          retention-days: 7
 
-      - name: Install tsx
-        run: npm install -g tsx
-
-      - name: Fetch latest data
-        run: tsx scripts/fetch-data.ts
-
-      - name: Validate data
+  validate:
+    needs: collect
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          name: collected-game-data
+          path: .cache/data-candidate
+      - name: Validate schema, counts, and probability references
+        run: npm run data:validate -- .cache/data-candidate
+      - name: Apply candidate to the isolated validation checkout
+        run: npm run data:apply -- .cache/data-candidate
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: validated-game-data
+          path: .cache/data-candidate/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Record publication boundary
         run: |
-          for f in src/data/characters.json src/data/maps.json src/data/costumes.json src/data/guides.json src/data/stories.json src/data/probability-meta.json; do
-            if [ ! -s "$f" ]; then
-              echo "ERROR: $f is empty or missing"
-              exit 1
-            fi
-            entries=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$f','utf8')).length || 0)")
-            if [ "$entries" -lt 5 ]; then
-              echo "ERROR: $f has only $entries entries (expected >= 5)"
-              exit 1
-            fi
-            echo "OK: $f has $entries entries"
-          done
-
-      - name: Check for changes
-        id: diff
-        run: |
-          git diff --quiet src/data/ public/data/ || echo "changed=true" >> $GITHUB_OUTPUT
-
-      - name: Commit and push
-        if: steps.diff.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/ public/data/
-          git commit -m "chore: update game data (automated)"
-          git push
+          echo '검증된 후보: validated-game-data. data:apply 후 변경을 검토하여 main에 반영하면 Vercel이 배포합니다.' >> "$GITHUB_STEP_SUMMARY"

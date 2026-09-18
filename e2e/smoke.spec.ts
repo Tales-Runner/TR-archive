@@ -113,4 +113,32 @@ test.describe("security headers", () => {
     expect(nonceB).toBeTruthy();
     expect(nonceA).not.toBe(nonceB);
   });
+
+  test("허용된 런타임은 실행되고 nonce 없는 인라인 스크립트는 차단됨", async ({ page }) => {
+    // Inject into the HTML parser input. Scripts inserted from trusted runtime
+    // code are deliberately trusted by strict-dynamic and are not an XSS test.
+    await page.route("**/", async route => {
+      const response = await route.fetch();
+      const body = (await response.text()).replace("<head>", "<head><script>document.documentElement.dataset.injected = 'yes'</script>");
+      await route.fulfill({ response, body });
+    });
+    const response = await page.goto("/");
+    const csp = response!.headers()["content-security-policy"];
+    const nonce = csp.match(/nonce-([A-Za-z0-9+/=]+)/)![1];
+    const inlineNonces = await page.locator("script:not([src])").evaluateAll(scripts =>
+      scripts.filter(script => script.textContent?.includes("self.__next_f")).map(script => (script as HTMLScriptElement).nonce),
+    );
+    expect(inlineNonces.length).toBeGreaterThan(0);
+    expect(inlineNonces.every(value => value === nonce)).toBe(true);
+    await expect(page.locator("html")).not.toHaveAttribute("data-injected");
+    expect(csp.split(";").find(directive => directive.trim().startsWith("script-src "))).not.toContain("'unsafe-inline'");
+  });
+
+  test("확률 JSON은 nonce 처리 없이 제공됨", async ({ request }) => {
+    const response = await request.get("/data/probability/trading-position.json");
+    expect(response.status()).toBe(200);
+    expect(Array.isArray(await response.json())).toBe(true);
+    expect(response.headers()["content-security-policy"]).toContain("default-src 'none'");
+    expect(response.headers()["content-security-policy"]).not.toContain("nonce-");
+  });
 });

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { connection } from "next/server";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
@@ -120,10 +120,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Middleware sets x-nonce per request so Next's inline runtime scripts
-  // match the CSP's `'nonce-...'` directive. Reading headers() here tags
-  // the tree as dynamic (intentional — it's the cost of per-request CSP).
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  // HTML is rendered per request so Next can attach the proxy's CSP nonce.
+  // Bundled JSON and immutable assets remain independent of this render step.
+  await connection();
 
   return (
     <html
@@ -144,7 +143,6 @@ export default async function RootLayout({
           crossOrigin="anonymous"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
-        {nonce && <meta property="csp-nonce" content={nonce} />}
       </head>
       <body className="min-h-full flex flex-col bg-[#0f0b1a] overflow-x-hidden">
         <ToastProvider>

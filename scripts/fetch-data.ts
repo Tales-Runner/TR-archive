@@ -1,10 +1,11 @@
-import { writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { readSnapshot, validateSnapshot, writeSnapshot, type Snapshot } from "./data-snapshot";
 import { API_BASE, UPSTREAM_USER_AGENT } from "@/lib/constants";
 
-const ROOT = join(new URL(".", import.meta.url).pathname, "..");
+const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "..");
 const DATA_DIR = join(ROOT, "src", "data");
-const PUBLIC_PROB_DIR = join(ROOT, "public", "data", "probability");
+type Save = (file: string, data: unknown) => void;
 const DELAY = 500;
 
 function sleep(ms: number) {
@@ -23,6 +24,7 @@ async function api<T>(path: string, retries = 2): Promise<T> {
       }
       const res = await fetch(url, {
         headers: { "User-Agent": UPSTREAM_USER_AGENT },
+        signal: AbortSignal.timeout(15_000),
       });
       if (!res.ok) {
         console.warn(`  ⚠ ${res.status} ${res.statusText}`);
@@ -33,6 +35,7 @@ async function api<T>(path: string, retries = 2): Promise<T> {
         console.warn(`  ⚠ API error: ${json.resCd} ${json.rspMsg}`);
         throw new Error(`API ${json.resCd} fetching ${path}`);
       }
+      if (!json.result || typeof json.result !== "object") throw new Error(`Missing result fetching ${path}`);
       return json.result as T;
     } catch (err) {
       console.warn(`  ⚠ fetch error: ${err}`);
@@ -42,21 +45,14 @@ async function api<T>(path: string, retries = 2): Promise<T> {
   throw new Error(`Failed to fetch ${path}`);
 }
 
-function save(filename: string, data: unknown) {
-  const path = join(DATA_DIR, filename);
-  writeFileSync(path, JSON.stringify(data, null, 2), "utf-8");
-  console.log(`  ✓ saved ${filename}`);
-}
-
 // ── Characters ───────────────────────────────────────
 
-async function fetchCharacters() {
+async function fetchCharacters(save: Save) {
   console.log("\n🎭 Characters");
 
   const listResult = await api<{ list: { id: number }[] }>(
     "/trintro/character/all"
   );
-  if (!listResult) return;
 
   const ids = listResult.list.map((c) => c.id);
   console.log(`  found ${ids.length} characters, fetching details...`);
@@ -67,13 +63,12 @@ async function fetchCharacters() {
     const detail = await api<{ info: Record<string, unknown> }>(
       `/trintro/character/${id}`
     );
-    if (detail?.info) {
-      characters.push(detail.info);
-    }
+    if (!detail.info) throw new Error(`Missing character detail: ${id}`);
+    characters.push(detail.info);
   }
 
   console.log(`  fetched ${characters.length} characters with details`);
-  save("characters.json", characters);
+  save("src/data/characters.json", characters);
 }
 
 // ── Maps ──────────────────────────────────────────────
@@ -113,13 +108,12 @@ interface MapDetail {
   recommendDataList: unknown[];
 }
 
-async function fetchMaps() {
+async function fetchMaps(save: Save) {
   console.log("\n📍 Maps");
 
   const typesResult = await api<{ list: MapTypeRaw[]; totalCount: number }>(
     "/trlibrary/map/type"
   );
-  if (!typesResult) return;
   const mapTypes = typesResult.list.map((t) => ({
     codeId: t.codeId,
     codeName: t.codeName,
@@ -128,7 +122,6 @@ async function fetchMaps() {
   const listResult = await api<{ list: MapListYear[]; totalCount: number }>(
     "/trlibrary/map/list"
   );
-  if (!listResult) return;
 
   const allIds: number[] = [];
   for (const yearGroup of listResult.list) {
@@ -142,13 +135,12 @@ async function fetchMaps() {
   for (const id of allIds) {
     await sleep(DELAY);
     const detail = await api<{ info: MapDetail }>(`/trlibrary/map/${id}`);
-    if (detail?.info) {
-      maps.push(detail.info);
-    }
+    if (!detail.info) throw new Error(`Missing map detail: ${id}`);
+    maps.push(detail.info);
   }
 
-  save("map-types.json", mapTypes);
-  save("maps.json", maps);
+  save("src/data/map-types.json", mapTypes);
+  save("src/data/maps.json", maps);
 }
 
 // ── Costumes ──────────────────────────────────────────
@@ -189,13 +181,12 @@ interface ClosetDetail {
   itemList: ClosetDetailItem[];
 }
 
-async function fetchCostumes() {
+async function fetchCostumes(save: Save) {
   console.log("\n👗 Costumes");
 
   const listResult = await api<{ list: ClosetListYear[]; totalCount: number }>(
     "/trlibrary/closet/list"
   );
-  if (!listResult) return;
 
   const costumes: {
     id: number;
@@ -213,16 +204,17 @@ async function fetchCostumes() {
       const detail = await api<{ info: ClosetDetail }>(
         `/trlibrary/closet/${item.id}`
       );
+      if (!detail.info) throw new Error(`Missing costume detail: ${item.id}`);
       costumes.push({
         ...item,
         openYear: yearGroup.openYear,
-        detail: detail?.info ?? null,
+        detail: detail.info,
       });
     }
   }
 
   console.log(`  fetched ${costumes.length} costume sets`);
-  save("costumes.json", costumes);
+  save("src/data/costumes.json", costumes);
 }
 
 // ── Guides ────────────────────────────────────────────
@@ -254,13 +246,12 @@ interface GuideDetailResult {
   partList?: GuidePart[];
 }
 
-async function fetchGuides() {
+async function fetchGuides(save: Save) {
   console.log("\n📖 Guides");
 
   const listResult = await api<{ list: GuideListItem[]; totalCount: number }>(
     "/trlibrary/guide?search-word="
   );
-  if (!listResult) return;
 
   const visibleGuides = listResult.list.filter((g) => g.isView);
   console.log(`  found ${visibleGuides.length} visible guides, fetching details...`);
@@ -276,19 +267,19 @@ async function fetchGuides() {
   for (const g of visibleGuides) {
     await sleep(DELAY);
     const detail = await api<GuideDetailResult>(`/trlibrary/guide/${g.id}`);
-    if (detail) {
-      const parts = detail.info.partList ?? detail.partList ?? [];
-      guides.push({
-        id: g.id,
-        subject: detail.info.subject,
-        category: detail.info.category,
-        hashTagSubject: detail.info.hashTagSubject,
-        partList: parts,
-      });
-    }
+    if (!detail.info) throw new Error(`Missing guide detail: ${g.id}`);
+    const parts = detail.info.partList ?? detail.partList;
+    if (!Array.isArray(parts)) throw new Error(`Missing guide parts: ${g.id}`);
+    guides.push({
+      id: g.id,
+      subject: detail.info.subject,
+      category: detail.info.category,
+      hashTagSubject: detail.info.hashTagSubject,
+      partList: parts,
+    });
   }
 
-  save("guides.json", guides);
+  save("src/data/guides.json", guides);
 }
 
 // ── Stories ───────────────────────────────────────────
@@ -325,13 +316,12 @@ interface StoryDetailResult {
   };
 }
 
-async function fetchStories() {
+async function fetchStories(save: Save) {
   console.log("\n📚 Stories");
 
   const listResult = await api<{ list: StoryListYear[]; totalCount: number }>(
     "/trlibrary/trstory/list"
   );
-  if (!listResult) return;
 
   const stories: {
     id: number;
@@ -356,7 +346,8 @@ async function fetchStories() {
   for (const { item, openYear } of allItems) {
     await sleep(DELAY);
     const detail = await api<StoryDetailResult>(`/trlibrary/trstory/${item.id}`);
-    const images = (detail?.info?.itemList ?? [])
+    if (!Array.isArray(detail.info?.itemList)) throw new Error(`Missing story detail: ${item.id}`);
+    const images = detail.info.itemList
       .sort((a, b) => a.viewOrder - b.viewOrder)
       .map((i) => ({
         imageUrl: i.imageUrl,
@@ -377,7 +368,7 @@ async function fetchStories() {
   }
 
   console.log(`  fetched ${stories.length} stories with images`);
-  save("stories.json", stories);
+  save("src/data/stories.json", stories);
 }
 
 // ── Probability ──────────────────────────────────────
@@ -407,20 +398,25 @@ interface RawProbItem {
   itemList: RawProbSubItem[];
 }
 
-function normalizeProbItems(items: RawProbItem[]) {
+export function normalizeProbItems(items: RawProbItem[]) {
   return items.map((item) => ({
     itemNm: item.itemNm,
     itemList: item.itemList
       .filter((r) => (r.sourceNm ?? r.resultItemNm ?? "") !== "합계")
-      .map((r) => ({
-        sourceNm: r.sourceNm ?? "",
-        targetNm: r.targetNm ?? r.resultItemNm ?? "",
-        probability: r.probability ?? 0,
-      })),
+      .map((r) => {
+        if (typeof r.probability !== "number" || !Number.isFinite(r.probability)) {
+          throw new Error(`Missing or invalid probability: ${item.itemNm}`);
+        }
+        return {
+          sourceNm: r.sourceNm ?? "",
+          targetNm: r.targetNm ?? r.resultItemNm ?? "",
+          probability: r.probability,
+        };
+      }),
   }));
 }
 
-async function fetchProbability() {
+async function fetchProbability(save: Save) {
   console.log("\n🎲 Probability");
 
   const categories: {
@@ -434,7 +430,6 @@ async function fetchProbability() {
     await sleep(DELAY);
     // Endpoints return either { info: { comments, itemList } } or { info: { comments }, itemList: [...] }
     const raw = await api<Record<string, unknown>>(cat.path);
-    if (!raw) continue;
 
     const info = raw.info as Record<string, unknown> | undefined;
     const comments = (info?.comments as string) ?? "";
@@ -457,44 +452,44 @@ async function fetchProbability() {
 
   console.log(`  fetched ${categories.length} categories`);
 
-  // Upstream API occasionally returns all-empty itemLists during maintenance
-  // windows. Overwriting the committed data with an empty meta would cause
-  // the downstream validate step to reject the whole run. Bail early and
-  // keep the existing JSON so the site keeps working with slightly stale data.
-  if (categories.length === 0) {
-    console.log("  ⚠ all categories empty — keeping existing probability-meta.json + per-category files");
-    return;
-  }
+  if (categories.length === 0) throw new Error("All probability categories are empty");
 
-  // Save per-category files to public/ for on-demand loading
-  mkdirSync(PUBLIC_PROB_DIR, { recursive: true });
   const meta: { id: string; name: string; comments: string; itemCount: number }[] = [];
   for (const cat of categories) {
-    const path = join(PUBLIC_PROB_DIR, `${cat.id}.json`);
-    writeFileSync(path, JSON.stringify(cat.itemList), "utf-8");
+    save(`public/data/probability/${cat.id}.json`, cat.itemList);
     console.log(`  ✓ public/data/probability/${cat.id}.json`);
     meta.push({ id: cat.id, name: cat.name, comments: cat.comments, itemCount: cat.itemList.length });
   }
-  save("probability-meta.json", meta);
+  save("src/data/probability-meta.json", meta);
 }
 
 // ── Main ─────────────────────────────────────────────
 
-async function main() {
-  console.log("🚀 TR Utils — data fetcher");
-  console.log(`   target: ${DATA_DIR}\n`);
-
-  await fetchCharacters();
-  await fetchMaps();
-  await fetchCostumes();
-  await fetchGuides();
-  await fetchStories();
-  await fetchProbability();
-
-  console.log("\n✅ Done!");
+export async function collectData(): Promise<Snapshot> {
+  const snapshot: Snapshot = new Map();
+  const save: Save = (file, data) => { snapshot.set(file, data); };
+  await fetchCharacters(save);
+  await fetchMaps(save);
+  await fetchCostumes(save);
+  await fetchGuides(save);
+  await fetchStories(save);
+  await fetchProbability(save);
+  return snapshot;
 }
 
-main().catch((err) => {
-  console.error("Fatal:", err);
-  process.exit(1);
-});
+async function main() {
+  const output = process.argv[2];
+  if (!output) throw new Error("Usage: npm run data:collect -- <new-snapshot-directory>");
+  console.log(`Collecting candidate data; current data: ${DATA_DIR}`);
+  const snapshot = await collectData();
+  validateSnapshot(snapshot, readSnapshot(ROOT));
+  writeSnapshot(resolve(output), snapshot);
+  console.log(`Candidate saved to ${resolve(output)}. Run data:validate and data:apply before publishing.`);
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error("Fatal:", err);
+    process.exitCode = 1;
+  });
+}

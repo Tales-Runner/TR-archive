@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 /**
  * 정적 보안 헤더.
  *
- * CSP 는 per-request nonce 를 쓰기 위해 `src/middleware.ts` 에서 설정.
+ * CSP 는 per-request nonce 를 쓰기 위해 `src/proxy.ts` 에서 설정.
  * 여기엔 요청과 무관하게 항상 같은 값인 헤더만 둔다.
  */
 const securityHeaders = [
@@ -21,6 +21,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -32,6 +33,10 @@ const nextConfig: NextConfig = {
   },
   headers() {
     return [
+      ...["/api/:path*", "/data/:path*"].map(source => ({
+        source,
+        headers: [{ key: "Content-Security-Policy", value: "default-src 'none'; frame-ancestors 'none'; base-uri 'none'" }],
+      })),
       {
         source: "/(.*)",
         headers: securityHeaders,

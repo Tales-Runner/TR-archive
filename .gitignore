@@ -50,3 +50,7 @@ next-env.d.ts
 # claude
 CLAUDE.md
 AGENTS.md
+
+# Unpublished data candidates
+/.cache/
+*.refresh-*.tmp

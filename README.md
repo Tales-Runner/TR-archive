@@ -49,11 +49,36 @@ npm run dev
 ## 데이터 갱신
 
 ```bash
-npx tsx scripts/fetch-data.ts
+npm run data:collect -- .cache/data-candidate
+npm run data:validate -- .cache/data-candidate
+npm run data:apply -- .cache/data-candidate
+npm test
+npm run build
 ```
 
 공식 API에서 캐릭터, 맵, 코스튬, 가이드, 스토리 메타 데이터를 수집합니다.
-GitHub Actions으로 매일 자동 실행됩니다.
+수집은 새 후보 디렉터리에만 기록합니다. 필수 필드, 중복 ID, 기존 대비 20% 초과 감소,
+확률 카테고리 누락·개수·범위를 검증한 뒤에만 기존 데이터에 적용할 수 있습니다.
+동일 후보 디렉터리는 재사용하지 않습니다.
+
+GitHub Actions은 매일 **수집 → 별도 체크아웃에서 검증·빌드 → 검증된 아티팩트 보관**까지 실행합니다.
+`validated-game-data`를 내려받아 위의 검증·적용 과정을 거친 뒤 변경을 검토하여 `main`에 반영하면
+Vercel이 배포합니다. 수집용 토큰은 읽기 전용이며 보호된 `main`에 직접 푸시하지 않습니다.
+
+2026-09-18 실측 API는 기존 모션 필드(`hurdleMotion`, `swimmingMotion` 등)를 제공하지 않습니다.
+현재 화면의 데이터 계약과 맞지 않는 후보는 검증에서 차단하고 기존 데이터를 유지합니다.
+새 `fallForwardMotion`·`fallBackwardMotion`을 기존 필드에 임의로 대응시키지 않습니다.
+
+## 렌더링과 보안
+
+HTML은 요청마다 렌더링합니다. `src/proxy.ts`가 새 CSP nonce를 생성하고,
+루트 레이아웃의 `connection()`이 Next.js 런타임에 같은 nonce를 붙일 수 있도록 합니다.
+스크립트에는 nonce와 `strict-dynamic`을 적용하며, `unsafe-eval`은 개발 서버에서만 허용합니다.
+정적 JSON·이미지·JS/CSS는 HTML nonce 처리 대상에서 제외합니다. 공지·점검 API의 캐시는 각 라우트가 관리합니다.
+
+JSON을 빌드에 포함한다고 HTML까지 정적 생성되는 것은 아닙니다. 현재는 엄격한 스크립트 CSP를 유지합니다.
+정적 생성 전환은 Next.js의 실험적 SRI만 켜서 끝나는 작업이 아니며, 인라인 런타임과 클라이언트 이동까지
+별도 검증해야 합니다. [Next.js CSP 문서](https://nextjs.org/docs/app/guides/content-security-policy)를 기준으로 판단합니다.
 
 ## 기여하기
 

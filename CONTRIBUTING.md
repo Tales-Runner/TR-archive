@@ -86,10 +86,14 @@ src/
 ## 데이터 갱신
 
 ```bash
-npx tsx scripts/fetch-data.ts
+npm run data:collect -- .cache/data-candidate
+npm run data:validate -- .cache/data-candidate
+npm run data:apply -- .cache/data-candidate
 ```
 
-공식 API에서 캐릭터, 맵, 코스튬, 가이드, 스토리 데이터를 수집합니다. GitHub Actions로 매일 자동 실행됩니다.
+공식 API에서 전체 후보를 수집한 뒤 검증하고 적용합니다. 기존 파일은 수집 도중 변경하지 않습니다.
+GitHub Actions는 매일 수집·검증·빌드를 실행하고 `validated-game-data` 아티팩트를 보관합니다.
+적용 후 테스트와 빌드를 확인하고 PR로 반영합니다. `main` 반영이 Vercel 배포를 시작합니다.
 
 ## 데이터 출처
 

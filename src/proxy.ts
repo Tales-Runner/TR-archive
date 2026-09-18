@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * CSP nonce middleware.
+ * CSP nonce proxy.
  *
  * Generates a fresh base64 nonce per request, injects it into the CSP via
  * `script-src 'nonce-...' 'strict-dynamic'`, and forwards the nonce to the
@@ -16,16 +16,14 @@ import { NextRequest, NextResponse } from "next/server";
  * (HSTS, X-Frame-Options, Permissions-Policy, …). Keeping the nonce-bound
  * CSP here avoids a brittle coordination between the two places.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const nonce = generateNonce();
+  const isDev = process.env.NODE_ENV === "development";
 
   const csp = [
     "default-src 'self'",
-    // `'strict-dynamic'` tells browsers that support CSP3 to trust any
-    // script loaded transitively by a nonced script, and to ignore the
-    // other allow-list sources. `'unsafe-inline'` + https: remain as
-    // fallbacks for CSP1/2 browsers (they simply ignore 'strict-dynamic').
-    `script-src 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' https:`,
+    // Trust only our runtime and scripts it loads. Development needs eval for HMR.
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
     "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
     "img-src 'self' https://trimage.rhaon.co.kr data:",
     "font-src 'self' https://cdn.jsdelivr.net",
@@ -37,7 +35,7 @@ export function middleware(request: NextRequest) {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    "upgrade-insecure-requests",
+    ...(isDev ? [] : ["upgrade-insecure-requests"]),
   ].join("; ");
 
   const requestHeaders = new Headers(request.headers);
@@ -54,8 +52,6 @@ export function middleware(request: NextRequest) {
 function generateNonce(): string {
   const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
-  // btoa isn't available on every edge runtime fork; go via
-  // String.fromCharCode + Buffer shim or use base64url by hand.
   let bin = "";
   for (const b of bytes) bin += String.fromCharCode(b);
   return btoa(bin);
@@ -65,6 +61,7 @@ export const config = {
   matcher: [
     /*
      * Apply to every route except:
+     *   - api/data/_vercel (JSON and telemetry never need an HTML nonce)
      *   - _next/static (build artifacts, immutable, served directly)
      *   - _next/image  (image optimization, own caching)
      *   - favicon.ico, robots.txt, sitemap.xml, manifest.json, sw.js (static)
@@ -75,7 +72,7 @@ export const config = {
      */
     {
       source:
-        "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|sw.js|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|avif|woff2?)).*)",
+        "/((?!api(?:/|$)|data(?:/|$)|_vercel(?:/|$)|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|manifest.json|sw.js|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|avif|woff2?)).*)",
     },
   ],
 };

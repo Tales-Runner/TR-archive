@@ -11,7 +11,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "data:collect": "tsx scripts/fetch-data.ts",
+    "data:validate": "tsx scripts/manage-data.ts validate",
+    "data:apply": "tsx scripts/manage-data.ts apply"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
@@ -36,6 +39,7 @@
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^4.1.7"
   },
