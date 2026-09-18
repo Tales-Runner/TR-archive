@@ -89,7 +89,8 @@ test.describe("security headers", () => {
     const csp = response?.headers()["content-security-policy"] ?? "";
     expect(csp).toContain("strict-dynamic");
     expect(csp).toMatch(/nonce-[A-Za-z0-9+/=]+/);
-    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp.split("; ").find(value => value.startsWith("frame-ancestors ")))
+      .toBe("frame-ancestors http://127.0.0.1:4318");
     expect(csp).toContain("object-src 'none'");
   });
 
