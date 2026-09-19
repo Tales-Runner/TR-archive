@@ -90,7 +90,7 @@ test.describe("security headers", () => {
     expect(csp).toContain("strict-dynamic");
     expect(csp).toMatch(/nonce-[A-Za-z0-9+/=]+/);
     expect(csp.split("; ").find(value => value.startsWith("frame-ancestors ")))
-      .toBe("frame-ancestors http://127.0.0.1:4318");
+      .toBe("frame-ancestors http://127.0.0.1:4318 https://heznpc-apply-deepgrov.vercel.app");
     expect(csp).toContain("object-src 'none'");
   });
 

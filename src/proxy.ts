@@ -34,9 +34,9 @@ export function proxy(request: NextRequest) {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    // Only the owner's local portfolio may embed this app. Keep X-Frame-Options:
+    // Only the owner's local and production portfolios may embed this app. Keep X-Frame-Options:
     // DENY as the fallback for browsers without CSP frame-ancestors support.
-    "frame-ancestors http://127.0.0.1:4318",
+    "frame-ancestors http://127.0.0.1:4318 https://heznpc-apply-deepgrov.vercel.app",
     ...(isDev ? [] : ["upgrade-insecure-requests"]),
   ].join("; ");
 
